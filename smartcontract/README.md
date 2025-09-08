@@ -1,25 +1,47 @@
-# FlickShare 
+# 🎬 FlickShare Ecosystem
 
-`FlickShare` is a **community movie-review smart contract** with support via ERC20 tokens and anti-spam proof-of-personhood checks using **WorldID**.  
-It leverages **Permit2** for signature-based gasless transfers and ensures secure handling of contributions.
+FlickShare is a **community-driven movie-review + NFT ecosystem** that leverages  
+**World ID** for proof-of-personhood, **Permit2** for gasless payments, and **World Chain** for scalability.  
+
+It consists of two core contracts:  
+
+- **FlickShare** → ERC20-powered movie-review platform with anti-Sybil protections.  
+- **FlickShareNFT** → World ID–gated NFT contract for unique, one-per-human collectibles.  
+- **Reward System (Coming Soon)** 
 
 ---
 
+## 🌍 Why World Chain?
+
+FlickShare is **built for World Chain**, the L2 blockchain optimized for **human-first dApps**.  
+
+- ✅ **Low Fees** → reviews, likes, and NFT mints cost near-zero gas.  
+- ✅ **Proof-of-Personhood Native** → World ID verification is seamless.  
+- ✅ **Scalable & Fair** → prevents spam/Sybil attacks while rewarding real users.  
+
+---
+
+# 📖 FlickShare (Reviews + Contributions)
+
+A **community movie-review smart contract** with token support, anti-spam checks, and future reward integration.  
+
 ## 🚀 Features
 
-- ✅ **WorldID Verification** – ensures only unique humans can post reviews, like, or check-in.  
-- ✅ **Permit2 Tipping** – supports signature-based token transfers for gasless payments.  
-- ✅ **Developer Revenue** – configurable dev fee on all support contributions.  
-- ✅ **Like System** – users can like reviews once, verified via WorldID.  
-- ✅ **Daily Check-In** – prevents Sybil spam with WorldID nullifiers.  
-- ✅ **Safe and Secure** – uses `SafeERC20` and `ReentrancyGuard`.
+- ✅ **WorldID Verification** – ensures only verified humans can review, like, or check-in.  
+- ✅ **Permit2 Transfers** – supports signature-based token transfers for gasless payments.  
+- ✅ **Developer Revenue** – configurable dev fee on all contributions.  
+- ✅ **Like System** – each user can like a review once (WorldID enforced).  
+- ✅ **Daily Check-In** – anti-Sybil via WorldID nullifiers.  
+- ✅ **Safe & Secure** – built with OpenZeppelin libraries.  
+- 🟣 **World Chain Native** – designed for low-cost, human-verified transactions on World Chain.  
+- ⏳ **Upcoming Reward System** – contributors and reviewers will start earning token rewards (ETA: 2–3 months).  
 
 ---
 
 ## 📦 Contract Overview
 
 - **Contract Name**: `FlickShare`  
-- **Token Standard**: ERC20 tipping token (e.g., WLD)  
+- **Token Standard**: ERC20 (e.g., WLD)  
 - **Frameworks Used**: OpenZeppelin (`Ownable`, `ReentrancyGuard`, `SafeERC20`)  
 - **Verification Layer**: WorldID (`IWorldID`, `ByteHasher`)  
 - **Signature Transfer**: Permit2 (`ISignatureTransfer`)  
@@ -30,81 +52,74 @@ It leverages **Permit2** for signature-based gasless transfers and ensures secur
 
 | Variable               | Description |
 |------------------------|-------------|
-| `token`                | ERC20 token used for tipping. |
+| `token`                | ERC20 token used for utility. |
 | `devAddress`           | Developer payout address. |
 | `permit2`              | Permit2 contract for signature-based transfers. |
 | `worldId`              | WorldID contract for proof-of-personhood checks. |
 | `reviewCounter`        | Tracks total number of reviews. |
 | `totalDevEarnings`     | Tracks accumulated dev fees. |
-| `MIN_FEE_BPS` / `MAX_FEE_BPS` | Min/max dev fee (in basis points, e.g., 5%-20%). |
+| `MIN_FEE_BPS` / `MAX_FEE_BPS` | Min/max dev fee (e.g., 5%-20%). |
 | `reviews`              | Mapping of reviewId → Review struct. |
-| `supporters`           | Tracks contributions to reviews per supporter. |
+| `supporters`           | Tracks contributions per supporter. |
 | `hasLiked`             | Tracks if a user has liked a review. |
 | `checkinCount`         | Tracks user daily check-ins. |
 
 ---
 
-## 📝 Review Struct
+# 🎨 FlickShareNFT (World ID–Gated NFTs)
 
-```solidity
-struct Review {
-    uint256 reviewId;
-    address reviewer;
-    uint256 movieId;
-    string reviewText;
-    uint8 rating;
-    uint256 totalSupport;
-    uint256 likeCount;
-    uint256 timestamp;
-}
-```
-
-
-
-# FlickShareNFT
-
-`FlickShareNFT` is a **World ID–gated ERC-721 NFT smart contract** with randomized token assignment and single mint per verified human.  
-It ensures that each eligible wallet can only mint **one unique NFT**, verified through **Worldcoin proof of personhood**.
-
----
+A **World ID–gated ERC-721 NFT collection** where each verified human (1000) can mint **one randomized NFT**.  
 
 ## 🚀 Features
 
-- ✅ **World ID Integration** – users must prove they are a verified human via Worldcoin.
-- ✅ **One Mint per User** – each address can mint only once.
-- ✅ **Randomized Token IDs** – Fisher–Yates shuffle ensures randomness in token distribution.
-- ✅ **Immutable Max Supply** – fixed total supply defined at deployment.
-- ✅ **Metadata Support** – configurable `baseTokenURI` for on-chain metadata management.
-- ✅ **Owner Controls** – owner can update baseURI if needed.
+- ✅ **World ID Integration** – each mint requires proof of personhood.  
+- ✅ **One Mint per Human** – prevents multiple mints per user.  
+- ✅ **Randomized Token Assignment** – Fisher–Yates shuffle for fair distribution.  
+- ✅ **Immutable Max Supply** – supply is fixed forever at deployment.  
+- ✅ **Metadata Support** – configurable `baseTokenURI`.  
+- ✅ **Owner Controls** – update `baseTokenURI` if needed.  
+- 🟣 **World Chain First-Class** – NFTs are deployed and minted on World Chain for scalability.  
+- ⏳ **Host Watch Parties:** Get the ability to host your own mini movie watch parties directly within the app.
+- ⏳ **Pioneer Status:** Receive recognition and a badge as a distinguished early supporter of the platform.
 
 ---
 
 ## 📦 Contract Overview
 
-- **Contract Name**: `FlickShareNFT`
-- **Base Standard**: ERC-721
-- **Frameworks Used**: OpenZeppelin (`Ownable`, `ERC721`, `ReentrancyGuard`)
-- **Verification Layer**: Worldcoin (`IWorldID`, `ByteHasher`)
+- **Contract Name**: `FlickShareNFT`  
+- **Base Standard**: ERC-721  
+- **Frameworks Used**: OpenZeppelin (`Ownable`, `ERC721`, `ReentrancyGuard`)  
+- **Verification Layer**: WorldID (`IWorldID`, `ByteHasher`)  
 
 ---
 
 ## 🔑 Key Variables
 
-| Variable        | Description |
-|-----------------|-------------|
-| `maxSupply`     | Maximum number of NFTs available (set at deployment, immutable). |
-| `baseTokenURI`  | Metadata URI prefix for all NFTs. |
-| `totalMinted`   | Counter for how many NFTs have been minted so far. |
-| `worldId`       | Reference to the World ID verifier contract. |
-| `hasMinted`     | Maps an address to the token ID it minted (if any). |
+| Variable          | Description |
+|-------------------|-------------|
+| `maxSupply`       | Maximum number of NFTs (immutable). |
+| `baseTokenURI`    | Metadata URI prefix. |
+| `totalMinted`     | Counter for minted NFTs. |
+| `worldId`         | World ID verifier contract reference. |
+| `hasMinted`       | Maps address → minted token ID. |
 | `tokenToMetadata` | Maps token IDs to metadata IDs. |
-| `nullifierUsed` | Prevents reusing the same Worldcoin proof. |
+| `nullifierUsed`   | Prevents reusing Worldcoin proof. |
 
 ---
 
-## 🛠 Deployment
+# 🔮 Upcoming Reward System (ETA: 2–3 Months)
 
-Example deployment using **Foundry**:
+The **Reward System** will introduce new incentives for active community members:  
+
+- 🎁 **On-Chain Distribution** → Earn points for posting reviews, supporting reviews or daily check-ins.  
+- 🎁 **Off-Chain Distribution** → Earn points for inviting friends , join us on Social Media.
+- 🌍 **World Chain Powered** → Optimized for low fees and verified human-only interactions.  
+
+---
+
+# 🛠 Deployment Example
+
+### FlickShareNFT Deployment (Foundry)
 
 ```bash
 forge create src/FlickShareNFT.sol:FlickShareNFT \
