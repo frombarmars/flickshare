@@ -1,0 +1,63 @@
+{
+  "name": "@worldcoin/next-15-template",
+  "version": "0.1.0",
+  "homepage": "https://docs.worldcoin.org/mini-apps",
+  "description": "Create a Mini App",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/x-date-pickers": "^8.10.0",
+    "@prisma/client": "^6.13.0",
+    "@vercel/analytics": "^1.5.0",
+    "@worldcoin/idkit": "^2.4.1",
+    "@worldcoin/mini-apps-ui-kit-react": "^1.0.2",
+    "@worldcoin/minikit-js": "latest",
+    "@worldcoin/minikit-react": "latest",
+    "axios": "^1.11.0",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
+    "ethers": "^6.15.0",
+    "iconoir-react": "^7.11.0",
+    "lucide-react": "^0.536.0",
+    "next": "15.2.3",
+    "next-auth": "^5.0.0-beta.25",
+    "prisma-dbml-generator": "^0.12.0",
+    "react": "^19.0.0",
+    "react-date-picker": "^12.0.1",
+    "react-datepicker": "^8.4.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.62.0",
+    "react-hot-toast": "^2.5.2",
+    "react-select": "^5.10.2",
+    "recharts": "^3.1.2",
+    "tailwind-merge": "^3.2.0",
+    "viem": "2.23.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20.19.13",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eruda": "^3.4.1",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.3",
+    "prisma": "^6.13.0",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

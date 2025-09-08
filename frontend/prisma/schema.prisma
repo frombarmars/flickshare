@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model User {
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  walletAddress    String             @unique
+  username         String?            @unique
+  profilePicture   String?
+  discordUsername  String?
+  twitterUsername  String?
+  isAdmin          Boolean?           @default(false) // 👈 add default here
+  reviews          Review[]
+  collections      Collection[]
+  inviteCode       InviteCode? // 1:1 invite code
+  checkIns         CheckIn[]
+  supports         Support[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  // Referrals made by this user (1:M)
+  referrals        Referral[]         @relation("Referrer")
+  // Referral record pointing to this user (M:1) - Changed from 1:1 to M:1
+  referredBy       Referral?          @relation("Referred", fields: [referredById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  referredById     String?            @db.ObjectId // Removed @unique
+  ReviewLike       ReviewLike[]
+  PointTransaction PointTransaction[]
+  totalPoints      Int                @default(0)
+
+  @@index([referredById])
+}
+
+model Movie {
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  tmdbId           Int               @unique
+  title            String
+  description      String
+  releaseDate      DateTime?
+  runtime          Int?
+  posterPath       String?
+  backdropPath     String?
+  imdbId           String?
+  popularity       Float?
+  voteAverage      Float?
+  voteCount        Int?
+  tagline          String?
+  status           String?
+  originalLang     String?
+  adult            Boolean           @default(false)
+  cast             MovieCast[]
+  crew             MovieCrew[]
+  reviews          Review[]
+  movieGenres      MovieGenre[] // join with genres
+  collectionMovies CollectionMovie[] // join with collections
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Genre {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  tmdbId      Int          @unique
+  name        String
+  movieGenres MovieGenre[] // <-- explicit join
+}
+
+model MovieGenre {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  movie   Movie  @relation(fields: [movieId], references: [id])
+  movieId String @db.ObjectId
+  genre   Genre  @relation(fields: [genreId], references: [id])
+  genreId String @db.ObjectId
+
+  @@index([movieId])
+  @@index([genreId])
+}
+
+// Florject Checked this model 
+model Review {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  numericId Int?   @unique // <--- Add this
+  txHash     String?      @unique
+  movie      Movie        @relation(fields: [movieId], references: [id])
+  movieId    String       @db.ObjectId
+  reviewer   User         @relation(fields: [reviewerId], references: [id])
+  reviewerId String       @db.ObjectId
+  comment    String
+  rating     Int
+  supports   Support[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  ReviewLike ReviewLike[]
+
+  @@index([createdAt]) // Add index for createdAt field
+  @@index([movieId])
+  @@index([reviewerId])
+}
+
+model Collection {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  user      User              @relation(fields: [userId], references: [id])
+  userId    String            @db.ObjectId
+  movies    CollectionMovie[] // explicit join
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([userId])
+}
+
+model CollectionMovie {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String     @db.ObjectId
+  movie        Movie      @relation(fields: [movieId], references: [id])
+  movieId      String     @db.ObjectId
+  addedAt      DateTime   @default(now())
+
+  @@index([collectionId])
+  @@index([movieId])
+}
+
+model Referral {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Who made the referral
+  referrer   User   @relation("Referrer", fields: [referrerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  referrerId String @db.ObjectId
+
+  // Who was referred - Changed to array to support M:1 from User side
+  referred User[] @relation("Referred")
+
+  createdAt DateTime @default(now())
+}
+
+model InviteCode {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique @db.ObjectId
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model CheckIn {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Support {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  txHash    String?  @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  review    Review   @relation(fields: [reviewId], references: [id])
+  reviewId  String   @db.ObjectId
+  amount    Int
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([reviewId])
+}
+
+model Person {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  tmdbId    Int         @unique
+  name      String
+  biography String?
+  photoPath String?
+  castRoles MovieCast[]
+  crewRoles MovieCrew[]
+}
+
+model MovieCast {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  movie     Movie  @relation(fields: [movieId], references: [id])
+  movieId   String @db.ObjectId
+  person    Person @relation(fields: [personId], references: [id])
+  personId  String @db.ObjectId
+  character String
+}
+
+model MovieCrew {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  movie    Movie  @relation(fields: [movieId], references: [id])
+  movieId  String @db.ObjectId
+  person   Person @relation(fields: [personId], references: [id])
+  personId String @db.ObjectId
+  job      String
+}
+
+model ReviewLike {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  review    Review   @relation(fields: [reviewId], references: [id])
+  reviewId  String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  txHash    String?  @unique
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, userId]) // prevent duplicate likes
+}
+
+model PointTransaction {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  type      String // e.g. "REVIEW", "SUPPORT", "CHECKIN", "REFERRAL", "FOLLOW_DISCORD", "FOLLOW_X", "FOLLOW_INSTAGRAM", "FOLLOW_FACEBOOK","FOLLOW_LINKEDIN", "REACT_TO_TWEET"
+  points    Int
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+}

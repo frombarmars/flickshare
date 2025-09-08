@@ -1,0 +1,228 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  walletAddress String [unique, not null]
+  username String [unique]
+  profilePicture String
+  discordUsername String
+  twitterUsername String
+  isAdmin Boolean [default: false]
+  reviews Review [not null]
+  collections Collection [not null]
+  inviteCode InviteCode
+  checkIns CheckIn [not null]
+  supports Support [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  referrals Referral [not null]
+  referredBy Referral
+  referredById String
+  ReviewLike ReviewLike [not null]
+  PointTransaction PointTransaction [not null]
+  totalPoints Int [not null, default: 0]
+}
+
+Table Movie {
+  id String [pk]
+  tmdbId Int [unique, not null]
+  title String [not null]
+  description String [not null]
+  releaseDate DateTime
+  runtime Int
+  posterPath String
+  backdropPath String
+  imdbId String
+  popularity Float
+  voteAverage Float
+  voteCount Int
+  tagline String
+  status String
+  originalLang String
+  adult Boolean [not null, default: false]
+  cast MovieCast [not null]
+  crew MovieCrew [not null]
+  reviews Review [not null]
+  movieGenres MovieGenre [not null]
+  collectionMovies CollectionMovie [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Genre {
+  id String [pk]
+  tmdbId Int [unique, not null]
+  name String [not null]
+  movieGenres MovieGenre [not null]
+}
+
+Table MovieGenre {
+  id String [pk]
+  movie Movie [not null]
+  movieId String [not null]
+  genre Genre [not null]
+  genreId String [not null]
+}
+
+Table Review {
+  id String [pk]
+  numericId Int [unique]
+  txHash String [unique]
+  movie Movie [not null]
+  movieId String [not null]
+  reviewer User [not null]
+  reviewerId String [not null]
+  comment String [not null]
+  rating Int [not null]
+  supports Support [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  ReviewLike ReviewLike [not null]
+}
+
+Table Collection {
+  id String [pk]
+  name String [not null]
+  user User [not null]
+  userId String [not null]
+  movies CollectionMovie [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table CollectionMovie {
+  id String [pk]
+  collection Collection [not null]
+  collectionId String [not null]
+  movie Movie [not null]
+  movieId String [not null]
+  addedAt DateTime [default: `now()`, not null]
+}
+
+Table Referral {
+  id String [pk]
+  referrer User [not null]
+  referrerId String [not null]
+  referred User [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table InviteCode {
+  id String [pk]
+  code String [unique, not null]
+  user User [not null]
+  userId String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  expiresAt DateTime [not null]
+}
+
+Table CheckIn {
+  id String [pk]
+  user User [not null]
+  userId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Support {
+  id String [pk]
+  txHash String [unique]
+  user User [not null]
+  userId String [not null]
+  review Review [not null]
+  reviewId String [not null]
+  amount Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Person {
+  id String [pk]
+  tmdbId Int [unique, not null]
+  name String [not null]
+  biography String
+  photoPath String
+  castRoles MovieCast [not null]
+  crewRoles MovieCrew [not null]
+}
+
+Table MovieCast {
+  id String [pk]
+  movie Movie [not null]
+  movieId String [not null]
+  person Person [not null]
+  personId String [not null]
+  character String [not null]
+}
+
+Table MovieCrew {
+  id String [pk]
+  movie Movie [not null]
+  movieId String [not null]
+  person Person [not null]
+  personId String [not null]
+  job String [not null]
+}
+
+Table ReviewLike {
+  id String [pk]
+  review Review [not null]
+  reviewId String [not null]
+  user User [not null]
+  userId String [not null]
+  txHash String [unique]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (reviewId, userId) [unique]
+  }
+}
+
+Table PointTransaction {
+  id String [pk]
+  user User [not null]
+  userId String [not null]
+  type String [not null]
+  points Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Ref: User.referredById - Referral.id
+
+Ref: MovieGenre.movieId > Movie.id
+
+Ref: MovieGenre.genreId > Genre.id
+
+Ref: Review.movieId > Movie.id
+
+Ref: Review.reviewerId > User.id
+
+Ref: Collection.userId > User.id
+
+Ref: CollectionMovie.collectionId > Collection.id
+
+Ref: CollectionMovie.movieId > Movie.id
+
+Ref: Referral.referrerId > User.id [delete: No Action]
+
+Ref: InviteCode.userId - User.id
+
+Ref: CheckIn.userId > User.id
+
+Ref: Support.userId > User.id
+
+Ref: Support.reviewId > Review.id
+
+Ref: MovieCast.movieId > Movie.id
+
+Ref: MovieCast.personId > Person.id
+
+Ref: MovieCrew.movieId > Movie.id
+
+Ref: MovieCrew.personId > Person.id
+
+Ref: ReviewLike.reviewId > Review.id
+
+Ref: ReviewLike.userId > User.id
+
+Ref: PointTransaction.userId > User.id
