@@ -9,9 +9,7 @@ export async function POST(req: NextRequest) {
     const numericReviewId = parseInt(reviewId, 10);
     console.log("Review Numeric ID in api:");
     console.log(numericReviewId);
-    if (!Number.isFinite(numericReviewId)) {
-      return NextResponse.json({ error: "Invalid reviewId" }, { status: 400 });
-    }
+
     // Find the review with better error handling
     const currentReview = await prisma.review.findFirst({
       where: { numericId: numericReviewId },

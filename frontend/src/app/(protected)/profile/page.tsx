@@ -18,6 +18,7 @@ interface Review {
   rating: number;
   createdAt: string;
   movie: Movie;
+  numericId: string;
 }
 
 interface Support {
@@ -62,6 +63,7 @@ export default function Profile() {
         const res = await fetch(`/api/profile/${userName}`);
         if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
+        console.log("Profile API response:", data);
 
         setReviews(data.data.reviews || []);
         setSupports(data.data.supports || []);
@@ -125,7 +127,7 @@ export default function Profile() {
         {reviews.map((review) => (
           <div
             key={review.id}
-            onClick={() => handleReviewClick(review.id)}
+            onClick={() => handleReviewClick(review.numericId)}
             className="bg-gray-50 rounded-lg p-3 mx-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 active:scale-[0.98] touch-manipulation border border-gray-200"
           >
             <div className="flex items-center gap-3">

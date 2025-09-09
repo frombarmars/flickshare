@@ -20,12 +20,29 @@ export async function GET(
         createdAt: true,
         updatedAt: true,
         reviews: {
-          include: { movie: true },
+          select: {
+            id: true,
+            numericId: true, // 👈 explicitly include numericId
+            comment: true,
+            rating: true,
+            createdAt: true,
+            updatedAt: true,
+            movie: true, // or select fields explicitly
+          },
           orderBy: { createdAt: "desc" },
         },
         supports: {
           include: {
-            review: { include: { movie: true, reviewer: true } },
+            review: {
+              select: {
+                id: true,
+                numericId: true, // 👈 include numericId for supported reviews
+                comment: true,
+                rating: true,
+                movie: true,
+                reviewer: true,
+              },
+            },
           },
           orderBy: { createdAt: "desc" },
         },

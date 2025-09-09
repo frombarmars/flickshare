@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       take: limit,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
       include: {
         reviewer: {
           select: {
@@ -148,6 +148,7 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             supports: true,
+            ReviewLike: true, // 👈 count ReviewLike array
           },
         },
       },
@@ -165,6 +166,7 @@ export async function GET(request: NextRequest) {
       rating: review.rating,
       reviewIdOnChain: review.numericId,
       coins: review.supports.reduce((sum, support) => sum + support.amount, 0),
+      likes: review._count.ReviewLike, // 👈 include like count
       date: review.createdAt.toISOString().split("T")[0],
       reviewId: review.id,
       movieTitle: review.movie.title,

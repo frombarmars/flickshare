@@ -18,6 +18,7 @@ interface Review {
   rating: number;
   createdAt: string;
   movie: Movie;
+  numericId: string;
 }
 
 interface Support {
@@ -110,8 +111,8 @@ export default function Profile() {
     });
   };
 
-  const handleReviewClick = (reviewId: string) => {
-    router.push(`/review/${reviewId}`);
+  const handleReviewClick = (numericReviewId: string) => {
+    router.push(`/review/${numericReviewId}`);
   };
 
   const handleSupportClick = (supportId: string) => {
@@ -130,7 +131,7 @@ export default function Profile() {
         {reviews.map((review) => (
           <div
             key={review.id}
-            onClick={() => handleReviewClick(review.id)}
+            onClick={() => handleReviewClick(review.numericId)}
             className="bg-gray-50 rounded-lg p-3 mx-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 active:scale-[0.98] touch-manipulation border border-gray-200"
           >
             <div className="flex items-center gap-3">

@@ -82,7 +82,7 @@ const SupportPage = () => {
           args: [userWalletAddress],
         })) as bigint;
         console.log(balance);
-        
+
         // convert from wei
         const balanceInWLD = Number(balance) / 1e18;
         setCurrentBalance(balanceInWLD);
@@ -118,18 +118,38 @@ const SupportPage = () => {
 
   // handle UI when tx confirmed
   useEffect(() => {
-    if (isConfirmed) {
+    if (isConfirmed && reviewData) {
+      const saveSupport = async () => {
+        try {
+          await fetch("/api/support", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              txHash: transactionId,
+              userId: session?.user.id,  // assuming session.user.id is your DB userId
+              reviewId: reviewData.review.id,
+              amount: selectedAmount, // store as int WLD
+            }),
+          });
+        } catch (err) {
+          console.error("Failed to save support record:", err);
+        }
+      };
+
+      saveSupport();
+
       // deduct balance only when confirmed
       setCurrentBalance((prev) => prev - selectedAmount);
       setIsProcessing(false);
-      setSuccessMessage(`Successfully sent ${selectedAmount} WLD to @${reviewData?.review?.username || "the reviewer"}!`);
+      setSuccessMessage(
+        `Successfully sent ${selectedAmount} WLD to @${reviewData?.review?.username || "the reviewer"}!`
+      );
 
-      // Clear success message after 5 seconds
       setTimeout(() => {
         setSuccessMessage("");
       }, 5000);
     }
-  }, [isConfirmed, selectedAmount, reviewData]);
+  }, [isConfirmed, selectedAmount, reviewData, session?.user.id, transactionId]);
 
   const presetAmounts = [5, 10, 25, 50];
 

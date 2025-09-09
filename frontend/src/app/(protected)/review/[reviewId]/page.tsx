@@ -50,8 +50,6 @@ type Tx = {
 
 const ReviewSupportUI = () => {
   const params = useParams<{ reviewId: string }>();
-  console.log("Page : details/[reviewId]/page.tsx");
-  console.log(params);
 
   const { data: session } = useSession();
   const reviewId = params?.reviewId;

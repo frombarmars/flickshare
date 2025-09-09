@@ -165,7 +165,7 @@ model Support {
   userId    String   @db.ObjectId
   review    Review   @relation(fields: [reviewId], references: [id])
   reviewId  String   @db.ObjectId
-  amount    Int
+  amount    Float
   createdAt DateTime @default(now())
 
   @@index([userId])

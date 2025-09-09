@@ -132,7 +132,7 @@ Table Support {
   userId String [not null]
   review Review [not null]
   reviewId String [not null]
-  amount Int [not null]
+  amount Float [not null]
   createdAt DateTime [default: `now()`, not null]
 }
 

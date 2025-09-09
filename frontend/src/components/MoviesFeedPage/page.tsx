@@ -137,8 +137,8 @@ export default function MovieFeedPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleMovieClick = (movie: Movie) => {
-    router.push(`/movie/${movie.id}`);
+  const handleMovieClick = (tmdbId: number) => {
+    router.push(`/movie/${tmdbId}`);
   };
 
   const handleSortChange = (option: SortOption) => {
@@ -241,7 +241,7 @@ export default function MovieFeedPage() {
               key={movie.id}
               ref={isLast ? lastMovieRef : null}
               className="bg-white rounded-lg overflow-hidden shadow border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer group"
-              onClick={() => handleMovieClick(movie)}
+              onClick={() => handleMovieClick(movie.tmdbId)}
             >
               {/* Movie Poster */}
               <div className="relative aspect-[3/4] overflow-hidden">

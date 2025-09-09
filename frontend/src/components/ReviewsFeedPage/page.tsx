@@ -88,7 +88,7 @@ export default function ReviewsFeedPage() {
   );
 
   const handleReviewClick = (review: any) => {
-    router.push(`/details/${review.reviewIdOnChain}`);
+    router.push(`/review/${review.reviewIdOnChain}`);
   };
 
   const handleAvatarClick = (e: React.MouseEvent, username: string) => {
@@ -184,7 +184,7 @@ export default function ReviewsFeedPage() {
                       </div>
                       <div className="flex items-center gap-1 ml-4">
                         <ThumbsUp size={11} className="text-blue-500" />
-                        <span>{Math.floor(r.coins * 0.1)} likes</span>
+                        <span>{r.likes} likes</span>
                       </div>
                     </div>
                   </div>

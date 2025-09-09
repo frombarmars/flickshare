@@ -1,0 +1,25 @@
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export async function POST(
+    req: NextRequest,
+    context: { params: Promise<{ userId: string }> },
+) {
+    const userId = (await context.params).userId;
+    // Define today’s start
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const alreadyCheckedIn = await prisma.checkIn.findFirst({
+        where: {
+            userId,
+            createdAt: { gte: today },
+        },
+    });
+
+    if (alreadyCheckedIn) {
+        return NextResponse.json({ ok: false, message: "Already checked in today" });
+    }
+
+    return NextResponse.json({ ok: true });
+}

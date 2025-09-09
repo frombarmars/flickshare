@@ -83,7 +83,7 @@ export default function TrendingMovies() {
 
     // Add this function to handle movie card click
     const handleMovieClick = (movieId: number) => {
-        router.push(`/moviedetails/${movieId}`);
+        router.push(`/movie/${movieId}`);
     };
 
     return (

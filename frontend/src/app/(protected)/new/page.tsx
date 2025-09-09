@@ -206,6 +206,7 @@ export default function AddReview() {
           },
         ],
       });
+      console.log("Transaction sent, ID:", finalPayload);
       console.log(finalPayload);
       if (finalPayload.status === "error") {
         setErrors({ submit: "Transaction failed, please try again." });

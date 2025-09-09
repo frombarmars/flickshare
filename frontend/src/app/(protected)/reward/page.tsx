@@ -145,28 +145,6 @@ export default function RewardProgram() {
         transactionId: nftTransactionId,
     });
 
-    useEffect(() => {
-        if (isConfirmed) {
-            setSuccessMessage("Daily check-in confirmed on-chain!");
-            // Add your points API call here after confirmation
-            fetch(`/api/check-in/${userId}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.ok) {
-                        setErrors({ submit: data.message || "Already checked in today" });
-                    }
-                });
-        }
-    }, [isConfirmed]);
-
-    useEffect(() => {
-        if (isNftConfirmed) {
-            setNftClaimed(true);
-            setNftImage("/api/placeholder/300/400?text=Your+NFT");
-        }
-    }, [isNftConfirmed]);
-
-    // Replace your dailyCheckIn function with this:
     const dailyCheckIn = async () => {
         setErrors({});
         setSuccessMessage("");
@@ -174,8 +152,17 @@ export default function RewardProgram() {
         try {
             setLoading(true);
 
-            const userSignal = session?.user?.walletAddress;
+            // Step 1: Precheck with DB
+            const precheck = await fetch(`/api/check-in/precheck/${userId}`, { method: "POST" });
+            const precheckData = await precheck.json();
 
+            if (!precheckData.ok) {
+                setErrors({ submit: precheckData.message || "Already checked in today" });
+                return;
+            }
+
+            // Step 2: Worldcoin Verify
+            const userSignal = session?.user?.walletAddress;
             const result = await MiniKit.commandsAsync.verify({
                 action: "daily-checkin",
                 verification_level: VerificationLevel.Orb,
@@ -187,6 +174,7 @@ export default function RewardProgram() {
                 return;
             }
 
+            // Step 3: On-chain Transaction
             const proofArray = decodeAbiParameters(
                 parseAbiParameters("uint256[8]"),
                 result.finalPayload.proof as `0x${string}`
@@ -204,18 +192,33 @@ export default function RewardProgram() {
                             result.finalPayload.nullifier_hash,
                             ENV_VARIABLES.WORLD_MINIAPP_ID,
                             "daily-checkin",
-                            proofArray
+                            proofArray,
                         ],
                     },
                 ],
             });
 
-            if (finalPayload.status === 'error') {
+            if (finalPayload.status === "error") {
                 setErrors({ submit: "Transaction failed, please try again." });
-            } else {
-                setTransactionId(finalPayload.transaction_id);
-                // Don't set success message here - wait for confirmation
+                return;
             }
+
+            setTransactionId(finalPayload.transaction_id);
+
+            // Step 4: Wait for confirmation (already using `useWaitForTransactionReceipt`)
+            // Once `isConfirmed === true`, call confirm API:
+            if (isConfirmed) {
+                const confirmRes = await fetch(`/api/check-in/confirm/${userId}`, { method: "POST" });
+                const confirmData = await confirmRes.json();
+
+                if (confirmData.ok) {
+                    setSuccessMessage("Daily check-in confirmed!");
+                    setAirdropPoints(confirmData.totalPoints);
+                } else {
+                    setErrors({ submit: confirmData.message });
+                }
+            }
+
         } catch (err) {
             console.error("Error during check-in:", err);
             setErrors({ submit: "Something went wrong. Please try again." });
@@ -223,6 +226,17 @@ export default function RewardProgram() {
             setLoading(false);
         }
     };
+
+
+    useEffect(() => {
+        if (isNftConfirmed) {
+            setNftClaimed(true);
+            setNftImage("/api/placeholder/300/400?text=Your+NFT");
+        }
+    }, [isNftConfirmed]);
+
+    // Replace your dailyCheckIn function with this:
+
 
     // Replace your claimNFT function with this:
     const claimNFT = async () => {
@@ -688,9 +702,9 @@ export default function RewardProgram() {
                     <div className="mt-3 mb-6">
                         <button
                             onClick={() => router.push('/leaderboard')}
-                            className="w-full bg-white border border-gray-300 text-black py-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+                            className="!w-full !bg-white !border border-gray-300 text-black !py-3 rounded-xl !hover:bg-gray-50 !active:bg-gray-100 transition-all duration-200 !font-semibold !flex !items-center !justify-center !gap-2"
                         >
-                            <Trophy className="w-4 h-4" strokeWidth={2} />
+                            <Trophy className="!w-4 !h-4" strokeWidth={2} />
                             View Full Leaderboard
                         </button>
                     </div>
