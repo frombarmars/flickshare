@@ -205,20 +205,6 @@ export default function RewardProgram() {
 
             setTransactionId(finalPayload.transaction_id);
 
-            // Step 4: Wait for confirmation (already using `useWaitForTransactionReceipt`)
-            // Once `isConfirmed === true`, call confirm API:
-            if (isConfirmed) {
-                const confirmRes = await fetch(`/api/check-in/confirm/${userId}`, { method: "POST" });
-                const confirmData = await confirmRes.json();
-
-                if (confirmData.ok) {
-                    setSuccessMessage("Daily check-in confirmed!");
-                    setAirdropPoints(confirmData.totalPoints);
-                } else {
-                    setErrors({ submit: confirmData.message });
-                }
-            }
-
         } catch (err) {
             console.error("Error during check-in:", err);
             setErrors({ submit: "Something went wrong. Please try again." });
@@ -227,6 +213,29 @@ export default function RewardProgram() {
         }
     };
 
+    // Track check-in tx confirmation
+    useEffect(() => {
+        const confirmCheckIn = async () => {
+            if (!isConfirmed || !userId) return;
+
+            try {
+                const confirmRes = await fetch(`/api/check-in/confirm/${userId}`, { method: "POST" });
+                const confirmData = await confirmRes.json();
+                await refreshPoints(); // 👈 update points after confirm
+                if (confirmData.ok) {
+                    setSuccessMessage("Daily check-in confirmed!");
+                    setAirdropPoints(confirmData.totalPoints);
+                } else {
+                    setErrors({ submit: confirmData.message });
+                }
+            } catch (err) {
+                console.error("Error confirming check-in:", err);
+                setErrors({ submit: "Something went wrong during confirmation." });
+            }
+        };
+
+        confirmCheckIn();
+    }, [isConfirmed, userId]); // <-- runs only when tx is confirmed
 
     useEffect(() => {
         if (isNftConfirmed) {
@@ -331,9 +340,6 @@ export default function RewardProgram() {
         }
     ];
 
-
-
-
     useEffect(() => {
         const checkIfUserMintedNFT = async () => {
             const tokenId: number = await isUserMintedNFT(userWalletAddress);
@@ -372,6 +378,21 @@ export default function RewardProgram() {
             setNftLoading(false);
         }
     };
+
+    const refreshPoints = async () => {
+        if (!userId) return;
+        try {
+            const res = await fetch(`/api/points/summary/${userId}`);
+            const data = await res.json();
+            if (data.ok) {
+                setAirdropPoints(data.totalPoints);
+                setCompletedTasks(data.completedTasks);
+            }
+        } catch (err) {
+            console.error("Failed to refresh points", err);
+        }
+    };
+
 
     return (
         <main className="!w-full !min-h-screen !bg-white !text-gray-900 !overflow-x-hidden">

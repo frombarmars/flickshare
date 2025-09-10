@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { AuthButton } from "@/components/AuthButton";
+import { Page } from "@/components/PageLayout";
 
 export default function Home() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   type Particle = {
     x: number;
@@ -13,6 +14,7 @@ export default function Home() {
     opacity: number;
   };
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [showButton, setShowButton] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Play intro sound
@@ -48,14 +50,14 @@ export default function Home() {
     }
   }, [searchParams]);
 
-  // Redirect after delay
+  // Show button after animations complete
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push("/wallet-login");
-    }, 5000);
+      setShowButton(true);
+    }, 3000);
 
     return () => clearTimeout(timer);
-  }, [router]);
+  }, []);
 
   // Initialize particles
   useEffect(() => {
@@ -90,63 +92,65 @@ export default function Home() {
   }, [particles.length]);
 
   return (
-    <div className="relative w-screen h-screen bg-white dark:bg-black overflow-hidden flex flex-col items-center justify-center">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-black dark:from-white to-transparent opacity-5"></div>
-        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black dark:from-white to-transparent opacity-5"></div>
-      </div>
+    <Page>
+      <Page.Main className="flex flex-col items-center justify-center">
+        <div className="relative w-screen h-screen bg-white dark:bg-black overflow-hidden flex flex-col items-center justify-center">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-black dark:from-white to-transparent opacity-5"></div>
+            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black dark:from-white to-transparent opacity-5"></div>
+          </div>
 
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
+          {/* Grid pattern */}
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
                             linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)`,
-          backgroundSize: "50px 50px",
-        }}
-      ></div>
+              backgroundSize: "50px 50px",
+            }}
+          ></div>
 
-      {/* Animated particles */}
-      {particles.map((particle, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full bg-black dark:bg-white"
-          style={{
-            top: `${particle.y}%`,
-            left: `${particle.x}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            opacity: particle.opacity,
-          }}
-        />
-      ))}
+          {/* Animated particles */}
+          {particles.map((particle, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-black dark:bg-white"
+              style={{
+                top: `${particle.y}%`,
+                left: `${particle.x}%`,
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
+                opacity: particle.opacity,
+              }}
+            />
+          ))}
 
-      {/* Pulsing circles */}
-      <div className="absolute w-80 h-80 rounded-full border border-black dark:border-white opacity-5 animate-ping-slow"></div>
-      <div className="absolute w-96 h-96 rounded-full border border-black dark:border-white opacity-3 animate-ping-slower"></div>
+          {/* Pulsing circles */}
+          <div className="absolute w-80 h-80 rounded-full border border-black dark:border-white opacity-5 animate-ping-slow"></div>
+          <div className="absolute w-96 h-96 rounded-full border border-black dark:border-white opacity-3 animate-ping-slower"></div>
 
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center justify-center text-center px-6">
-        <h1 className="text-black dark:text-white text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-[0.2em] mb-8 animate-fade-in">
-          WATCH REVIEW EARN
-        </h1>
-        <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-black to-transparent dark:via-white opacity-70 mb-8 animate-expand"></div>
+          {/* Main content */}
+          <div className="relative z-10 flex flex-col items-center justify-center text-center px-6">
+            <h1 className="text-black dark:text-white text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-[0.2em] mb-8 animate-fade-in">
+              WATCH REVIEW EARN
+            </h1>
+            <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-black to-transparent dark:via-white opacity-70 mb-8 animate-expand"></div>
 
-        <p className="uppercase text-black dark:text-white text-base md:text-xl font-medium tracking-[0.3em] opacity-90 mb-3 animate-fade-in-delay">
-          Where Movies Meet Web3
-        </p>
-        <p className="text-black dark:text-white text-sm md:text-lg italic font-light tracking-wide opacity-70 animate-fade-in-delay-2">
-          Own your reviews. Share your voice.
-        </p>
-      </div>
+            <p className="uppercase text-black dark:text-white text-base md:text-xl font-medium tracking-[0.3em] opacity-90 mb-3 animate-fade-in-delay">
+              Where Movies Meet Web3
+            </p>
+            <p className="text-black dark:text-white text-sm md:text-lg italic font-light tracking-wide opacity-70 animate-fade-in-delay-2">
+              Own your reviews. Share your voice.
+            </p>
 
-      {/* Loading indicator */}
-      <div className="absolute bottom-12 w-40 h-1 bg-black/20 dark:bg-white/20 rounded overflow-hidden">
-        <div className="h-full bg-black/70 dark:bg-white/70 rounded animate-loading-bar"></div>
-      </div>
+            {/* Auth Button */}
+            <div className={`mt-12 transition-all duration-1000 ${showButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <AuthButton />
+            </div>
+          </div>
 
-      <style>{`
+          <style>{`
         @keyframes fade-in {
           0% { opacity: 0; transform: translateY(20px); }
           100% { opacity: 1; transform: translateY(0); }
@@ -159,9 +163,9 @@ export default function Home() {
         @keyframes ping-slow { 0% { transform: scale(0.8); opacity: 0.1; } 50% { opacity: 0.05; } 100% { transform: scale(2.5); opacity: 0; } }
         .animate-ping-slow { animation: ping-slow 4s cubic-bezier(0, 0, 0.2, 1) infinite; }
         .animate-ping-slower { animation: ping-slow 6s cubic-bezier(0, 0, 0.2, 1) infinite; }
-        @keyframes loading-bar { 0% { transform: translateX(-100%); } 100% { transform: translateX(0%); } }
-        .animate-loading-bar { animation: loading-bar 5s linear forwards; transform-origin: left; }
       `}</style>
-    </div>
+        </div>
+      </Page.Main>
+    </Page>
   );
 }

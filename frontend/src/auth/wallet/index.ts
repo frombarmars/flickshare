@@ -34,7 +34,7 @@ export const walletAuth = async (inviteCode: string) => {
     console.log(result.finalPayload);
   }
   await signIn('world-app', {
-    redirectTo: '/verify',
+    redirectTo: '/home',
     nonce,
     signedNonce,
     finalPayloadJson: JSON.stringify(result.finalPayload),
