@@ -84,8 +84,8 @@ model MovieGenre {
 
 // Florject Checked this model 
 model Review {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  numericId Int?   @unique // <--- Add this
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  numericId  Int?         @unique // <--- Add this
   txHash     String?      @unique
   movie      Movie        @relation(fields: [movieId], references: [id])
   movieId    String       @db.ObjectId
@@ -98,9 +98,16 @@ model Review {
   updatedAt  DateTime     @updatedAt
   ReviewLike ReviewLike[]
 
+  // 👇 New fields
+  isBanned  Boolean?  @default(false) // admin can flag it
+  bannedAt  DateTime?
+  bannedBy  String?   @db.ObjectId // which admin banned
+  banReason String?
+
   @@index([createdAt]) // Add index for createdAt field
   @@index([movieId])
   @@index([reviewerId])
+  @@index([isBanned]) // quick lookup for moderation
 }
 
 model Collection {

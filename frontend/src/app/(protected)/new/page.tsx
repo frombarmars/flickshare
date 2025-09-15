@@ -165,23 +165,35 @@ export default function AddReview() {
     e.preventDefault();
     setSuccessMessage("");
     setErrors({});
-    console.log(ENV_VARIABLES);
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
+
     try {
+      // 👇 Check review count first
+      const res = await fetch(`/api/reviews/count?userId=${session?.user?.id}`);
+      const { count } = await res.json();
+      const remaining = 5 - count;
+      if (remaining <= 0) {
+        setErrors({ submit: "You’ve reached today’s limit of 5 reviews." });
+      } else {
+        setSuccessMessage(`You can submit ${remaining} more review(s) today.`);
+      }
+
+
+      // Proceed as usual
       const userSignal = session?.user?.walletAddress;
-      console.log(userSignal);
       setLoading(true);
       savedToDbRef.current = false;
+
       const result = await MiniKit.commandsAsync.verify({
         action: "add-review",
         verification_level: VerificationLevel.Orb,
         signal: userSignal,
       });
-      console.log(result);
 
       if (result.finalPayload.status === "error") {
         setErrors({ submit: "Verification failed, please try again." });
@@ -189,31 +201,34 @@ export default function AddReview() {
         return;
       }
 
-
       const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
             address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
             abi: FlickShareContractABI,
             functionName: "createReview",
-            args: [movieId,
-              review, rating, result.finalPayload.merkle_root, userSignal, result.finalPayload.nullifier_hash, ENV_VARIABLES.WORLD_MINIAPP_ID, "add-review",
+            args: [
+              movieId,
+              review,
+              rating,
+              result.finalPayload.merkle_root,
+              userSignal,
+              result.finalPayload.nullifier_hash,
+              ENV_VARIABLES.WORLD_MINIAPP_ID,
+              "add-review",
               decodeAbiParameters(
-                parseAbiParameters('uint256[8]'),
+                parseAbiParameters("uint256[8]"),
                 result.finalPayload.proof as `0x${string}`
               )[0],
             ],
           },
         ],
       });
-      console.log("Transaction sent, ID:", finalPayload);
-      console.log(finalPayload);
+
       if (finalPayload.status === "error") {
         setErrors({ submit: "Transaction failed, please try again." });
       } else {
         setTransactionId(finalPayload.transaction_id);
-        // IMPORTANT: We no longer call /api/movies/{movieId} here.
-        // The server-side /api/reviews will ensure the movie exists if missing.
       }
     } catch (err) {
       console.error("Error sending transaction:", err);
