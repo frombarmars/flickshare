@@ -26,7 +26,7 @@ export default function Home() {
     } catch (err) {
       console.error("Failed to get permissions:", err);
     }
-  }, [isInstalled]);
+  }, []);
 
   // 2. Request notification permission
   const requestPermission = useCallback(async () => {
@@ -48,7 +48,7 @@ export default function Home() {
     } catch (err) {
       console.error("Permission request failed:", err);
     }
-  }, [isInstalled]);
+  }, []);
 
   // 3. On mount: check → request if needed
   useEffect(() => {
