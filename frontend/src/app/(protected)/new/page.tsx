@@ -43,6 +43,8 @@ export default function AddReview() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [transactionId, setTransactionId] = useState<string>("");
+  const [dailyCount, setDailyCount] = useState<number | null>(null);
+  const [remaining, setRemaining] = useState<number>(5);
 
   const savedToDbRef = useRef(false); // prevent double POST after confirmation
   const WORD_LIMIT = 100;
@@ -60,6 +62,22 @@ export default function AddReview() {
     return newErrors;
   };
 
+  useEffect(() => {
+    async function fetchDailyCount() {
+      if (!session?.user?.id) return;
+
+      try {
+        const res = await fetch(`/api/reviews/count?userId=${session.user.id}`);
+        const { count } = await res.json();
+        setDailyCount(count);
+        setRemaining(5 - count);
+      } catch (err) {
+        console.error("Failed to fetch daily review count", err);
+      }
+    }
+
+    fetchDailyCount();
+  }, [session?.user?.id]);
   // Track tx confirmation
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -173,17 +191,6 @@ export default function AddReview() {
     }
 
     try {
-      // 👇 Check review count first
-      const res = await fetch(`/api/reviews/count?userId=${session?.user?.id}`);
-      const { count } = await res.json();
-      const remaining = 5 - count;
-      if (remaining <= 0) {
-        setErrors({ submit: "You’ve reached today’s limit of 5 reviews." });
-      } else {
-        setSuccessMessage(`You can submit ${remaining} more review(s) today.`);
-      }
-
-
       // Proceed as usual
       const userSignal = session?.user?.walletAddress;
       setLoading(true);
@@ -240,10 +247,32 @@ export default function AddReview() {
 
   const isSubmitDisabled = loading || isConfirming || !session?.user?.id;
 
+
+  if (dailyCount !== null && remaining <= 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-xl font-semibold text-gray-800">
+            Daily Limit Reached
+          </h1>
+          <p className="mt-2 text-gray-600">
+            You’ve already submitted 5 reviews today. Please come back tomorrow.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-4 py-8">
       <div className="w-full max-w-lg mb-8 text-center">
         <h1 className="text-xl font-light text-gray-900">Add Review</h1>
+        {/* 👇 Daily remaining reviews info */}
+        {dailyCount !== null && (
+          <p className="mt-2 text-sm text-gray-500 text-center">
+            You can submit {remaining} more review(s) today.
+          </p>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-6">
@@ -401,16 +430,6 @@ export default function AddReview() {
         {successMessage && (
           <div className="text-center p-4 bg-green-50 rounded-2xl border border-green-200">
             <p className="text-green-600 text-sm font-medium">{successMessage}</p>
-            {transactionId && (
-              <a
-                href={`https://worldscan.org/tx/${transactionId}`}
-                className="text-xs text-blue-500 underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Transaction
-              </a>
-            )}
           </div>
         )}
       </form>

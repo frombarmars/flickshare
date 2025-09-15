@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { MiniKit } from "@worldcoin/minikit-js";
-import { Gift, ExternalLink, CheckCircle, XCircle, Loader } from "lucide-react";
+import { Gift, CheckCircle, XCircle, Loader } from "lucide-react";
 import FlickShareContractABI from "@/abi/FlickShareContract.json";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import client from "@/lib/worldClient";
@@ -166,17 +166,6 @@ export default function ClaimNFTPage() {
                                 This NFT proves you were among the first supporters of FlickShare and grants you exclusive benefits.
                             </p>
                         </div>
-
-                        {transactionId && (
-                            <a
-                                href={`https://worldscan.org/tx/${transactionId}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-black"
-                            >
-                                View transaction on explorer <ExternalLink className="w-4 h-4" />
-                            </a>
-                        )}
                     </div>
                 )}
 

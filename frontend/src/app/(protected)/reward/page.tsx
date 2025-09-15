@@ -15,7 +15,6 @@ import {
     Mail,
     MessageCircle,
     Twitter,
-    ExternalLink,
     XCircle,
     Loader,
     Trophy
@@ -448,16 +447,6 @@ export default function RewardProgram() {
                                 </div>
                                 <h2 className="text-lg font-bold text-black">{nftMetaData?.name || "Your NFT"}</h2>
                                 <p className="text-gray-600 text-sm mt-1">{nftMetaData?.description || "Exclusive Early User NFT"}</p>
-                                {nftTransactionId && (
-                                    <a
-                                        href={`https://worldscan.org/tx/${nftTransactionId}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-black mt-3"
-                                    >
-                                        View transaction on explorer <ExternalLink className="w-4 h-4" />
-                                    </a>
-                                )}
                             </div>
                         ) : (
                             <div className="text-center relative z-1">
@@ -566,17 +555,6 @@ export default function RewardProgram() {
                                 </div>
                                 <h2 className="!text-lg !font-bold !text-black">NFT Claimed Successfully!</h2>
                                 <p className="!text-gray-600 !text-sm !mt-1">Your exclusive Early User NFT</p>
-
-                                {nftTransactionId && (
-                                    <a
-                                        href={`https://worldscan.org/tx/${nftTransactionId}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-black mt-3"
-                                    >
-                                        View transaction on explorer <ExternalLink className="w-4 h-4" />
-                                    </a>
-                                )}
                             </div>
                         )}
 
@@ -708,14 +686,6 @@ export default function RewardProgram() {
                                 <p className="text-green-600 text-sm font-medium">
                                     {successMessage}
                                 </p>
-                                {transactionId && (
-                                    <a
-                                        href={`https://worldscan.org/tx/${transactionId}`}
-                                        className="text-xs text-blue-500 underline"
-                                    >
-                                        View Transaction
-                                    </a>
-                                )}
                             </div>
                         )}
                     </div>
