@@ -47,7 +47,7 @@ export default function AddReview() {
   const [remaining, setRemaining] = useState<number>(5);
 
   const savedToDbRef = useRef(false); // prevent double POST after confirmation
-  const WORD_LIMIT = 100;
+  const WORD_LIMIT = 200;
 
   const wordCount = review.trim() ? review.trim().split(/\s+/).length : 0;
 
