@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { Settings, Star, Copy, Check, Calendar, Coins } from "lucide-react";
+import { Settings, Star, Copy, Check, Calendar, Coins, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { CircularIcon } from "@worldcoin/mini-apps-ui-kit-react";
 import { CheckCircleSolid } from "iconoir-react";
 import { useRouter } from "next/navigation";
+import { MiniKit, Permission, RequestPermissionPayload } from "@worldcoin/minikit-js";
 
 interface Movie {
   id: string;
@@ -44,6 +45,67 @@ export default function Profile() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [supports, setSupports] = useState<Support[]>([]);
 
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [notifGranted, setNotifGranted] = useState<boolean | undefined>();
+  const [showSettings, setShowSettings] = useState(false);
+
+  // 1. Detect MiniKit availability
+  useEffect(() => {
+    setIsInstalled(typeof MiniKit !== "undefined");
+  }, []);
+
+  // 2. Get current permissions
+  const getPermissions = useCallback(async () => {
+    if (!isInstalled) {
+      console.warn("MiniKit is not installed");
+      return;
+    }
+
+    try {
+      const payload = await MiniKit.commandsAsync.getPermissions();
+      console.log("Current permissions:", payload);
+
+      const granted =
+        (payload?.finalPayload as any)?.permissions?.[Permission.Notifications];
+
+      setNotifGranted(granted); // true | false | undefined
+      return payload;
+    } catch (err) {
+      console.error("Failed to get permissions:", err);
+    }
+  }, [isInstalled]);
+
+  // 3. Request permission when user clicks
+  const requestPermission = useCallback(async () => {
+    if (!isInstalled) {
+      console.warn("MiniKit is not installed");
+      return;
+    }
+
+    try {
+      const requestPermissionPayload: RequestPermissionPayload = {
+        permission: Permission.Notifications,
+      };
+
+      const payload = await MiniKit.commandsAsync.requestPermission(
+        requestPermissionPayload
+      );
+
+      console.log("Notification permission response:", payload);
+
+      const granted =
+        (payload?.finalPayload as any)?.permissions?.[Permission.Notifications];
+
+      setNotifGranted(granted);
+    } catch (err) {
+      console.error("Permission request failed:", err);
+    }
+  }, [isInstalled]);
+
+  // 4. On mount, fetch initial permissions
+  useEffect(() => {
+    getPermissions();
+  }, [getPermissions]);
 
   const handleCopyAddress = async () => {
     try {
@@ -74,30 +136,6 @@ export default function Profile() {
 
     fetchProfile();
   }, [userName]);
-
-  // Build activity history from reviews and supports
-  // const activityHistory = [
-  //   ...reviews.map((review) => ({
-  //     id: `review-${review.id}`,
-  //     type: "review",
-  //     date: review.createdAt,
-  //     title: `Posted a review — ${review.movie.title}`,
-  //     subtitle: `${review.rating}/5`,
-  //     posterUrl: review.movie.posterPath
-  //       ? `https://image.tmdb.org/t/p/w500${review.movie.posterPath}`
-  //       : null,
-  //     originId: review.id,
-  //   })),
-  //   ...supports.map((support) => ({
-  //     id: `support-${support.id}`,
-  //     type: "support",
-  //     date: support.createdAt,
-  //     title: `Sent ${support.amount} WLD to @${support.review.reviewer.username}`,
-  //     subtitle: support.review.movie.title,
-  //     posterUrl: null,
-  //     originId: support.id,
-  //   })),
-  // ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -290,18 +328,49 @@ export default function Profile() {
 
   return (
     <main className="w-full min-h-screen bg-white text-gray-900 overflow-x-hidden">
-      <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-20 safe-area-top">
+      <header className="bg-white border-b px-4 py-4 sticky top-0 z-20">
         <div className="flex items-center justify-between max-w-sm mx-auto">
           <div className="w-10"></div>
-          <h1 className="text-xl font-bold text-black">Profile</h1>
+          <h1 className="text-xl font-bold">Profile</h1>
           <button
-            aria-label="Settings"
-            className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-200 active:scale-95 touch-manipulation"
+            onClick={() => setShowSettings(true)}
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-xl"
           >
-            <Settings className="w-5 h-5" strokeWidth={2} />
+            <Settings className="w-5 h-5" />
           </button>
         </div>
       </header>
+
+      {/* Settings modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-30">
+          <div className="bg-white rounded-2xl shadow-lg p-6 w-[90%] max-w-sm relative">
+            <button
+              onClick={() => setShowSettings(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-lg font-semibold mb-4">Settings</h2>
+
+            {/* Notifications */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Notifications</span>
+              {notifGranted === true ? (
+                <Check className="w-5 h-5 text-green-600" />
+              ) : (
+                <button
+                  onClick={requestPermission}
+                  className="px-3 py-1 text-xs rounded-lg bg-black text-white hover:bg-gray-800"
+                >
+                  Enable
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-sm mx-auto px-4">
         <section className="pt-8 pb-8">

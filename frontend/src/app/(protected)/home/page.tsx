@@ -48,7 +48,7 @@ export default function Home() {
     } catch (err) {
       console.error("Permission request failed:", err);
     }
-  }, []);
+  }, [isInstalled]);
 
   // 3. On mount: check → request if needed
   useEffect(() => {
