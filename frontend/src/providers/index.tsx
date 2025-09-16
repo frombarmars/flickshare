@@ -1,6 +1,7 @@
 'use client';
-import { LocaleProvider } from '@/context/LocaleContext';
+// import { LocaleProvider } from '@/context/LocaleContext';
 import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
+import { Analytics } from "@vercel/analytics/next";
 import { Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
 import dynamic from 'next/dynamic';
@@ -37,9 +38,10 @@ export default function ClientProviders({
     <ErudaProvider>
       <MiniKitProvider>
         <SessionProvider session={session}>
-          <LocaleProvider>
-            {children}
-          </LocaleProvider>
+          {/* <LocaleProvider> */}
+          {children}
+          <Analytics />
+          {/* </LocaleProvider> */}
         </SessionProvider>
       </MiniKitProvider>
     </ErudaProvider>
