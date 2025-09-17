@@ -9,8 +9,6 @@ import {
   User,
   ChevronDown,
   Share2,
-  Facebook,
-  Instagram,
   ThumbsUp,
 } from "lucide-react";
 import Image from "next/image";
@@ -256,29 +254,15 @@ const ReviewSupportUI = () => {
   };
 
 
-  // Share functions
-  const shareOnFacebook = () => {
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-      window.location.href
-    )}`;
-    window.open(shareUrl, "_blank", "width=600,height=400");
-    setShowShareOptions(false);
-  };
 
-  const shareOnInstagram = () => {
-    const text = `Check out this review of "${review?.title ?? ""}" by ${review?.username ?? ""
-      } on FlickShare!`;
-    navigator.clipboard.writeText(`${text} ${window.location.href}`);
-    window.open("https://www.instagram.com/", "_blank");
-    setShowShareOptions(false);
-  };
+
 
   const shareOnX = () => {
     const text = `Check out this review of "${review?.title ?? ""}" by ${review?.username ?? ""
       } on FlickShare!`;
     const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
       text
-    )}&url=${encodeURIComponent(window.location.href)}`;
+    )}&url=${encodeURIComponent(`https://world.org/mini-app?app_id=app_c832bd1cc0b9cfec0d768b55e7cd1c8b&path=/review/${reviewId}`)}`;
     window.open(shareUrl, "_blank", "width=600,height=400");
     setShowShareOptions(false);
   };
@@ -373,24 +357,6 @@ const ReviewSupportUI = () => {
           <div className="bg-white rounded-xl p-5 w-full max-w-xs">
             <h3 className="text-lg font-bold mb-4 text-center">Share Review</h3>
             <div className="flex justify-center gap-4">
-              <button
-                onClick={shareOnFacebook}
-                className="!flex !flex-col !items-center !gap-2 !p-3 !rounded-xl !hover:bg-blue-50 !transition-colors"
-              >
-                <div className="!w-12 !h-12 !bg-blue-600 !rounded-full !flex !items-center !justify-center">
-                  <Facebook className="!w-6 !h-6 !text-white" />
-                </div>
-                <span className="!text-sm !font-medium">Facebook</span>
-              </button>
-              <button
-                onClick={shareOnInstagram}
-                className="!flex !flex-col !items-center !gap-2 !p-3 !rounded-xl !hover:bg-pink-50 !transition-colors"
-              >
-                <div className="!w-12 !h-12 !bg-gradient-to-br !from-purple-600 !via-pink-600 !to-orange-400 !rounded-full !flex !items-center !justify-center">
-                  <Instagram className="!w-6 !h-6 !text-white" />
-                </div>
-                <span className="!text-sm !font-medium">Instagram</span>
-              </button>
               <button
                 onClick={shareOnX}
                 className="!flex !flex-col !items-center !gap-2 !p-3 !rounded-xl !hover:bg-gray-50 !transition-colors"
