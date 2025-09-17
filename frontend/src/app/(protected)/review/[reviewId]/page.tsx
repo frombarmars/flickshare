@@ -258,14 +258,20 @@ const ReviewSupportUI = () => {
 
 
   const shareOnX = () => {
-    const text = `Check out this review of "${review?.title ?? ""}" by ${review?.username ?? ""
-      } on FlickShare!`;
-    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
-      text
-    )}&url=${encodeURIComponent(`https://world.org/mini-app?app_id=app_c832bd1cc0b9cfec0d768b55e7cd1c8b&path=/review/${reviewId}`)}`;
+    if (!review) return; // Exit if review is undefined
+
+    const { title = "", username = "" } = review;
+
+    const text = `Check out this review of "${title}" by ${username} on FlickShare!`;
+
+    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(
+      `https://world.org/mini-app?app_id=${ENV_VARIABLES.WORLD_MINIAPP_ID}&path=${encodeURIComponent(`/review/${reviewId}`)}`
+    )}`;
+
     window.open(shareUrl, "_blank", "width=600,height=400");
     setShowShareOptions(false);
   };
+
 
   const truncateHash = (hash: string) => {
     if (!hash) return "";
