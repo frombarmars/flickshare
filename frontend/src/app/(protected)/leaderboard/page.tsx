@@ -106,7 +106,7 @@ const LeaderboardPage = () => {
 
       {/* Always visible pinned rank */}
       {currentUser && !leaderboardData.some((u) => u.id === currentUser.id) && (
-        <div className="!fixed !bottom-0 !left-0 !right-0 !bg-white !border-t !shadow-lg !w-full">
+        <div className="!fixed !bottom-30 !mt-10 !left-0 !right-0 !bg-white !border-t !shadow-lg !w-full">
           <div className="!text-center !text-xs !text-gray-400 !py-1 !border-b">
             Your Rank
           </div>
