@@ -44,13 +44,14 @@ const LeaderboardPage = () => {
     <div
       key={user.id}
       className={`flex items-center justify-between p-4 mb-3 rounded-xl border transition-transform 
-        ${user.rank === 1
-          ? "bg-yellow-50 border-yellow-300 shadow"
-          : user.rank === 2
-          ? "bg-gray-50 border-gray-300"
-          : user.rank === 3
-          ? "bg-amber-50 border-amber-300"
-          : "bg-white border-gray-200"
+        ${
+          user.rank === 1
+            ? "bg-yellow-50 border-yellow-300 shadow"
+            : user.rank === 2
+            ? "bg-gray-50 border-gray-300"
+            : user.rank === 3
+            ? "bg-amber-50 border-amber-300"
+            : "bg-white border-gray-200"
         }
         ${isCurrentUser ? "ring-2 ring-blue-500 scale-[1.02]" : ""}`}
     >
@@ -61,7 +62,11 @@ const LeaderboardPage = () => {
         </div>
         {getBadgeIcon(user.rank)}
         <div>
-          <p className={`font-medium ${isCurrentUser ? "text-blue-600" : "text-gray-900"}`}>
+          <p
+            className={`font-medium ${
+              isCurrentUser ? "text-blue-600" : "text-gray-900"
+            }`}
+          >
             {user.username}
             {isCurrentUser && " (You)"}
           </p>
@@ -71,7 +76,11 @@ const LeaderboardPage = () => {
 
       {/* Points */}
       <div className="text-right">
-        <p className={`font-bold text-lg ${isCurrentUser ? "text-blue-600" : "text-gray-900"}`}>
+        <p
+          className={`font-bold text-lg ${
+            isCurrentUser ? "text-blue-600" : "text-gray-900"
+          }`}
+        >
           {user.points}
         </p>
         <p className="text-xs text-gray-500 uppercase">PTS</p>
@@ -95,13 +104,14 @@ const LeaderboardPage = () => {
         )}
       </div>
 
-      {/* Pinned Current User */}
-      {currentUser &&
-        !leaderboardData.some((u) => u.id === currentUser.id) && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
-            {renderUserCard(currentUser, true)}
+      {currentUser && !leaderboardData.some((u) => u.id === currentUser.id) && (
+        <div className="!fixed bottom-0 !left-0 !right-0 !bg-white !border-t !shadow-lg">
+          <div className="!text-center !text-xs !text-gray-400 !py-1 !border-b">
+            Your Rank
           </div>
-        )}
+          <div className="!p-4">{renderUserCard(currentUser, true)}</div>
+        </div>
+      )}
     </div>
   );
 };

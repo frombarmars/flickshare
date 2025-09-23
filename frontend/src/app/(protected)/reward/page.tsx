@@ -698,26 +698,26 @@ export default function RewardProgram() {
 
             {/* Daily check-in - Unique style */}
             <button
-              className="w-full bg-blue-600 text-white rounded-2xl p-5 shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-colors duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="!w-full !bg-blue-600 !text-white !rounded-2xl !p-5 !shadow-lg !mhover:bg-blue-700 !active:bg-blue-800 !transition-colors !duration-200 !flex !items-center !disabled:opacity-50 !disabled:cursor-not-allowed"
               onClick={dailyCheckIn}
               disabled={loading || isConfirming}
             >
-              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mr-4">
-                <CheckCircle className="w-6 h-6 text-white" strokeWidth={2} />
+              <div className="!w-12 h-12 !bg-blue-500 !rounded-xl !flex !items-center !justify-center !mr-4">
+                <CheckCircle className="!w-6 !h-6 !text-white" strokeWidth={2} />
               </div>
-              <div className="flex-1 text-left">
-                <h4 className="font-semibold text-white text-lg mb-1">
+              <div className="!flex-1 !text-left">
+                <h4 className="!font-semibold !text-white !text-lg !mb-1">
                   Daily Check-in
                 </h4>
-                <p className="text-blue-200 text-sm mb-2">
+                <p className="!text-blue-200 !text-sm !mb-2">
                   Earn rewards by checking in daily
                 </p>
-                <div className="flex items-center">
+                <div className="!flex !items-center">
                   <Coins
-                    className="w-5 h-5 text-blue-200 mr-1"
+                    className="!w-5 !h-5 !text-blue-200 !mr-1"
                     strokeWidth={2}
                   />
-                  <span className="font-semibold text-white text-sm">
+                  <span className="!font-semibold !text-white !text-sm">
                     5 points
                   </span>
                 </div>
