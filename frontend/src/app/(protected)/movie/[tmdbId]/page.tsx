@@ -1,11 +1,6 @@
 "use client";
 import { ENV_VARIABLES } from "@/constants/env_variables";
-import {
-  ArrowLeft,
-  Star,
-  User,
-  Share2,
-} from "lucide-react";
+import { ArrowLeft, Star, User, Share2 } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -26,9 +21,12 @@ const MovieDetailsPage = () => {
 
     const fetchMovie = async () => {
       try {
-        const res = await fetch(`${ENV_VARIABLES.TMDB_BASE_URL}/movie/${tmdbId}`, {
-          headers: { Authorization: `Bearer ${ENV_VARIABLES.TMDB_API_KEY}` },
-        });
+        const res = await fetch(
+          `${ENV_VARIABLES.TMDB_BASE_URL}/movie/${tmdbId}`,
+          {
+            headers: { Authorization: `Bearer ${ENV_VARIABLES.TMDB_API_KEY}` },
+          }
+        );
         const data = await res.json();
         setMovie(data);
       } catch (err) {
@@ -38,9 +36,12 @@ const MovieDetailsPage = () => {
 
     const fetchCredits = async () => {
       try {
-        const res = await fetch(`${ENV_VARIABLES.TMDB_BASE_URL}/movie/${tmdbId}/credits`, {
-          headers: { Authorization: `Bearer ${ENV_VARIABLES.TMDB_API_KEY}` },
-        });
+        const res = await fetch(
+          `${ENV_VARIABLES.TMDB_BASE_URL}/movie/${tmdbId}/credits`,
+          {
+            headers: { Authorization: `Bearer ${ENV_VARIABLES.TMDB_API_KEY}` },
+          }
+        );
         const data = await res.json();
         setCredits(data);
       } catch (err) {
@@ -69,14 +70,17 @@ const MovieDetailsPage = () => {
   const getTopCast = () => credits?.cast?.slice(0, 5) || [];
 
   const truncateText = (text: string, maxLength = 150) =>
-    text && text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    text && text.length > maxLength
+      ? text.substring(0, maxLength) + "..."
+      : text;
 
   const getSortedReviews = () => {
     switch (activeFilter) {
       case "trending":
         return [...reviews].sort(
           (a, b) =>
-            (b.likes?.length || 0) + (b.supports?.length || 0) -
+            (b.likes?.length || 0) +
+            (b.supports?.length || 0) -
             ((a.likes?.length || 0) + (a.supports?.length || 0))
         );
       case "most_liked":
@@ -117,8 +121,9 @@ const MovieDetailsPage = () => {
       <div className="!bg-white !p-4 !border-b">
         <div className="!flex !gap-3">
           <Image
-            src={`https://image.tmdb.org/t/p/w500${movie.posterPath || movie.poster_path || ""
-              }`}
+            src={`https://image.tmdb.org/t/p/w500${
+              movie.posterPath || movie.poster_path || ""
+            }`}
             alt={movie.title}
             width={64}
             height={96}
@@ -142,7 +147,9 @@ const MovieDetailsPage = () => {
             {getDirectors().length > 0 && (
               <p className="!text-xs !text-gray-600">
                 <span className="!font-medium">Director:</span>{" "}
-                {getDirectors().map((d: any) => d.name).join(", ")}
+                {getDirectors()
+                  .map((d: any) => d.name)
+                  .join(", ")}
               </p>
             )}
           </div>
@@ -162,7 +169,8 @@ const MovieDetailsPage = () => {
             <div className="!space-y-2">
               {getTopCast().map((c: any) => (
                 <p key={c.cast_id} className="!text-xs !text-gray-600">
-                  <span className="!font-medium">{c.name}</span> as {c.character}
+                  <span className="!font-medium">{c.name}</span> as{" "}
+                  {c.character}
                 </p>
               ))}
             </div>
@@ -178,28 +186,31 @@ const MovieDetailsPage = () => {
         <div className="!flex !gap-2 !mb-3">
           <button
             onClick={() => setActiveFilter("trending")}
-            className={`!px-3 !py-1 !rounded ${activeFilter === "trending"
+            className={`!px-3 !py-1 !rounded ${
+              activeFilter === "trending"
                 ? "!bg-gray-800 !text-white"
                 : "!bg-gray-100"
-              }`}
+            }`}
           >
             Trending
           </button>
           <button
             onClick={() => setActiveFilter("most_liked")}
-            className={`!px-3 !py-1 !rounded ${activeFilter === "most_liked"
+            className={`!px-3 !py-1 !rounded ${
+              activeFilter === "most_liked"
                 ? "!bg-gray-800 !text-white"
                 : "!bg-gray-100"
-              }`}
+            }`}
           >
             Most Liked
           </button>
           <button
             onClick={() => setActiveFilter("most_support")}
-            className={`!px-3 !py-1 !rounded ${activeFilter === "most_support"
+            className={`!px-3 !py-1 !rounded ${
+              activeFilter === "most_support"
                 ? "!bg-gray-800 !text-white"
                 : "!bg-gray-100"
-              }`}
+            }`}
           >
             Most Support
           </button>
@@ -225,16 +236,17 @@ const MovieDetailsPage = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`!w-3 !h-3 ${i < review.rating
+                      className={`!w-3 !h-3 ${
+                        i < review.rating
                           ? "!text-yellow-400 !fill-current"
                           : "!text-gray-300"
-                        }`}
+                      }`}
                     />
                   ))}
                 </div>
               </div>
-              <p className="!text-gray-800 !text-sm !mb-3">
-                {truncateText(review.comment)}
+              <p className="!text-gray-800 !text-sm !mb-3 line-clamp-5">
+                {review.comment}
               </p>
             </div>
           ))}

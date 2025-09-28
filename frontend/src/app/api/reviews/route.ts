@@ -152,6 +152,10 @@ export async function GET(request: NextRequest) {
           },
         },
       },
+      where :
+      {
+        isBanned : false,
+      }
     });
 
     const formattedReviews = reviews.map((review) => ({

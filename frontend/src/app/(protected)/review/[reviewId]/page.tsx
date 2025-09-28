@@ -65,7 +65,6 @@ const ReviewSupportUI = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
-
   const router = useRouter();
 
   // Fetch review + transactions from your API/DB using the dynamic reviewId
@@ -78,7 +77,9 @@ const ReviewSupportUI = () => {
       setError(null);
       try {
         // Adjust this endpoint to match your actual API route or client
-        const res = await fetch(`/api/reviews/${reviewId}`, { cache: "no-store" });
+        const res = await fetch(`/api/reviews/${reviewId}`, {
+          cache: "no-store",
+        });
         if (!res.ok) throw new Error(`Failed to fetch review ${reviewId}`);
         const data = (await res.json()) as {
           review: any;
@@ -97,42 +98,45 @@ const ReviewSupportUI = () => {
             "@user",
           title: data.review.title ?? data.review.movieTitle ?? "Untitled",
           rating: Number(data.review.rating ?? data.review.stars ?? 0),
-          totalSupport: Number(data.review.totalSupport ?? data.review.totalWLD ?? 0),
+          totalSupport: Number(
+            data.review.totalSupport ?? data.review.totalWLD ?? 0
+          ),
           reviewText: data.review.reviewText ?? data.review.content ?? "",
-          poster:
-            `${ENV_VARIABLES.TMDB_IMAGE_BASE}${data.review.poster}`,
+          poster: `${ENV_VARIABLES.TMDB_IMAGE_BASE}${data.review.poster}`,
           likeCount: Number(data.review.likeCount ?? data.review.likes ?? 0),
           isLikedByMe: Boolean(data.review.isLikedByMe ?? false),
         };
 
         // Normalize transactions shape
-        const normalizedTxs: Tx[] = (data.transactions ?? []).map((t: any, idx: number) => {
-          const txHash: string = t.txHash ?? t.hash ?? "";
-          const createdAt: string | undefined =
-            t.createdAt ?? t.timestamp ?? t.blockTimestamp;
-          const date = t.date;
-          const time = t.time;
+        const normalizedTxs: Tx[] = (data.transactions ?? []).map(
+          (t: any, idx: number) => {
+            const txHash: string = t.txHash ?? t.hash ?? "";
+            const createdAt: string | undefined =
+              t.createdAt ?? t.timestamp ?? t.blockTimestamp;
+            const date = t.date;
+            const time = t.time;
 
-          return {
-            id: String(t.id ?? idx + 1),
-            from:
-              t.from ??
-              t.fromUsername ??
-              t.sender?.username ??
-              t.sender?.handle ??
-              "@unknown",
-            to: t.to ?? t.toUsername ?? t.receiver?.username ?? "@unknown",
-            amount: Number(t.amount ?? t.value ?? 0),
-            amountFiat: t.amountFiat,
-            createdAt,
-            date,
-            time,
-            txHash,
-            explorerUrl:
-              t.explorerUrl ??
-              (txHash ? `https://worldscan.org/tx/${txHash}` : undefined),
-          };
-        });
+            return {
+              id: String(t.id ?? idx + 1),
+              from:
+                t.from ??
+                t.fromUsername ??
+                t.sender?.username ??
+                t.sender?.handle ??
+                "@unknown",
+              to: t.to ?? t.toUsername ?? t.receiver?.username ?? "@unknown",
+              amount: Number(t.amount ?? t.value ?? 0),
+              amountFiat: t.amountFiat,
+              createdAt,
+              date,
+              time,
+              txHash,
+              explorerUrl:
+                t.explorerUrl ??
+                (txHash ? `https://worldscan.org/tx/${txHash}` : undefined),
+            };
+          }
+        );
 
         setReview(normalizedReview);
         setTransactions(normalizedTxs);
@@ -169,33 +173,33 @@ const ReviewSupportUI = () => {
     transactionId: txId,
   });
 
-  useEffect(() => {
-    if (isConfirmed && txId && reviewId && session?.user?.id) {
-      // Only run once when confirmed
-      (async () => {
-        try {
-          const dbRes = await fetch(`/api/reviews/like`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              reviewId,
-              userId: session.user.id,
-              txHash: txId, // you may replace with waitResult.transaction_hash if backend needs real hash
-            }),
-          });
+  // useEffect(() => {
+  //   if (isConfirmed && txId && reviewId && session?.user?.id) {
+  //     // Only run once when confirmed
+  //     (async () => {
+  //       try {
+  //         const dbRes = await fetch(`/api/reviews/like`, {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             reviewId,
+  //             userId: session.user.id,
+  //             txHash: txId, // you may replace with waitResult.transaction_hash if backend needs real hash
+  //           }),
+  //         });
 
-          if (!dbRes.ok) {
-            const dbResult = await dbRes.json();
-            throw new Error(dbResult.error || "DB update failed");
-          }
+  //         if (!dbRes.ok) {
+  //           const dbResult = await dbRes.json();
+  //           throw new Error(dbResult.error || "DB update failed");
+  //         }
 
-          console.log("✅ Like successfully saved to database");
-        } catch (err) {
-          console.error("DB sync failed", err);
-        }
-      })();
-    }
-  }, [isConfirmed, txId, reviewId, session?.user?.id]);
+  //         console.log("✅ Like successfully saved to database");
+  //       } catch (err) {
+  //         console.error("DB sync failed", err);
+  //       }
+  //     })();
+  //   }
+  // }, [isConfirmed, txId, reviewId, session?.user?.id]);
 
   const handleLike = async () => {
     setIsLiked(true);
@@ -244,7 +248,18 @@ const ReviewSupportUI = () => {
 
       // ✅ Save txId so the hook starts tracking
       setTxId(finalPayload.transaction_id);
-
+      // ✅ Immediately notify backend (fire & forget)
+      fetch(`/api/reviews/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reviewId,
+          userId: session?.user?.id,
+          txHash: finalPayload.transaction_id,
+        }),
+      }).catch((err) => {
+        console.error("DB sync failed (will retry on next load):", err);
+      });
     } catch (err) {
       console.error(err);
       setIsLiked((prev) => !prev);
@@ -253,10 +268,6 @@ const ReviewSupportUI = () => {
     }
   };
 
-
-
-
-
   const shareOnX = () => {
     if (!review) return; // Exit if review is undefined
 
@@ -264,14 +275,17 @@ const ReviewSupportUI = () => {
 
     const text = `Check out this review of "${title}" by ${username} on FlickShare!`;
 
-    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(
-      `https://world.org/mini-app?app_id=${ENV_VARIABLES.WORLD_MINIAPP_ID}&path=${encodeURIComponent(`/review/${reviewId}`)}`
+    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
+      text
+    )}&url=${encodeURIComponent(
+      `https://world.org/mini-app?app_id=${
+        ENV_VARIABLES.WORLD_MINIAPP_ID
+      }&path=${encodeURIComponent(`/review/${reviewId}`)}`
     )}`;
 
     window.open(shareUrl, "_blank", "width=600,height=400");
     setShowShareOptions(false);
   };
-
 
   const truncateHash = (hash: string) => {
     if (!hash) return "";
@@ -280,8 +294,10 @@ const ReviewSupportUI = () => {
   };
 
   const getSupporterTier = (amount: number) => {
-    if (amount >= 5) return { tier: "Gold Supporter", color: "text-yellow-600" };
-    if (amount >= 2) return { tier: "Silver Supporter", color: "text-gray-500" };
+    if (amount >= 5)
+      return { tier: "Gold Supporter", color: "text-yellow-600" };
+    if (amount >= 2)
+      return { tier: "Silver Supporter", color: "text-gray-500" };
     return { tier: "Bronze Supporter", color: "text-amber-600" };
   };
 
@@ -320,8 +336,8 @@ const ReviewSupportUI = () => {
     const d = tx.createdAt
       ? new Date(tx.createdAt)
       : tx.date && tx.time
-        ? new Date(`${tx.date}T${tx.time}`)
-        : null;
+      ? new Date(`${tx.date}T${tx.time}`)
+      : null;
 
     if (!d || isNaN(d.getTime())) return "";
 
@@ -437,14 +453,17 @@ const ReviewSupportUI = () => {
                       aria-label={isLiked ? "Unlike" : "Like"}
                     >
                       <ThumbsUp
-                        className={`w-5 h-5 transition-all duration-200 ${isLiked
-                          ? "stroke-blue-500 fill-transparent"
-                          : "stroke-current fill-transparent"
-                          }`}
+                        className={`w-5 h-5 transition-all duration-200 ${
+                          isLiked
+                            ? "stroke-blue-500 fill-transparent"
+                            : "stroke-current fill-transparent"
+                        }`}
                         strokeWidth={2}
                       />
                     </button>
-                    <span className="text-xs text-gray-500 mt-1">{likeCount}</span>
+                    <span className="text-xs text-gray-500 mt-1">
+                      {likeCount}
+                    </span>
                   </div>
                 </div>
 
@@ -452,10 +471,11 @@ const ReviewSupportUI = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${i < (review.rating ?? 0)
-                        ? "text-yellow-400 fill-current"
-                        : "text-gray-300"
-                        }`}
+                      className={`w-4 h-4 ${
+                        i < (review.rating ?? 0)
+                          ? "text-yellow-400 fill-current"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                 </div>
@@ -469,7 +489,9 @@ const ReviewSupportUI = () => {
 
             {/* Review Text */}
             <div className="mt-4">
-              <p className="text-gray-800 text-sm leading-relaxed">{review.reviewText}</p>
+              <p className="text-gray-800 text-sm leading-relaxed">
+                {review.reviewText}
+              </p>
             </div>
           </div>
 
@@ -496,8 +518,9 @@ const ReviewSupportUI = () => {
                 >
                   {activeView === "history" ? "History" : "Analytics"}
                   <ChevronDown
-                    className={`w-3 h-3 transition-transform ${dropdownOpen ? "rotate-180" : ""
-                      }`}
+                    className={`w-3 h-3 transition-transform ${
+                      dropdownOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 
@@ -508,10 +531,11 @@ const ReviewSupportUI = () => {
                         setActiveView("history");
                         setDropdownOpen(false);
                       }}
-                      className={`!w-full !text-left !px-3 !py-2 !text-sm !transition-colors ${activeView === "history"
-                        ? "!bg-black !text-white"
-                        : "!text-gray-700 !hover:bg-gray-50"
-                        }`}
+                      className={`!w-full !text-left !px-3 !py-2 !text-sm !transition-colors ${
+                        activeView === "history"
+                          ? "!bg-black !text-white"
+                          : "!text-gray-700 !hover:bg-gray-50"
+                      }`}
                     >
                       History
                     </button>
@@ -520,10 +544,11 @@ const ReviewSupportUI = () => {
                         setActiveView("analytics");
                         setDropdownOpen(false);
                       }}
-                      className={`!w-full !text-left !px-3 !py-2 !text-sm !transition-colors ${activeView === "analytics"
-                        ? "!bg-black !text-white"
-                        : "!text-gray-700 !hover:bg-gray-50"
-                        }`}
+                      className={`!w-full !text-left !px-3 !py-2 !text-sm !transition-colors ${
+                        activeView === "analytics"
+                          ? "!bg-black !text-white"
+                          : "!text-gray-700 !hover:bg-gray-50"
+                      }`}
                     >
                       Analytics
                     </button>
@@ -553,7 +578,9 @@ const ReviewSupportUI = () => {
                           <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
                             <User className="w-3 h-3 text-gray-600" />
                           </div>
-                          <span className="font-medium text-black text-sm">{tx.from}</span>
+                          <span className="font-medium text-black text-sm">
+                            {tx.from}
+                          </span>
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-green-600 flex items-center justify-end gap-1 text-sm">
@@ -568,7 +595,9 @@ const ReviewSupportUI = () => {
 
                       {/* Date Row */}
                       <div className="mb-1">
-                        <span className="text-gray-600 text-xs">{dateTime}</span>
+                        <span className="text-gray-600 text-xs">
+                          {dateTime}
+                        </span>
                       </div>
 
                       {/* Hash + View Row */}
@@ -587,7 +616,9 @@ const ReviewSupportUI = () => {
                             <ExternalLink className="w-3 h-3" />
                           </a>
                         ) : (
-                          <span className="text-gray-300 text-xs">No explorer link</span>
+                          <span className="text-gray-300 text-xs">
+                            No explorer link
+                          </span>
                         )}
                       </div>
                     </div>
@@ -599,8 +630,13 @@ const ReviewSupportUI = () => {
             /* Analytics View */
             <div className="bg-white p-3">
               {(() => {
-                const { pieData, totalWLD, tierCounts, topSupporters, average } =
-                  getAnalyticsData;
+                const {
+                  pieData,
+                  totalWLD,
+                  tierCounts,
+                  topSupporters,
+                  average,
+                } = getAnalyticsData;
 
                 return (
                   <>
@@ -610,7 +646,9 @@ const ReviewSupportUI = () => {
                         <div className="text-2xl font-bold text-green-600 mb-1">
                           {totalWLD} WLD
                         </div>
-                        <div className="text-gray-600 text-xs">Total Received</div>
+                        <div className="text-gray-600 text-xs">
+                          Total Received
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 mb-3">
@@ -644,7 +682,8 @@ const ReviewSupportUI = () => {
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex flex-col items-center justify-center">
                           <div className="text-lg font-bold text-gray-900">
-                            {average.toFixed(1)} <span className="text-green-600">WLD</span>
+                            {average.toFixed(1)}{" "}
+                            <span className="text-green-600">WLD</span>
                           </div>
                           <div className="text-xs text-gray-500">Average</div>
                         </div>
@@ -665,14 +704,15 @@ const ReviewSupportUI = () => {
                             <div className="flex items-center gap-2">
                               <div
                                 className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white
-                            ${index === 0
-                                    ? "bg-yellow-500"
-                                    : index === 1
-                                      ? "bg-gray-400"
-                                      : index === 2
-                                        ? "bg-amber-600"
-                                        : "bg-gray-300"
-                                  }`}
+                            ${
+                              index === 0
+                                ? "bg-yellow-500"
+                                : index === 1
+                                ? "bg-gray-400"
+                                : index === 2
+                                ? "bg-amber-600"
+                                : "bg-gray-300"
+                            }`}
                               >
                                 {index + 1}
                               </div>
@@ -706,7 +746,10 @@ const ReviewSupportUI = () => {
                               dataKey="value"
                             >
                               {pieData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
                               ))}
                             </Pie>
                             <Tooltip
@@ -723,8 +766,9 @@ const ReviewSupportUI = () => {
                     {/* Note */}
                     <div className="text-center text-xs text-gray-500 p-2">
                       <p>
-                        <strong>Note:</strong> Analytics calculated from all support
-                        transactions. Top supporters ranked by total contribution.
+                        <strong>Note:</strong> Analytics calculated from all
+                        support transactions. Top supporters ranked by total
+                        contribution.
                       </p>
                     </div>
                   </>
@@ -742,4 +786,3 @@ const ReviewSupportUI = () => {
 };
 
 export default ReviewSupportUI;
-

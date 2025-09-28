@@ -160,32 +160,6 @@ export default function MovieFeedPage() {
 
   return (
     <div className="p-3 bg-white min-h-screen">
-
-      {/* Stats Section - Refined */}
-      {/* <div className="w-full mb-0">
-        <div className="flex items-center justify-center gap-8 py-3 border-y border-gray-100">
-          <div className="text-center">
-            <div className="text-lg font-light text-black">{movies.length}</div>
-            <div className="text-xs uppercase tracking-wider text-gray-400 mt-0.5">Films</div>
-          </div>
-          
-          <div className="w-px h-8 bg-gray-200"></div>
-          
-          <div className="text-center">
-            <div className="text-lg font-light text-black">{averageRating}</div>
-            <div className="text-xs uppercase tracking-wider text-gray-400 mt-0.5">Rating</div>
-          </div>
-          
-          <div className="w-px h-8 bg-gray-200"></div>
-          
-          <div className="text-center">
-            <div className="text-lg font-light text-black">{totalReviews.toLocaleString()}</div>
-            <div className="text-xs uppercase tracking-wider text-gray-400 mt-0.5">Reviews</div>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Search and Filter Bar - Condensed */}
       <div className="mb-4 flex gap-2">
         <div className="flex-1 bg-gray-100 rounded-lg p-2 flex items-center border border-gray-200">
           <Search size={14} className="text-gray-500 mr-2 ml-2" />
