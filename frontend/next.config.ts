@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         hostname: '**', // Matches any domain
       },],
   },
-  allowedDevOrigins: ['*', '731b82837da5.ngrok-free.app'], // Add your dev origin here
+  allowedDevOrigins: ['*', 'https://arrange-nav-situation-ist.trycloudflare.com'], // Add your dev origin here
   reactStrictMode: false,
 };
 

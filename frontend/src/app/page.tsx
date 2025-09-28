@@ -93,7 +93,7 @@ export default function Home() {
 
   return (
     <Page>
-      <Page.Main className="flex flex-col items-center justify-center">
+      <Page.Main className="flex flex-col items-center justify-center min-h-screen p-0">
         <div className="relative w-screen h-screen bg-white dark:bg-black overflow-hidden flex flex-col items-center justify-center">
           {/* Animated background elements */}
           <div className="absolute inset-0 opacity-20">
