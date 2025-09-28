@@ -18,8 +18,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 import { useSession } from "next-auth/react";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
-import client from "@/lib/worldClient";
-import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 
 type Review = {
   id: string;
@@ -163,15 +161,7 @@ const ReviewSupportUI = () => {
     }
   }, [review]);
 
-  const [txId, setTxId] = useState<string>("");
-
-  const { isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    client,
-    appConfig: {
-      app_id: ENV_VARIABLES.WORLD_MINIAPP_ID,
-    },
-    transactionId: txId,
-  });
+  // const [txId, setTxId] = useState<string>("");
 
   // useEffect(() => {
   //   if (isConfirmed && txId && reviewId && session?.user?.id) {
@@ -247,7 +237,7 @@ const ReviewSupportUI = () => {
       }
 
       // ✅ Save txId so the hook starts tracking
-      setTxId(finalPayload.transaction_id);
+      // setTxId(finalPayload.transaction_id);
       // ✅ Immediately notify backend (fire & forget)
       fetch(`/api/reviews/like`, {
         method: "POST",

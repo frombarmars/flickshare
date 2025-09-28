@@ -69,10 +69,10 @@ const MovieDetailsPage = () => {
 
   const getTopCast = () => credits?.cast?.slice(0, 5) || [];
 
-  const truncateText = (text: string, maxLength = 150) =>
-    text && text.length > maxLength
-      ? text.substring(0, maxLength) + "..."
-      : text;
+  // const truncateText = (text: string, maxLength = 150) =>
+  //   text && text.length > maxLength
+  //     ? text.substring(0, maxLength) + "..."
+  //     : text;
 
   const getSortedReviews = () => {
     switch (activeFilter) {
