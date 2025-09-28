@@ -4,6 +4,7 @@ import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
 import { Analytics } from "@vercel/analytics/next";
 import { Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
+import { EmotionProvider } from '@/providers/Emotion';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 
@@ -35,15 +36,17 @@ export default function ClientProviders({
   session,
 }: ClientProvidersProps) {
   return (
-    <ErudaProvider>
-      <MiniKitProvider>
-        <SessionProvider session={session}>
-          {/* <LocaleProvider> */}
-          {children}
-          <Analytics />
-          {/* </LocaleProvider> */}
-        </SessionProvider>
-      </MiniKitProvider>
-    </ErudaProvider>
+    <EmotionProvider>
+      <ErudaProvider>
+        <MiniKitProvider>
+          <SessionProvider session={session}>
+            {/* <LocaleProvider> */}
+            {children}
+            <Analytics />
+            {/* </LocaleProvider> */}
+          </SessionProvider>
+        </MiniKitProvider>
+      </ErudaProvider>
+    </EmotionProvider>
   );
 }

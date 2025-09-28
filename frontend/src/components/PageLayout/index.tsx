@@ -39,13 +39,9 @@ const Main = (props: { children: ReactNode; className?: string }) => {
   );
 };
 
-const Footer = (props: { children: ReactNode; className?: string }) => {
-  return (
-    <footer className={twMerge('px-6 pb-[35px]', clsx(props.className))}>
-      {props.children}
-    </footer>
-  );
-};
+import { useDevice } from '@/hooks/useDevice';
+
+import { Footer } from '@/components/Footer';
 
 Page.Header = Header;
 Page.Main = Main;

@@ -142,7 +142,7 @@ export default function UsersFeedPage() {
                             <button
                                 type="button"
                                 onClick={() => setSearchQuery("")}
-                                className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 mr-1"
+                                className="!text-gray-400 !hover:text-gray-600 !transition-colors !flex-shrink-0 !mr-1"
                                 aria-label="Clear search"
                             >
                                 <X size={14} />
@@ -153,10 +153,10 @@ export default function UsersFeedPage() {
                     {/* Sort Dropdown */}
                     <div className="relative" ref={dropdownRef}>
                         <button
-                            className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200"
+                            className="!w-10 !h-10 !bg-gray-100 !flex !items-center !justify-center !border !border-gray-200"
                             onClick={() => setShowSortDropdown(!showSortDropdown)}
                         >
-                            <Filter size={16} className="text-black" />
+                            <Filter size={16} className="!text-black" />
                         </button>
                         
                         <AnimatePresence>
@@ -166,12 +166,12 @@ export default function UsersFeedPage() {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                     transition={{ duration: 0.2 }}
-                                    className="absolute right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]"
+                                    className="!absolute !ight-0 !top-12 !bg-white !border ~border-gray-200 !rounded-lg !shadow-lg !z-10 !min-w-[140px]"
                                 >
                                     {sortOptions.map((option) => (
                                         <button
                                             key={option.value}
-                                            className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center ${
+                                            className={`!w-full !text-left !px-3 !py-2 !text-xs !hover:bg-gray-100 !first:rounded-t-lg !last:rounded-b-lg !flex !items-center ${
                                                 sortBy === option.value ? 'bg-gray-100 font-medium' : ''
                                             }`}
                                             onClick={() => {
@@ -179,7 +179,7 @@ export default function UsersFeedPage() {
                                                 setShowSortDropdown(false);
                                             }}
                                         >
-                                            <span className="mr-2">{option.icon}</span>
+                                            <span className="!mr-2">{option.icon}</span>
                                             {option.label}
                                         </button>
                                     ))}

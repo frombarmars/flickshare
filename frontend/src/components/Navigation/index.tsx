@@ -12,6 +12,8 @@ import { useEffect, useState } from 'react';
  * Read More: https://docs.world.org/mini-apps/design/app-guidelines#mobile-first
  */
 
+import { useDevice } from '@/hooks/useDevice';
+
 /**
  * A bottom navigation component that navigates between
  * different pages in the app.
@@ -21,6 +23,7 @@ import { useEffect, useState } from 'react';
 */
 export const Navigation = () => {
   const [value, setValue] = useState('');
+  const os = useDevice();
 
   useEffect(() => {
     switch (value) {
@@ -38,13 +41,12 @@ export const Navigation = () => {
   }, [value]);
 
   return (
-    <Tabs value={value} onValueChange={setValue} className="h-12 border-t border-gray-500"
-    >
-      <TabItem value="home" icon={<Home color='black' strokeWidth={2} size={24} />} className="py-3" />
-      <TabItem value="movie" icon={<Film color='black' strokeWidth={2} size={24} />} className="py-3" />
-      <TabItem value="new" icon={<Plus color='black' strokeWidth={2} size={24} />} className="py-3" />
-      <TabItem value="reward" icon={<Gift color='black' strokeWidth={2} size={24} />} className="py-3" />
-      <TabItem value="profile" icon={<User color='black' strokeWidth={2} size={24} />} className="py-3" />
+    <Tabs value={value} onValueChange={setValue} className={`h-12 border-t border-gray-500 custom-tabs ${os === 'android' ? 'mb-0 shadow-md' : ''}`}>
+      <TabItem value="home" icon={<Home color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
+      <TabItem value="movie" icon={<Film color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
+      <TabItem value="new" icon={<Plus color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
+      <TabItem value="reward" icon={<Gift color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
+      <TabItem value="profile" icon={<User color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
     </Tabs>
   );
 };
