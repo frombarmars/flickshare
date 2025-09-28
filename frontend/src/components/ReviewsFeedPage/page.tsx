@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { ChevronRight, Coins, ThumbsUp } from "lucide-react";
+import { ChevronRight, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import client from "@/lib/worldClient";
@@ -10,6 +10,7 @@ import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
 import { useSession } from "next-auth/react";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
+import { toast } from "react-toastify";
 
 type ReviewAddedLog = {
   reviewer: string;
@@ -128,6 +129,14 @@ export default function ReviewsFeedPage() {
       },
       transactionId,
     });
+
+  useEffect(() => {
+    if (isConfirming) {
+      toast.loading("Confirming transaction...");
+    } else if (isConfirmed) {
+      toast.success("Transaction confirmed!");
+    }
+  }, [isConfirming, isConfirmed]);
 
   const handleLike = async (reviewIdOnChain: number) => {
     setReviews((prev) =>

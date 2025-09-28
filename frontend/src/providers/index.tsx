@@ -1,16 +1,17 @@
-'use client';
+"use client";
 // import { LocaleProvider } from '@/context/LocaleContext';
-import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
+import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
 import { Analytics } from "@vercel/analytics/next";
-import { Session } from 'next-auth';
-import { SessionProvider } from 'next-auth/react';
-import { EmotionProvider } from '@/providers/Emotion';
-import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
+import { Session } from "next-auth";
+import { SessionProvider } from "next-auth/react";
+import { EmotionProvider } from "@/providers/Emotion";
+import dynamic from "next/dynamic";
+import type { ReactNode } from "react";
+import { ToastContainer } from "react-toastify";
 
 const ErudaProvider = dynamic(
-  () => import('@/providers/Eruda').then((c) => c.ErudaProvider),
-  { ssr: false },
+  () => import("@/providers/Eruda").then((c) => c.ErudaProvider),
+  { ssr: false }
 );
 
 // Define props for ClientProviders
@@ -41,6 +42,11 @@ export default function ClientProviders({
         <MiniKitProvider>
           <SessionProvider session={session}>
             {/* <LocaleProvider> */}
+            <ToastContainer
+              position="top-right"
+              autoClose={1000}
+              hideProgressBar={false}
+            />
             {children}
             <Analytics />
             {/* </LocaleProvider> */}
