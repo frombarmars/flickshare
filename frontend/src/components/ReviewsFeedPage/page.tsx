@@ -7,38 +7,46 @@ import client from "@/lib/worldClient";
 import { ENV_VARIABLES } from "@/constants/env_variables";
 import FlickShareContractABI from "@/abi/FlickShareContract.json";
 
+type ReviewAddedLog = {
+  reviewer: string;
+  movieId: bigint;
+  reviewId: bigint;
+  reviewText: string;
+  timestamp: bigint;
+  rating: number;
+};
+
 export default function ReviewsFeedPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const scrollObserver = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef(false);
   const router = useRouter();
 
+  const nextCursorRef = useRef<string | null>(null);
+  const hasMoreRef = useRef(true);
+
   const fetchReviews = useCallback(async () => {
-    if (loadingRef.current || !hasMore) return;
+    if (loadingRef.current || !hasMoreRef.current) return;
     loadingRef.current = true;
     setLoading(true);
 
     try {
-      const url = nextCursor
-        ? `/api/reviews?cursor=${nextCursor}&limit=6`
+      const url = nextCursorRef.current
+        ? `/api/reviews?cursor=${nextCursorRef.current}&limit=6`
         : `/api/reviews?limit=6`;
 
       const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch reviews');
-      }
+      if (!response.ok) throw new Error("Failed to fetch reviews");
 
       const data = await response.json();
 
       if (data.reviews.length) {
         setReviews((prev) => [...prev, ...data.reviews]);
-        setNextCursor(data.nextCursor);
-        setHasMore(!!data.nextCursor);
+        nextCursorRef.current = data.nextCursor;
+        hasMoreRef.current = !!data.nextCursor;
       } else {
-        setHasMore(false);
+        hasMoreRef.current = false;
       }
     } catch (err) {
       console.error("Error fetching reviews:", err);
@@ -46,7 +54,7 @@ export default function ReviewsFeedPage() {
       setLoading(false);
       loadingRef.current = false;
     }
-  }, [nextCursor, hasMore]);
+  }, []);
 
   useEffect(() => {
     fetchReviews();
@@ -57,19 +65,30 @@ export default function ReviewsFeedPage() {
       address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS as `0x${string}`,
       abi: FlickShareContractABI,
       eventName: "ReviewAdded",
-      onLogs: () => {
-        console.log("Lee bal - reloading reviews");
-        setReviews([]);
-        setNextCursor(null);
-        setHasMore(true);
-        fetchReviews();
+      // 👇 logs are automatically typed with args
+      onLogs: (logs) => {
+        logs.forEach((log) => {
+          const { reviewer, movieId, reviewId, reviewText, timestamp, rating } =
+            (log as unknown as { args: ReviewAddedLog }).args;
+
+          const newReview = {
+            reviewer,
+            movieId: Number(movieId),
+            reviewIdOnChain: Number(reviewId),
+            reviewText,
+            timestamp: Number(timestamp) * 1000,
+            rating,
+            likes: [],
+            supports: [],
+          };
+
+          setReviews((prev) => [newReview, ...prev]);
+        });
       },
     });
 
     return () => unwatch();
-  }, [fetchReviews]);
-
-
+  }, []);
 
   const lastReviewRef = useCallback(
     (node: HTMLElement | null) => {
@@ -77,14 +96,14 @@ export default function ReviewsFeedPage() {
       if (scrollObserver.current) scrollObserver.current.disconnect();
 
       scrollObserver.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting && hasMoreRef.current) {
           fetchReviews();
         }
       });
 
       if (node) scrollObserver.current.observe(node);
     },
-    [loading, hasMore, fetchReviews]
+    [loading, fetchReviews]
   );
 
   const handleReviewClick = (review: any) => {
@@ -136,13 +155,18 @@ export default function ReviewsFeedPage() {
               >
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-                    <Image src={r.avatar || ""} alt={r.user} width={32} height={32} className="object-cover" />
+                    <Image
+                      src={r.avatar || ""}
+                      alt={r.user}
+                      width={32}
+                      height={32}
+                      className="object-cover"
+                    />
                   </div>
                   <p className="text-sm font-medium text-gray-900">{r.user}</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
-
 
               {/* Main content - poster + review */}
               <div className="flex gap-4 p-4 pt-3">
@@ -150,7 +174,9 @@ export default function ReviewsFeedPage() {
                 <div className="relative flex-shrink-0">
                   <div className="w-22 h-33 relative rounded-xl overflow-hidden shadow-lg border border-gray-200">
                     <Image
-                      src={`https://image.tmdb.org/t/p/w500${r.posterPath || "./placeholder.jpeg"}`}
+                      src={`https://image.tmdb.org/t/p/w500${
+                        r.posterPath || "./placeholder.jpeg"
+                      }`}
                       alt={r.movieTitle}
                       fill
                       className="object-cover"
@@ -180,7 +206,9 @@ export default function ReviewsFeedPage() {
                     <div className="flex items-center gap-3 text-xs text-gray-600">
                       <div className="flex items-center gap-1">
                         <Coins size={12} className="text-amber-500" />
-                        <span className="font-medium">{formatCoins(r.coins)} WLD Earned</span>
+                        <span className="font-medium">
+                          {formatCoins(r.coins)} WLD Earned
+                        </span>
                       </div>
                       <div className="flex items-center gap-1 ml-4">
                         <ThumbsUp size={11} className="text-blue-500" />
@@ -206,10 +234,12 @@ export default function ReviewsFeedPage() {
       )}
 
       {/* End message with clean styling */}
-      {!hasMore && reviews.length > 0 && (
+      {!hasMoreRef.current && reviews.length > 0 && (
         <div className="text-center py-8">
           <div className="inline-flex items-center gap-2px-4 py-3 rounded-2xl">
-            <span className="text-sm font-medium text-gray-600">All reviews loaded!</span>
+            <span className="text-sm font-medium text-gray-600">
+              All reviews loaded!
+            </span>
           </div>
         </div>
       )}
