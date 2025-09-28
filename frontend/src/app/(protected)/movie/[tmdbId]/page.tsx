@@ -2,6 +2,7 @@
 import { ENV_VARIABLES } from "@/constants/env_variables";
 import { ArrowLeft, Star, User, Share2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -144,12 +145,26 @@ const MovieDetailsPage = () => {
                 </span>
               ))}
             </div>
+
+            {/* Director */}
             {getDirectors().length > 0 && (
-              <p className="!text-xs !text-gray-600">
-                <span className="!font-medium">Director:</span>{" "}
+              <p className="!text-xs !text-gray-700 !mb-1">
+                <span className="!font-semibold">🎬 Director:</span>{" "}
                 {getDirectors()
                   .map((d: any) => d.name)
                   .join(", ")}
+              </p>
+            )}
+
+            {/* Cast */}
+            {getTopCast().length > 0 && (
+              <p className="!text-xs !text-gray-700">
+                <span className="!font-semibold">🎭 Cast:</span>{" "}
+                {getTopCast()
+                  .slice(0, 5) // limit to top 5 actors
+                  .map((c: any) => c.name)
+                  .join(", ")}
+                {getTopCast().length > 5 && " + more"}
               </p>
             )}
           </div>
@@ -161,26 +176,19 @@ const MovieDetailsPage = () => {
             {movie.description || movie.overview}
           </p>
         </div>
-
-        {/* Cast */}
-        {getTopCast().length > 0 && (
-          <div className="!mt-5">
-            <h3 className="!font-semibold !text-sm !mb-3">Main Cast</h3>
-            <div className="!space-y-2">
-              {getTopCast().map((c: any) => (
-                <p key={c.cast_id} className="!text-xs !text-gray-600">
-                  <span className="!font-medium">{c.name}</span> as{" "}
-                  {c.character}
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Reviews */}
       <div className="!bg-white !p-3">
         <h3 className="!font-bold !text-lg !mb-3">Reviews</h3>
+
+        {/* ➕ Add Review Button */}
+        <button
+          onClick={() => (window.location.href = `/new/${tmdbId}`)}
+          className="!w-full !py-4 !mb-4 !bg-black !text-white !rounded-lg !font-semibold hover:!bg-gray-800 transition"
+        >
+          Write a Review
+        </button>
 
         {/* Filter buttons */}
         <div className="!flex !gap-2 !mb-3">
@@ -218,37 +226,50 @@ const MovieDetailsPage = () => {
 
         <div className="!space-y-3">
           {getSortedReviews().map((review: any) => (
-            <div
-              key={review.id}
-              className="!border !border-gray-200 !rounded-lg !p-3 !bg-white"
-            >
-              <div className="!flex !items-center !justify-between !mb-2">
-                <div className="!flex !items-center !gap-2">
-                  <User className="!w-4 !h-4 !text-gray-600" />
-                  <span className="!font-medium !text-sm">
-                    {review.reviewer?.username || "Anonymous"}
-                  </span>
-                  <span className="!text-gray-400 !text-xs">
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </span>
+            <Link key={review.id} href={`/review/${review.id}`}>
+              <div
+                key={review.id}
+                className="!border !border-gray-200 !rounded-lg !p-3 !bg-white m-2"
+              >
+                <div className="!flex !items-center !justify-between !mb-2">
+                  <div className="!flex !items-center !gap-2">
+                    {review.reviewer?.profilePicture ? (
+                      <Image
+                        src={review.reviewer.profilePicture}
+                        alt={review.reviewer?.username || "User"}
+                        width={24}
+                        height={24}
+                        className="!w-6 !h-6 !rounded-full !object-cover"
+                      />
+                    ) : (
+                      <User className="!w-6 !h-6 !text-gray-600 !rounded-full !bg-gray-200 p-1" />
+                    )}
+
+                    <span className="!font-medium !text-sm">
+                      {review.reviewer?.username || "Anonymous"}
+                    </span>
+                    <span className="!text-gray-400 !text-xs">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="!flex !items-center !gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`!w-3 !h-3 ${
+                          i < review.rating
+                            ? "!text-yellow-400 !fill-current"
+                            : "!text-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="!flex !items-center !gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`!w-3 !h-3 ${
-                        i < review.rating
-                          ? "!text-yellow-400 !fill-current"
-                          : "!text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
+                <p className="!text-gray-800 !text-sm !mb-3 line-clamp-5">
+                  {review.comment}
+                </p>
               </div>
-              <p className="!text-gray-800 !text-sm !mb-3 line-clamp-5">
-                {review.comment}
-              </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import client from "@/lib/worldClient";
 import { ENV_VARIABLES } from "@/constants/env_variables";
 import FlickShareContractABI from "@/abi/FlickShareContract.json";
+import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
+import { decodeAbiParameters, parseAbiParameters } from "viem";
+import { useSession } from "next-auth/react";
+import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 
 type ReviewAddedLog = {
   reviewer: string;
@@ -19,10 +23,11 @@ type ReviewAddedLog = {
 export default function ReviewsFeedPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
   const scrollObserver = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef(false);
   const router = useRouter();
-
+  const { data: session } = useSession();
   const nextCursorRef = useRef<string | null>(null);
   const hasMoreRef = useRef(true);
 
@@ -115,18 +120,88 @@ export default function ReviewsFeedPage() {
     router.push(`/profile/${username}`);
   };
 
-  // const formatDate = (dateStr: string) => {
-  //   const date = new Date(dateStr);
-  //   const now = new Date();
-  //   const diffMs = now.getTime() - date.getTime();
-  //   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      client,
+      appConfig: {
+        app_id: ENV_VARIABLES.WORLD_MINIAPP_ID,
+      },
+      transactionId,
+    });
 
-  //   if (diffHours < 1) return 'now';
-  //   if (diffHours < 24) return `${diffHours}h`;
-  //   const diffDays = Math.floor(diffHours / 24);
-  //   if (diffDays < 7) return `${diffDays}d`;
-  //   return `${Math.floor(diffDays / 7)}w`;
-  // };
+  const handleLike = async (reviewIdOnChain: number) => {
+    setReviews((prev) =>
+      prev.map((r) =>
+        r.reviewIdOnChain === reviewIdOnChain
+          ? { ...r, isLiked: true, likes: r.likes + 1 }
+          : r
+      )
+    );
+
+    const userSignal = session?.user?.walletAddress;
+
+    try {
+      const result = await MiniKit.commandsAsync.verify({
+        action: "like-review",
+        verification_level: VerificationLevel.Orb,
+        signal: userSignal,
+      });
+
+      if (result.finalPayload.status === "error") {
+        throw new Error("Verification failed: " + result.finalPayload.status);
+      }
+
+      const proofArray = decodeAbiParameters(
+        parseAbiParameters("uint256[8]"),
+        result.finalPayload.proof as `0x${string}`
+      )[0];
+
+      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
+            abi: FlickShareContractABI,
+            functionName: "likeReview",
+            args: [
+              BigInt(reviewIdOnChain),
+              result.finalPayload.merkle_root,
+              userSignal,
+              result.finalPayload.nullifier_hash,
+              ENV_VARIABLES.WORLD_MINIAPP_ID,
+              "like-review",
+              proofArray,
+            ],
+          },
+        ],
+      });
+
+      if (finalPayload.status === "error") {
+        console.log(finalPayload);
+        throw new Error("Transaction failed: " + finalPayload.status);
+      }
+      setTransactionId(finalPayload.transaction_id);
+      fetch(`/api/reviews/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reviewId: reviewIdOnChain,
+          userId: session?.user?.id,
+          txHash: finalPayload.transaction_id,
+        }),
+      }).catch((err) => console.error("DB sync failed:", err));
+    } catch (err) {
+      console.error(err);
+      // Revert UI if failed
+      setReviews((prev) =>
+        prev.map((r) =>
+          r.reviewIdOnChain === reviewIdOnChain
+            ? { ...r, isLiked: false, likes: Math.max(0, r.likes - 1) }
+            : r
+        )
+      );
+      alert((err as Error).message);
+    }
+  };
 
   const formatCoins = (coins: number) => {
     if (coins >= 1000000) return `${(coins / 1000000).toFixed(1)}M`;
@@ -202,19 +277,46 @@ export default function ReviewsFeedPage() {
                   </p>
 
                   {/* Engagement footer */}
-                  <div className="flex items-center pt-1.5 border-t border-gray-100">
-                    <div className="flex items-center gap-3 text-xs text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Coins size={12} className="text-amber-500" />
-                        <span className="font-medium">
-                          {formatCoins(r.coins)} WLD Earned
-                        </span>
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="px-2 py-1 bg-gray-100 rounded-md">
+                        <div className="flex items-center gap-1.5 text-gray-700">
+                          <Image
+                            src="/wld_token.png"
+                            alt="WLD"
+                            width={20}
+                            height={20}
+                            className="mr-1"
+                          />
+                          <span className="font-medium">
+                            {formatCoins(r.coins)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 ml-4">
-                        <ThumbsUp size={11} className="text-blue-500" />
-                        <span>{r.likes} likes</span>
+                      <div className="px-2 py-1 bg-gray-100 rounded-md">
+                        <div className="flex items-center gap-1.5 text-gray-700">
+                          <ThumbsUp size={11} />
+                          <span>{r.likes}</span>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Bold icon-only like button */}
+                    {/* Like button inside review card */}
+                    <button
+                      className="p-2 bg-black rounded-lg hover:bg-gray-800 transition-colors shadow-sm hover:shadow-md flex items-center justify-center"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(r.reviewIdOnChain);
+                      }}
+                    >
+                      <ThumbsUp
+                        size={22}
+                        className={`text-black ${
+                          r.isLiked ? "fill-blue-500" : "fill-transparent"
+                        }`}
+                      />
+                    </button>
                   </div>
                 </div>
               </div>

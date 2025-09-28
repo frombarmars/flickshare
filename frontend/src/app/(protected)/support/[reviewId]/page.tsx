@@ -3,9 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ArrowLeft, Star, Copy, AlertCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { MiniKit } from "@worldcoin/minikit-js";
-import {
-  useWaitForTransactionReceipt,
-} from "@worldcoin/minikit-react";
+import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { useSession } from "next-auth/react";
 import FlickShareContractABI from "@/abi/FlickShareContract.json";
 import WLDTokenContractABI from "@/abi/WLDTokenContract.json";
@@ -39,7 +37,7 @@ const SupportPage = () => {
 
   useEffect(() => {
     if (!reviewId) {
-      setErrors(prev => ({ ...prev, review: "Review ID is missing" }));
+      setErrors((prev) => ({ ...prev, review: "Review ID is missing" }));
       return;
     }
 
@@ -49,17 +47,19 @@ const SupportPage = () => {
         const res = await fetch(`/api/reviews/${reviewId}`);
 
         if (!res.ok) {
-          throw new Error(`Failed to fetch review: ${res.status} ${res.statusText}`);
+          throw new Error(
+            `Failed to fetch review: ${res.status} ${res.statusText}`
+          );
         }
 
         const data = await res.json();
         setReviewData(data);
-        setErrors(prev => ({ ...prev, review: undefined }));
+        setErrors((prev) => ({ ...prev, review: undefined }));
       } catch {
         console.error("Failed to fetch review:");
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          review: "Failed to load review data"
+          review: "Failed to load review data",
         }));
       } finally {
         setIsLoading(false);
@@ -86,19 +86,19 @@ const SupportPage = () => {
         // convert from wei
         const balanceInWLD = Number(balance) / 1e18;
         setCurrentBalance(balanceInWLD);
-        setErrors(prev => ({ ...prev, balance: undefined }));
+        setErrors((prev) => ({ ...prev, balance: undefined }));
 
         if (balanceInWLD < 1) {
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
-            balance: "Your balance is too low to support this review"
+            balance: "Your balance is too low to support this review",
           }));
         }
       } catch (err) {
         console.error("Failed to fetch balance:", err);
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          balance: "Failed to load your balance"
+          balance: "Failed to load your balance",
         }));
       }
     };
@@ -126,7 +126,7 @@ const SupportPage = () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               txHash: transactionId,
-              userId: session?.user.id,  // assuming session.user.id is your DB userId
+              userId: session?.user.id, // assuming session.user.id is your DB userId
               reviewId: reviewData.review.id,
               amount: selectedAmount, // store as int WLD
             }),
@@ -142,14 +142,22 @@ const SupportPage = () => {
       setCurrentBalance((prev) => prev - selectedAmount);
       setIsProcessing(false);
       setSuccessMessage(
-        `Successfully sent ${selectedAmount} WLD to @${reviewData?.review?.username || "the reviewer"}!`
+        `Successfully sent ${selectedAmount} WLD to @${
+          reviewData?.review?.username || "the reviewer"
+        }!`
       );
 
       setTimeout(() => {
         setSuccessMessage("");
       }, 5000);
     }
-  }, [isConfirmed, selectedAmount, reviewData, session?.user.id, transactionId]);
+  }, [
+    isConfirmed,
+    selectedAmount,
+    reviewData,
+    session?.user.id,
+    transactionId,
+  ]);
 
   const presetAmounts = [5, 10, 25, 50];
 
@@ -157,14 +165,14 @@ const SupportPage = () => {
     setSelectedAmount(amount);
     setShowCustomInput(false);
     setCustomAmount("");
-    setErrors(prev => ({ ...prev, customAmount: undefined }));
+    setErrors((prev) => ({ ...prev, customAmount: undefined }));
   };
 
   const handleCustomSelect = () => {
     setShowCustomInput(true);
     setSelectedAmount(0);
     setCustomAmount("");
-    setErrors(prev => ({ ...prev, customAmount: undefined }));
+    setErrors((prev) => ({ ...prev, customAmount: undefined }));
   };
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,20 +188,20 @@ const SupportPage = () => {
     // Validate custom amount
     if (numValue > 0) {
       if (numValue > currentBalance) {
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          customAmount: "Amount exceeds your balance"
+          customAmount: "Amount exceeds your balance",
         }));
       } else {
-        setErrors(prev => ({ ...prev, customAmount: undefined }));
+        setErrors((prev) => ({ ...prev, customAmount: undefined }));
       }
     } else if (value !== "") {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        customAmount: "Please enter a valid amount"
+        customAmount: "Please enter a valid amount",
       }));
     } else {
-      setErrors(prev => ({ ...prev, customAmount: undefined }));
+      setErrors((prev) => ({ ...prev, customAmount: undefined }));
     }
   };
 
@@ -272,7 +280,7 @@ const SupportPage = () => {
     } catch {
       console.error("Error sending transaction:");
       setErrors({
-        submit: "Something went wrong. Please try again."
+        submit: "Something went wrong. Please try again.",
       });
       setIsProcessing(false);
     }
@@ -286,16 +294,20 @@ const SupportPage = () => {
   };
 
   const isSubmitDisabled = () => {
-    return selectedAmount === 0 ||
+    return (
+      selectedAmount === 0 ||
       selectedAmount > currentBalance ||
       isProcessing ||
       isConfirming ||
-      !!errors.customAmount;
+      !!errors.customAmount
+    );
   };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(
-      `Just supported @${reviewData?.review?.username || "MovieReviewer2024"} with ${selectedAmount} WLD on FlickShare! 🎬✨`
+      `Just supported @${
+        reviewData?.review?.username || "MovieReviewer2024"
+      } with ${selectedAmount} WLD on FlickShare! 🎬✨`
     );
   };
 
@@ -341,7 +353,9 @@ const SupportPage = () => {
         >
           <ArrowLeft className="w-6 h-6 text-black" />
         </button>
-        <h1 className="ml-4 text-xl font-semibold text-black">Support Review</h1>
+        <h1 className="ml-4 text-xl font-semibold text-black">
+          Support Review
+        </h1>
       </div>
 
       {/* Content */}
@@ -367,7 +381,10 @@ const SupportPage = () => {
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                 <Image
-                  src={reviewData.review.userProfile || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"}
+                  src={
+                    reviewData.review.userProfile ||
+                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+                  }
                   alt={reviewData.review.username}
                   width={48}
                   height={48}
@@ -375,18 +392,32 @@ const SupportPage = () => {
                 />
               </div>
               <div>
-                <div className="font-medium text-black">@{reviewData.review.username}</div>
+                <div className="font-medium text-black">
+                  @{reviewData.review.username}
+                </div>
                 <div className="flex items-center mt-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-3 h-3 mr-1 ${i < parseInt(reviewData.review.rating) ? "text-yellow-500 fill-current" : "text-gray-300"}`}
+                      className={`w-3 h-3 mr-1 ${
+                        i < parseInt(reviewData.review.rating)
+                          ? "text-yellow-500 fill-current"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                 </div>
+
                 <div className="flex items-center mt-1 text-sm text-gray-500">
-                  <div className="w-3 h-3 mr-1 bg-black rounded-full"></div>
-                  {reviewData.review.totalSupport || 0} WLD received
+                  {reviewData.review.totalSupport || 0}{" "}
+                  <Image
+                    src="/wld_token.png" // path to your PNG
+                    alt="WLD"
+                    width={20} // adjust size as needed
+                    height={20} // adjust size as needed
+                    className="mr-1"
+                  />{" "}
+                  received
                 </div>
               </div>
             </div>
@@ -421,16 +452,19 @@ const SupportPage = () => {
 
         {/* Support Contribution */}
         <div>
-          <h2 className="text-lg font-medium text-black mb-4">Support Amount</h2>
+          <h2 className="text-lg font-medium text-black mb-4">
+            Support Amount
+          </h2>
           <div className="grid grid-cols-4 gap-2 mb-3">
             {presetAmounts.map((amount) => (
               <button
                 key={amount}
                 onClick={() => handleAmountSelect(amount)}
-                className={`!p-3 !rounded-2xl !font-medium !transition-all !duration-200 ${selectedAmount === amount && !showCustomInput
-                  ? "!bg-black !text-white !shadow-lg !scale-105"
-                  : "!bg-gray-100 !text-gray-700 !hover:bg-gray-200"
-                  }`}
+                className={`!p-3 !rounded-2xl !font-medium !transition-all !duration-200 ${
+                  selectedAmount === amount && !showCustomInput
+                    ? "!bg-black !text-white !shadow-lg !scale-105"
+                    : "!bg-gray-100 !text-gray-700 !hover:bg-gray-200"
+                }`}
                 disabled={amount > currentBalance}
               >
                 {amount}
@@ -440,10 +474,11 @@ const SupportPage = () => {
 
           <button
             onClick={handleCustomSelect}
-            className={`!w-full !p-3 !border !rounded-2xl !font-medium !transition-colors !mb-3 ${showCustomInput
-              ? "!border-black !bg-black !text-white"
-              : "!border-gray-200 !text-black !hover:border-gray-300"
-              }`}
+            className={`!w-full !p-3 !border !rounded-2xl !font-medium !transition-colors !mb-3 ${
+              showCustomInput
+                ? "!border-black !bg-black !text-white"
+                : "!border-gray-200 !text-black !hover:border-gray-300"
+            }`}
           >
             Custom Amount
           </button>
@@ -472,10 +507,11 @@ const SupportPage = () => {
           <button
             onClick={handleSubmit}
             disabled={isSubmitDisabled()}
-            className={`!w-full !p-4 !rounded-2xl !font-semibold !text-lg !transition-all !duration-200 !mt-4 ${isSubmitDisabled()
-              ? "!bg-gray-200 !text-gray-400 !cursor-not-allowed"
-              : "!bg-black !text-white !hover:bg-gray-800 !transform !hover:scale-[1.02] !active:scale-[0.98] !shadow-lg"
-              }`}
+            className={`!w-full !p-4 !rounded-2xl !font-semibold !text-lg !transition-all !duration-200 !mt-4 ${
+              isSubmitDisabled()
+                ? "!bg-gray-200 !text-gray-400 !cursor-not-allowed"
+                : "!bg-black !text-white !hover:bg-gray-800 !transform !hover:scale-[1.02] !active:scale-[0.98] !shadow-lg"
+            }`}
           >
             {isProcessing || isConfirming ? (
               <div className="flex items-center justify-center">

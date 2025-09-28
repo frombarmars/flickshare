@@ -479,7 +479,7 @@ const ReviewSupportUI = () => {
 
             {/* Review Text */}
             <div className="mt-4">
-              <p className="text-gray-800 text-sm leading-relaxed">
+              <p className="text-gray-900 text-base md:text-lg font-semibold leading-relaxed tracking-wide">
                 {review.reviewText}
               </p>
             </div>
