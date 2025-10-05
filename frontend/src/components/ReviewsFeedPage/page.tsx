@@ -73,22 +73,20 @@ export default function ReviewsFeedPage() {
       eventName: "ReviewAdded",
       // 👇 logs are automatically typed with args
       onLogs: (logs) => {
-        logs.forEach((log) => {
-          const { reviewer, movieId, reviewId, reviewText, timestamp, rating } =
-            (log as unknown as { args: ReviewAddedLog }).args;
+        logs.forEach(async (log) => {
+          const { reviewId } = (log as unknown as { args: ReviewAddedLog }).args;
 
-          const newReview = {
-            reviewer,
-            movieId: Number(movieId),
-            reviewIdOnChain: Number(reviewId),
-            reviewText,
-            timestamp: Number(timestamp) * 1000,
-            rating,
-            likes: [],
-            supports: [],
-          };
-
-          setReviews((prev) => [newReview, ...prev]);
+          try {
+            const response = await fetch(`/api/reviews/${reviewId}`);
+            if (response.ok) {
+              const { review } = await response.json();
+              if (review) {
+                setReviews((prev) => [review, ...prev]);
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching new review:", error);
+          }
         });
       },
     });

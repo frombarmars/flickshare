@@ -16,13 +16,10 @@ export async function GET(
       );
     }
 
-    // Find the review by reviewId
-    console.log("Route : API/REVIEWS/[reviewId]/route.ts");
+
     
-    console.log(reviewId);
-    
-    const review = await prisma.review.findUnique({
-      where: { numericId: parseInt(reviewId) },
+    const review = await prisma.review.findFirst({
+      where: { numericId: parseInt(reviewId), isBanned: false },
       include: {
         movie: {
           select: {
@@ -44,6 +41,7 @@ export async function GET(
             id: true,
             username: true,
             profilePicture: true,
+            walletAddress: true,
           },
         },
         supports: {
@@ -89,16 +87,21 @@ export async function GET(
     // Shape the review for frontend
     const reviewData = {
       id: review.id,
-      username: review.reviewer?.username ?? "@user",
+      user:
+        review.reviewer.username ||
+        `User_${review.reviewer.walletAddress.substring(2, 6)}`,
+      handle: `@${review.reviewer.username || "user"
+        }_${review.reviewer.walletAddress.substring(2, 6)}`,
+      avatar: review.reviewer.profilePicture || "/placeholder.jpeg",
+      text: review.comment,
       rating: review.rating,
-      title: review.movie.title,
-      totalSupport: review.supports.reduce((sum, s) => sum + s.amount, 0),
-      reviewText: review.comment,
-      userProfile: review.reviewer.profilePicture,
-      poster: review.movie.posterPath ?? "/placeholder.png",
-      likeCount: review.ReviewLike.length,
-      // TODO: get user session to determine if current user liked it
-      isLikedByMe: false,
+      reviewIdOnChain: review.numericId,
+      coins: review.supports.reduce((sum, support) => sum + support.amount, 0),
+      likes: review.ReviewLike.length, // 👈 include like count
+      date: review.createdAt.toISOString().split("T")[0],
+      reviewId: review.id,
+      movieTitle: review.movie.title,
+      posterPath: review.movie.posterPath,
     };
 
     return NextResponse.json({

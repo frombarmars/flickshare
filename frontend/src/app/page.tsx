@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AuthButton } from "@/components/AuthButton";
 import { Page } from "@/components/PageLayout";
+import clsx from "clsx";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -145,25 +146,17 @@ export default function Home() {
             </p>
 
             {/* Auth Button */}
-            <div className={`mt-12 transition-all duration-1000 ${showButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <div
+              className={clsx(
+                "mt-12 transition-all duration-1000",
+                showButton
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
+              )}
+            >
               <AuthButton />
             </div>
           </div>
-
-          <style>{`
-        @keyframes fade-in {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fade-in 2s ease-out forwards; }
-        .animate-fade-in-delay { animation: fade-in 2s ease-out 0.5s forwards; opacity: 0; }
-        .animate-fade-in-delay-2 { animation: fade-in 2s ease-out 1s forwards; opacity: 0; }
-        @keyframes expand { 0% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
-        .animate-expand { animation: expand 2s ease-out forwards; transform-origin: left; }
-        @keyframes ping-slow { 0% { transform: scale(0.8); opacity: 0.1; } 50% { opacity: 0.05; } 100% { transform: scale(2.5); opacity: 0; } }
-        .animate-ping-slow { animation: ping-slow 4s cubic-bezier(0, 0, 0.2, 1) infinite; }
-        .animate-ping-slower { animation: ping-slow 6s cubic-bezier(0, 0, 0.2, 1) infinite; }
-      `}</style>
         </div>
       </Page.Main>
     </Page>

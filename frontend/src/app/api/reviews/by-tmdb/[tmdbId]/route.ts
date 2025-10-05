@@ -31,7 +31,7 @@ export async function GET(
 
     // Fetch reviews for this movie
     const reviews = await prisma.review.findMany({
-      where: { movieId: movie.id },
+      where: { movieId: movie.id, isBanned: false },
       include: {
         reviewer: {
           select: {
