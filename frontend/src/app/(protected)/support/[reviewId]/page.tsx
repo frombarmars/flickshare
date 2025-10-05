@@ -242,35 +242,38 @@ const SupportPage = () => {
     };
 
     try {
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS as `0x${string}`,
-            abi: FlickShareContractABI,
-            functionName: "supportReviewWithPermit",
-            args: [
-              reviewId,
-              permitTransfer.permitted.amount,
-              feeBps,
-              [
+      const { commandPayload, finalPayload } =
+        await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address:
+                ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS as `0x${string}`,
+              abi: FlickShareContractABI,
+              functionName: "supportReviewWithPermit",
+              args: [
+                reviewId,
+                permitTransfer.permitted.amount,
+                feeBps,
                 [
-                  permitTransfer.permitted.token,
-                  permitTransfer.permitted.amount,
+                  [
+                    permitTransfer.permitted.token,
+                    permitTransfer.permitted.amount,
+                  ],
+                  permitTransfer.nonce,
+                  permitTransfer.deadline,
                 ],
-                permitTransfer.nonce,
-                permitTransfer.deadline,
+                "PERMIT2_SIGNATURE_PLACEHOLDER_0",
               ],
-              "PERMIT2_SIGNATURE_PLACEHOLDER_0",
-            ],
-          },
-        ],
-        permit2: [
-          {
-            ...permitTransfer,
-            spender: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS as `0x${string}`,
-          },
-        ],
-      });
+            },
+          ],
+          permit2: [
+            {
+              ...permitTransfer,
+              spender:
+                ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS as `0x${string}`,
+            },
+          ],
+        });
 
       if (finalPayload.status === "error") {
         throw new Error(finalPayload.error_code || "Transaction failed");

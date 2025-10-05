@@ -234,29 +234,30 @@ export default function AddReview() {
         return;
       }
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
-            abi: FlickShareContractABI,
-            functionName: "createReview",
-            args: [
-              movieId,
-              review,
-              rating,
-              result.finalPayload.merkle_root,
-              userSignal,
-              result.finalPayload.nullifier_hash,
-              ENV_VARIABLES.WORLD_MINIAPP_ID,
-              "add-review",
-              decodeAbiParameters(
-                parseAbiParameters("uint256[8]"),
-                result.finalPayload.proof as `0x${string}`
-              )[0],
-            ],
-          },
-        ],
-      });
+      const { commandPayload, finalPayload } =
+        await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
+              abi: FlickShareContractABI,
+              functionName: "createReview",
+              args: [
+                movieId,
+                review,
+                rating,
+                result.finalPayload.merkle_root,
+                userSignal,
+                result.finalPayload.nullifier_hash,
+                ENV_VARIABLES.WORLD_MINIAPP_ID,
+                "add-review",
+                decodeAbiParameters(
+                  parseAbiParameters("uint256[8]"),
+                  result.finalPayload.proof as `0x${string}`
+                )[0],
+              ],
+            },
+          ],
+        });
 
       if (finalPayload.status === "error") {
         setErrors({ submit: "Transaction failed, please try again." });

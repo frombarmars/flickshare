@@ -208,7 +208,7 @@ export default function AddReview() {
         return;
       }
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+      const { commandPayload,finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
             address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,

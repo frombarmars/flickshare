@@ -189,23 +189,24 @@ export default function RewardProgram() {
         result.finalPayload.proof as `0x${string}`
       )[0];
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
-            abi: FlickShareContractABI,
-            functionName: "checkDaily",
-            args: [
-              result.finalPayload.merkle_root,
-              userSignal,
-              result.finalPayload.nullifier_hash,
-              ENV_VARIABLES.WORLD_MINIAPP_ID,
-              "daily-checkin",
-              proofArray,
-            ],
-          },
-        ],
-      });
+      const { commandPayload, finalPayload } =
+        await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
+              abi: FlickShareContractABI,
+              functionName: "checkDaily",
+              args: [
+                result.finalPayload.merkle_root,
+                userSignal,
+                result.finalPayload.nullifier_hash,
+                ENV_VARIABLES.WORLD_MINIAPP_ID,
+                "daily-checkin",
+                proofArray,
+              ],
+            },
+          ],
+        });
 
       if (finalPayload.status === "error") {
         setErrors({ submit: "Transaction failed, please try again." });
@@ -276,23 +277,24 @@ export default function RewardProgram() {
         result.finalPayload.proof as `0x${string}`
       )[0];
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: ENV_VARIABLES.NFT_CONTRACT_ADDRESS,
-            abi: NFTContractABI,
-            functionName: "mint",
-            args: [
-              result.finalPayload.merkle_root,
-              userWalletAddress,
-              result.finalPayload.nullifier_hash,
-              ENV_VARIABLES.WORLD_MINIAPP_ID,
-              "claim-nft-action",
-              proofArray,
-            ],
-          },
-        ],
-      });
+      const { commandPayload, finalPayload } =
+        await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address: ENV_VARIABLES.NFT_CONTRACT_ADDRESS,
+              abi: NFTContractABI,
+              functionName: "mint",
+              args: [
+                result.finalPayload.merkle_root,
+                userWalletAddress,
+                result.finalPayload.nullifier_hash,
+                ENV_VARIABLES.WORLD_MINIAPP_ID,
+                "claim-nft-action",
+                proofArray,
+              ],
+            },
+          ],
+        });
 
       if (finalPayload.status === "error") {
         setNftErrorMessage("NFT claim transaction failed. Please try again.");
@@ -709,7 +711,10 @@ export default function RewardProgram() {
               disabled={loading || isConfirming}
             >
               <div className="!w-12 h-12 !bg-blue-500 !rounded-xl !flex !items-center !justify-center !mr-4">
-                <CheckCircle className="!w-6 !h-6 !text-white" strokeWidth={2} />
+                <CheckCircle
+                  className="!w-6 !h-6 !text-white"
+                  strokeWidth={2}
+                />
               </div>
               <div className="!flex-1 !text-left">
                 <h4 className="!font-semibold !text-white !text-lg !mb-1">

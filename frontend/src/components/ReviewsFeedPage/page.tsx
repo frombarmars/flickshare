@@ -165,24 +165,25 @@ export default function ReviewsFeedPage() {
         result.finalPayload.proof as `0x${string}`
       )[0];
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
-            abi: FlickShareContractABI,
-            functionName: "likeReview",
-            args: [
-              BigInt(reviewIdOnChain),
-              result.finalPayload.merkle_root,
-              userSignal,
-              result.finalPayload.nullifier_hash,
-              ENV_VARIABLES.WORLD_MINIAPP_ID,
-              "like-review",
-              proofArray,
-            ],
-          },
-        ],
-      });
+      const { commandPayload, finalPayload } =
+        await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
+              abi: FlickShareContractABI,
+              functionName: "likeReview",
+              args: [
+                BigInt(reviewIdOnChain),
+                result.finalPayload.merkle_root,
+                userSignal,
+                result.finalPayload.nullifier_hash,
+                ENV_VARIABLES.WORLD_MINIAPP_ID,
+                "like-review",
+                proofArray,
+              ],
+            },
+          ],
+        });
 
       if (finalPayload.status === "error") {
         console.log(finalPayload);
