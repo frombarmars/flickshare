@@ -8,6 +8,7 @@ import { ENV_VARIABLES } from "@/constants/env_variables";
 import FlickShareContractABI from "@/abi/FlickShareContract.json";
 import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
+import { SupportAmount } from "@/components/SupportAmount";
 import { useSession } from "next-auth/react";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { toast } from "react-toastify";
@@ -38,9 +39,10 @@ export default function ReviewsFeedPage() {
     setLoading(true);
 
     try {
+      const userId = session?.user?.id;
       const url = nextCursorRef.current
-        ? `/api/reviews?cursor=${nextCursorRef.current}&limit=6`
-        : `/api/reviews?limit=6`;
+        ? `/api/reviews?cursor=${nextCursorRef.current}&limit=6&userId=${userId}`
+        : `/api/reviews?limit=6&userId=${userId}`;
 
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch reviews");
@@ -137,6 +139,12 @@ export default function ReviewsFeedPage() {
   }, [isConfirming, isConfirmed]);
 
   const handleLike = async (reviewIdOnChain: number) => {
+    const review = reviews.find((r) => r.reviewIdOnChain === reviewIdOnChain);
+    if (review?.isLiked) {
+      toast.info("You have already liked this review.");
+      return;
+    }
+
     setReviews((prev) =>
       prev.map((r) =>
         r.reviewIdOnChain === reviewIdOnChain
@@ -287,20 +295,7 @@ export default function ReviewsFeedPage() {
                   {/* Engagement footer */}
                   <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="px-2 py-1 bg-gray-100 rounded-md">
-                        <div className="flex items-center gap-1.5 text-gray-700">
-                          <Image
-                            src="/wld_token.png"
-                            alt="WLD"
-                            width={20}
-                            height={20}
-                            className="mr-1"
-                          />
-                          <span className="font-medium">
-                            {formatCoins(r.coins)}
-                          </span>
-                        </div>
-                      </div>
+                      <SupportAmount amount={r.coins} />
                       <div className="px-2 py-1 bg-gray-100 rounded-md">
                         <div className="flex items-center gap-1.5 text-gray-700">
                           <ThumbsUp size={11} />

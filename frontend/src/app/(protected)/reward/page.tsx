@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 import {
   Star,
@@ -222,7 +222,20 @@ export default function RewardProgram() {
     }
   };
 
-  // Track check-in tx confirmation
+  const refreshPoints = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const res = await fetch(`/api/points/summary/${userId}`);
+      const data = await res.json();
+      if (data.ok) {
+        setAirdropPoints(data.totalPoints);
+        setCompletedTasks(data.completedTasks);
+      }
+    } catch (err) {
+      console.error("Failed to refresh points", err);
+    }
+  }, [userId]);
+
   useEffect(() => {
     const confirmCheckIn = async () => {
       if (!isConfirmed || !userId) return;
@@ -246,7 +259,7 @@ export default function RewardProgram() {
     };
 
     confirmCheckIn();
-  }, [isConfirmed, userId]); // <-- runs only when tx is confirmed
+  }, [isConfirmed, userId, refreshPoints]); // <-- runs only when tx is confirmed
 
   useEffect(() => {
     if (isNftConfirmed) {
@@ -406,20 +419,6 @@ export default function RewardProgram() {
     }
   };
 
-  const refreshPoints = async () => {
-    if (!userId) return;
-    try {
-      const res = await fetch(`/api/points/summary/${userId}`);
-      const data = await res.json();
-      if (data.ok) {
-        setAirdropPoints(data.totalPoints);
-        setCompletedTasks(data.completedTasks);
-      }
-    } catch (err) {
-      console.error("Failed to refresh points", err);
-    }
-  };
-
   return (
     <main className="!w-full !min-h-screen !bg-white !text-gray-900 !overflow-x-hidden">
       {/* Mobile Header */}
@@ -439,13 +438,11 @@ export default function RewardProgram() {
         {/* NFT Claim Section */}
         <section className="pb-6">
           <div className="bg-white border-2 border-yellow-400 rounded-2xl p-6 shadow-lg mb-6 relative overflow-visible animate-pulse-glow">
-            {/* ... Limited Edition Badge and other elements ... */}
-
             {!nftClaimed ? (
               <button
                 onClick={claimNFT}
                 disabled={nftLoading || isNftConfirming}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-xl hover:from-yellow-600 hover:to-orange-600 active:from-yellow-700 active:to-orange-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-transform relative"
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-xl active:from-yellow-700 active:to-orange-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md transform relative select-none"
               >
                 {nftLoading || isNftConfirming ? (
                   <>
@@ -494,7 +491,7 @@ export default function RewardProgram() {
                 <button
                   onClick={handleShowNFT}
                   disabled={nftLoading}
-                  className="!w-full !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white !p-4 !rounded-xl !hover:from-blue-600 !hover:to-blue-700 !mt-4 flex !items-center !justify-center !gap-2"
+                  className="!w-full !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white !p-4 !rounded-xl active:!from-blue-600 active:!to-blue-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 !mt-4 flex !items-center !justify-center !gap-2 select-none"
                 >
                   {nftLoading ? (
                     <Loader className="w-5 h-5 animate-spin" />
@@ -584,7 +581,7 @@ export default function RewardProgram() {
               <button
                 onClick={claimNFT}
                 disabled={nftLoading || isNftConfirming}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-xl hover:from-yellow-600 hover:to-orange-600 active:from-yellow-700 active:to-orange-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-transform relative"
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-xl active:from-yellow-700 active:to-orange-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md transform relative select-none"
               >
                 {nftLoading || isNftConfirming ? (
                   <>
@@ -649,10 +646,10 @@ export default function RewardProgram() {
             {/* Review a movie */}
             <button
               onClick={() => router.push("/new")}
-              className="w-full bg-white border border-gray-200 rounded-2xl p-4 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 group"
+              className="w-full bg-gray-100 border border-gray-200 rounded-2xl p-4 active:bg-gray-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 group select-none"
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-50 group-hover:bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-4">
                   <Star className="w-5 h-5 text-gray-700" strokeWidth={2} />
                 </div>
                 <div className="flex-1 text-left">
@@ -678,10 +675,10 @@ export default function RewardProgram() {
             {/* Support a review */}
             <button
               onClick={() => router.push("/home")}
-              className="w-full bg-white border border-gray-200 rounded-2xl p-4 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 group"
+              className="w-full bg-gray-100 border border-gray-200 rounded-2xl p-4 active:bg-gray-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 group select-none"
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-50 group-hover:bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-4">
                   <ThumbsUp className="w-5 h-5 text-gray-700" strokeWidth={2} />
                 </div>
                 <div className="flex-1 text-left">
@@ -706,7 +703,7 @@ export default function RewardProgram() {
 
             {/* Daily check-in - Unique style */}
             <button
-              className="!w-full !bg-blue-600 !text-white !rounded-2xl !p-5 !shadow-lg !mhover:bg-blue-700 !active:bg-blue-800 !transition-colors !duration-200 !flex !items-center !disabled:opacity-50 !disabled:cursor-not-allowed"
+              className="!w-full !bg-blue-600 !text-white !rounded-2xl !p-5 !shadow-lg active:!bg-blue-800 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 !transition-transform !duration-200 !flex !items-center !disabled:opacity-50 !disabled:cursor-not-allowed select-none"
               onClick={dailyCheckIn}
               disabled={loading || isConfirming}
             >
@@ -754,7 +751,7 @@ export default function RewardProgram() {
           <div className="mt-3 mb-6">
             <button
               onClick={() => router.push("/leaderboard")}
-              className="!w-full !bg-white !border border-gray-300 text-black !py-3 rounded-xl !hover:bg-gray-50 !active:bg-gray-100 transition-all duration-200 !font-semibold !flex !items-center !justify-center !gap-2"
+              className="!w-full !bg-gray-100 !border border-gray-200 text-black !py-3 rounded-xl !active:bg-gray-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 !font-semibold !flex !items-center !justify-center !gap-2 select-none"
             >
               <Trophy className="!w-4 !h-4" strokeWidth={2} />
               View Full Leaderboard
@@ -800,7 +797,7 @@ export default function RewardProgram() {
                         onClick={handleCopyLink}
                         className={`flex items-center justify-center w-12 h-11 rounded-lg ${
                           copied ? "bg-green-500" : "bg-black"
-                        } text-white transition-colors`}
+                        } text-white transition-transform duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 select-none`}
                         aria-label="Copy invite link"
                       >
                         {copied ? (
@@ -821,7 +818,7 @@ export default function RewardProgram() {
                         <button
                           key={index}
                           onClick={option.share}
-                          className={`flex items-center justify-center gap-2 py-2 rounded-lg text-white ${option.color} transition-transform hover:scale-105`}
+                          className={`flex items-center justify-center gap-2 py-2 rounded-lg text-white ${option.color} transition-transform duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 select-none`}
                         >
                           {option.icon}
                           <span className="text-xs">{option.name}</span>
@@ -852,14 +849,14 @@ export default function RewardProgram() {
               <button
                 onClick={() => handleAction("FOLLOW_DISCORD")}
                 disabled={!!completedTasks["FOLLOW_DISCORD"]}
-                className={`w-full bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 group ${
+                className={`w-full bg-gray-100 border border-gray-200 rounded-2xl p-4 transition-transform duration-150 group active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                   completedTasks["FOLLOW_DISCORD"]
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-50"
-                }`}
+                    : "active:bg-gray-200"
+                } select-none`}
               >
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gray-50 group-hover:bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-4">
                     <Discord
                       className="w-5 h-5 text-gray-700"
                       strokeWidth={2}
@@ -899,14 +896,14 @@ export default function RewardProgram() {
               <button
                 onClick={() => handleAction("FOLLOW_X")}
                 disabled={!!completedTasks["FOLLOW_X"]}
-                className={`w-full bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 group ${
+                className={`w-full bg-gray-100 border border-gray-200 rounded-2xl p-4 transition-transform duration-150 group active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                   completedTasks["FOLLOW_X"]
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-50"
-                }`}
+                    : "active:bg-gray-200"
+                } select-none`}
               >
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gray-50 group-hover:bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-4">
                     <X className="w-5 h-5 text-gray-700" strokeWidth={2} />
                   </div>
                   <div className="flex-1 text-left">
@@ -943,14 +940,14 @@ export default function RewardProgram() {
               <button
                 onClick={() => handleAction("FOLLOW_INSTAGRAM")}
                 disabled={!!completedTasks["FOLLOW_INSTAGRAM"]}
-                className={`w-full bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 group ${
+                className={`w-full bg-gray-100 border border-gray-200 rounded-2xl p-4 transition-transform duration-150 group active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                   completedTasks["FOLLOW_INSTAGRAM"]
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-50"
-                }`}
+                    : "active:bg-gray-200"
+                } select-none`}
               >
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gray-50 group-hover:bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-4">
                     <Instagram
                       className="w-5 h-5 text-gray-700"
                       strokeWidth={2}
@@ -990,14 +987,14 @@ export default function RewardProgram() {
               <button
                 onClick={() => handleAction("FOLLOW_FACEBOOK")}
                 disabled={!!completedTasks["FOLLOW_FACEBOOK"]}
-                className={`w-full bg-white border border-gray-200 rounded-2xl p-4 transition-all duration-200 group ${
+                className={`w-full bg-gray-100 border border-gray-200 rounded-2xl p-4 transition-transform duration-150 group active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                   completedTasks["FOLLOW_FACEBOOK"]
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-50"
-                }`}
+                    : "active:bg-gray-200"
+                } select-none`}
               >
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gray-50 group-hover:bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-4">
                     <Facebook
                       className="w-5 h-5 text-gray-700"
                       strokeWidth={2}

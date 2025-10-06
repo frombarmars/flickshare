@@ -1,5 +1,6 @@
 
 import { Coins, Calendar } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Support } from "@/types/profile";
 
@@ -9,6 +10,8 @@ interface SupportListProps {
 }
 
 export const SupportList = ({ supports, username }: SupportListProps) => {
+  const router = useRouter();
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -17,9 +20,10 @@ export const SupportList = ({ supports, username }: SupportListProps) => {
     });
   };
 
-  const handleSupportClick = (supportId: string) => {
-    // Navigate to support transaction details
-    console.log(`Navigate to support transaction ${supportId}`);
+  const handleSupportClick = (reviewId: string) => {
+    if (reviewId) {
+      router.push(`/review/${reviewId}`);
+    }
   };
 
   return (
@@ -32,7 +36,7 @@ export const SupportList = ({ supports, username }: SupportListProps) => {
       {supports.map((support) => (
         <div
           key={support.id}
-          onClick={() => handleSupportClick(support.id)}
+          onClick={() => handleSupportClick(support.review.numericId)}
           className="bg-gray-50 rounded-xl p-4 mx-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 active:scale-[0.98] touch-manipulation"
         >
           <div className="space-y-3">

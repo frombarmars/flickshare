@@ -1,9 +1,33 @@
-import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const cursor = searchParams.get('cursor');
+    const q = searchParams.get('q');
+
+    const where = q
+    ? {
+        OR: [
+          { username: { contains: q } },
+          { walletAddress: { contains: q } },
+          { discordUsername: { contains: q } },
+          { twitterUsername: { contains: q } },
+        ],
+      }
+    : {};
+
     const users = await prisma.user.findMany({
+      take: limit,
+      ...(cursor && {
+        skip: 1, // Skip the cursor
+        cursor: {
+          id: cursor,
+        },
+      }),
+      where,
       select: {
         id: true,
         username: true,
@@ -16,19 +40,15 @@ export async function GET() {
             reviews: true,
             supports: true,
             referrals: true,
-          }
-        }
+          },
+        },
       },
       orderBy: {
-        reviews: {
-          _count: 'desc'
-        }
-      }
+        createdAt: 'desc',
+      },
     });
 
-    // Calculate activity score for each user
     const usersWithScore = users.map(user => {
-      // Simple algorithm to calculate activity score
       const activityScore = Math.min(100,
         (user._count.reviews * 5) +
         (user._count.supports * 2) +
@@ -41,8 +61,14 @@ export async function GET() {
       };
     });
 
+    let nextCursor: string | null = null;
+    if (users.length === limit) {
+      nextCursor = users[users.length - 1].id;
+    }
+
     return NextResponse.json({
-      users: usersWithScore
+      users: usersWithScore,
+      nextCursor,
     });
   } catch (error) {
     console.error('Error fetching users:', error);

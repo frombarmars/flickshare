@@ -8,6 +8,8 @@ export async function GET(
 ) {
   try {
     const { reviewId } = await context.params;
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
 
     if (!reviewId) {
       return NextResponse.json(
@@ -16,10 +18,10 @@ export async function GET(
       );
     }
 
+    console.log(reviewId);
 
-    
     const review = await prisma.review.findFirst({
-      where: { numericId: parseInt(reviewId), isBanned: false },
+      where: { numericId: parseInt(reviewId) },
       include: {
         movie: {
           select: {
@@ -27,13 +29,11 @@ export async function GET(
             title: true,
             posterPath: true,
             releaseDate: true,
-            movieGenres:
-            {
-              select:
-              {
+            movieGenres: {
+              select: {
                 genre: true,
-              }
-            }
+              },
+            },
           },
         },
         reviewer: {
@@ -90,14 +90,18 @@ export async function GET(
       user:
         review.reviewer.username ||
         `User_${review.reviewer.walletAddress.substring(2, 6)}`,
-      handle: `@${review.reviewer.username || "user"
-        }_${review.reviewer.walletAddress.substring(2, 6)}`,
+      handle: `@${
+        review.reviewer.username || "user"
+      }_${review.reviewer.walletAddress.substring(2, 6)}`,
       avatar: review.reviewer.profilePicture || "/placeholder.jpeg",
       text: review.comment,
       rating: review.rating,
       reviewIdOnChain: review.numericId,
       coins: review.supports.reduce((sum, support) => sum + support.amount, 0),
       likes: review.ReviewLike.length, // 👈 include like count
+      isLiked: userId
+        ? review.ReviewLike.some((like) => like.userId === userId)
+        : false,
       date: review.createdAt.toISOString().split("T")[0],
       reviewId: review.id,
       movieTitle: review.movie.title,

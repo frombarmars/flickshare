@@ -14,17 +14,21 @@ export const useReviewForm = () => {
   useEffect(() => {
     if (wordCount > WORD_LIMIT) {
       setErrors((prev) => ({ ...prev, review: `Review must be ${WORD_LIMIT} words or less.` }));
+    } else if (wordCount > 0 && wordCount < 5) {
+      setErrors((prev) => ({ ...prev, review: "Review must be at least 5 words." }));
     } else {
-      if (errors.review === `Review must be ${WORD_LIMIT} words or less.`) {
-        setErrors((prev) => ({ ...prev, review: undefined }));
-      }
+      setErrors((prev) => ({ ...prev, review: undefined }));
     }
-  }, [wordCount, errors.review]);
+  }, [wordCount]);
 
   const validateForm = (movie: string): FormErrors => {
     const newErrors: FormErrors = {};
     if (!movie.trim()) newErrors.movie = "Movie title is required";
-    if (!review.trim()) newErrors.review = "Please write a review";
+    if (!review.trim()) {
+      newErrors.review = "Please write a review";
+    } else if (wordCount < 5) {
+      newErrors.review = "Review must be at least 5 words.";
+    }
     if (rating === 0) newErrors.rating = "Please select a rating";
     return newErrors;
   };

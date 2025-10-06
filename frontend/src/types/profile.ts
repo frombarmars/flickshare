@@ -18,6 +18,7 @@ export interface Support {
   amount: number;
   createdAt: string;
   review: {
+    numericId: string;
     movie: Movie;
     reviewer: {
       username: string;

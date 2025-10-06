@@ -27,6 +27,7 @@ interface Support {
   amount: number;
   createdAt: string;
   review: {
+    numericId: string;
     movie: Movie;
     reviewer: {
       username: string;
@@ -149,9 +150,10 @@ export default function Profile() {
     router.push(`/review/${reviewId}`);
   };
 
-  const handleSupportClick = (supportId: string) => {
-    // Navigate to support transaction details
-    console.log(`Navigate to support transaction ${supportId}`);
+  const handleSupportClick = (reviewId: string) => {
+    if (reviewId) {
+      router.push(`/review/${reviewId}`);
+    }
   };
 
   const tabContent = {
@@ -219,7 +221,7 @@ export default function Profile() {
         {supports.map((support) => (
           <div
             key={support.id}
-            onClick={() => handleSupportClick(support.id)}
+            onClick={() => handleSupportClick(support.review.numericId)}
             className="bg-gray-50 rounded-xl p-4 mx-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 active:scale-[0.98] touch-manipulation"
           >
             <div className="space-y-3">

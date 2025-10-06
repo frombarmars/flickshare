@@ -120,6 +120,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const cursor = searchParams.get("cursor");
     const limit = parseInt(searchParams.get("limit") || "4");
+    const userId = searchParams.get("userId");
 
     const reviews = await prisma.review.findMany({
       take: limit,
@@ -145,6 +146,11 @@ export async function GET(request: NextRequest) {
             amount: true,
           },
         },
+        ReviewLike: {
+          select: {
+            userId: true,
+          },
+        },
         _count: {
           select: {
             supports: true,
@@ -152,10 +158,9 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      where :
-      {
-        isBanned : false,
-      }
+      where: {
+        isBanned: false,
+      },
     });
 
     const formattedReviews = reviews.map((review) => ({
@@ -163,14 +168,18 @@ export async function GET(request: NextRequest) {
       user:
         review.reviewer.username ||
         `User_${review.reviewer.walletAddress.substring(2, 6)}`,
-      handle: `@${review.reviewer.username || "user"
-        }_${review.reviewer.walletAddress.substring(2, 6)}`,
+      handle: `@${
+        review.reviewer.username || "user"
+      }_${review.reviewer.walletAddress.substring(2, 6)}`,
       avatar: review.reviewer.profilePicture || "/placeholder.jpeg",
       text: review.comment,
       rating: review.rating,
       reviewIdOnChain: review.numericId,
       coins: review.supports.reduce((sum, support) => sum + support.amount, 0),
       likes: review._count.ReviewLike, // 👈 include like count
+      isLiked: userId
+        ? review.ReviewLike.some((like) => like.userId === userId)
+        : false,
       date: review.createdAt.toISOString().split("T")[0],
       reviewId: review.id,
       movieTitle: review.movie.title,

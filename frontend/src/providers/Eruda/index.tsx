@@ -9,8 +9,8 @@ const Eruda = dynamic(() => import('./eruda-provider').then((c) => c.Eruda), {
 });
 
 export const ErudaProvider = (props: { children: ReactNode }) => {
-  if (ENV_VARIABLES.APP_ENV === 'production') {
-    return props.children;
-  }
+  //if (ENV_VARIABLES.APP_ENV === 'production') {
+    //return props.children;
+  //}
   return <Eruda>{props.children}</Eruda>;
 };

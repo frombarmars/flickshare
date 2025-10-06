@@ -1,6 +1,7 @@
 "use client";
+import { SupportAmount } from "@/components/SupportAmount";
 import { ENV_VARIABLES } from "@/constants/env_variables";
-import { ArrowLeft, Star, User, Share2 } from "lucide-react";
+import { ArrowLeft, Star, User, Share2, Coins, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -224,55 +225,77 @@ const MovieDetailsPage = () => {
           </button>
         </div>
 
-        <div className="!space-y-3">
+        <div className="!space-y-4">
           {getSortedReviews().map((review: any) => (
-            <Link key={review.id} href={`/review/${review.id}`}>
+            <Link key={review.id} href={`/review/${review.id}`} className="block">
               <div
                 key={review.id}
-                className="!border !border-gray-200 !rounded-lg !p-3 !bg-white m-2"
+                className="!border !border-gray-200 !rounded-xl !p-4 !bg-white hover:!bg-gray-50 !transition-colors !duration-200"
               >
-                <div className="!flex !items-center !justify-between !mb-2">
-                  <div className="!flex !items-center !gap-2">
+                <div className="!flex !items-start !justify-between !mb-3">
+                  <div className="!flex !items-center !gap-3">
                     {review.reviewer?.profilePicture ? (
                       <Image
                         src={review.reviewer.profilePicture}
                         alt={review.reviewer?.username || "User"}
-                        width={24}
-                        height={24}
-                        className="!w-6 !h-6 !rounded-full !object-cover"
+                        width={40}
+                        height={40}
+                        className="!w-10 !h-10 !rounded-full !object-cover"
                       />
                     ) : (
-                      <User className="!w-6 !h-6 !text-gray-600 !rounded-full !bg-gray-200 p-1" />
+                      <div className="!w-10 !h-10 !bg-gray-200 !rounded-full !flex !items-center !justify-center">
+                        <User className="!w-6 !h-6 !text-gray-500" />
+                      </div>
                     )}
-
-                    <span className="!font-medium !text-sm">
-                      {review.reviewer?.username || "Anonymous"}
-                    </span>
-                    <span className="!text-gray-400 !text-xs">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </span>
+                    <div>
+                      <span className="!font-semibold !text-base !text-gray-800">
+                        {review.reviewer?.username || "Anonymous"}
+                      </span>
+                      <p className="!text-gray-500 !text-xs">
+                        {new Date(review.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <div className="!flex !items-center !gap-1">
+                  <div className="!flex !items-center !gap-1 !mt-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`!w-3 !h-3 ${
+                        className={`!w-4 !h-4 ${
                           i < review.rating
-                            ? "!text-yellow-400 !fill-current"
+                            ? "!text-yellow-400 !fill-yellow-400"
                             : "!text-gray-300"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
-                <p className="!text-gray-800 !text-sm !mb-3 line-clamp-5">
+                <p className="!text-gray-700 !text-sm !leading-relaxed line-clamp-4 mb-3">
                   {review.comment}
                 </p>
+                <div className="!flex !items-center !gap-4 !text-xs !text-gray-500">
+                  <div className="!flex !items-center !gap-1">
+                    <ThumbsUp className="!w-3.5 !h-3.5" />
+                    <span>{review.likes?.length || 0} Likes</span>
+                  </div>
+                  <SupportAmount
+                    amount={(review.supports || []).reduce(
+                      (s: number, x: any) => s + x.amount,
+                      0
+                    )}
+                  />
+                </div>
               </div>
             </Link>
           ))}
         </div>
       </div>
+
+      {/* Bottom padding */}
+      <div className="h-16"></div>
     </div>
   );
 };

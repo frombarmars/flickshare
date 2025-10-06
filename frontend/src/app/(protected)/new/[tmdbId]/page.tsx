@@ -33,7 +33,7 @@ export default function AddReview() {
     setRating,
   });
 
-  const isSubmitDisabled = loading || isConfirming || !session?.user?.id;
+  const isSubmitDisabled = loading || isConfirming || !session?.user?.id || Object.values(errors).some(Boolean);
 
   if (dailyCount !== null && remaining <= 0) {
     return (
@@ -72,7 +72,12 @@ export default function AddReview() {
         <MovieSearch movie={movie} setMovie={setMovie} setMovieId={setMovieId} error={errors.movie} />
         <Rating rating={rating} setRating={setRating} error={errors.rating} />
         <ReviewForm review={review} setReview={setReview} wordCount={wordCount} error={errors.review} />
-        <SubmitButton loading={loading} isConfirming={isConfirming} isSubmitDisabled={isSubmitDisabled} />
+        <SubmitButton
+          loading={loading}
+          isConfirming={isConfirming}
+          isSubmitDisabled={isSubmitDisabled}
+          isLoggedIn={!!session?.user?.id}
+        />
 
         {errors.submit && (
           <div className="text-center p-4 bg-red-50 rounded-2xl border border-red-200">
