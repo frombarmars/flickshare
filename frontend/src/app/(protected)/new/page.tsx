@@ -54,9 +54,13 @@ export default function AddReview() {
   const validateForm = (): FormErrors => {
     const newErrors: FormErrors = {};
     if (!movie.trim()) newErrors.movie = "Movie title is required";
-    if (!review.trim()) newErrors.review = "Please write a review";
-    if (wordCount > WORD_LIMIT)
+    if (!review.trim()) {
+      newErrors.review = "Please write a review";
+    } else if (wordCount < 5) {
+      newErrors.review = "Review must be at least 5 words.";
+    } else if (wordCount > WORD_LIMIT) {
       newErrors.review = `Review must be ${WORD_LIMIT} words or less`;
+    }
     if (rating === 0) newErrors.rating = "Please select a rating";
     if (!session?.user?.id) newErrors.submit = "Please sign in to submit a review";
     return newErrors;

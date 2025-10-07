@@ -48,7 +48,7 @@ export default function AddReview() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validationErrors = validateForm(movie);
+    const validationErrors = validateForm(movie, wordCount, review, rating);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;

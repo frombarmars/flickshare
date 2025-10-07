@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Copy, Check, Calendar } from "lucide-react";
+import { Copy, Check, Calendar, Edit, Save } from "lucide-react";
 import { CircularIcon } from "@worldcoin/mini-apps-ui-kit-react";
 import { CheckCircleSolid } from "iconoir-react";
 
@@ -10,10 +10,19 @@ interface UserInfoProps {
   profilePicture?: string;
   walletAddress: string;
   createdAt: string;
+  bio?: string;
+  setBio: (bio: string) => void;
+  isOwner: boolean;
 }
 
-export const UserInfo = ({ username, profilePicture, walletAddress, createdAt }: UserInfoProps) => {
+export const UserInfo = ({ username, profilePicture, walletAddress, createdAt, bio, setBio, isOwner }: UserInfoProps) => {
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedBio, setEditedBio] = useState(bio || "");
+
+  useEffect(() => {
+    setEditedBio(bio || "");
+  }, [bio]);
 
   const handleCopyAddress = async () => {
     try {
@@ -22,6 +31,24 @@ export const UserInfo = ({ username, profilePicture, walletAddress, createdAt }:
       setTimeout(() => setCopied(false), 2000);
     } catch {
       console.log("Copy failed");
+    }
+  };
+
+  const handleSaveBio = async () => {
+    try {
+      const res = await fetch(`/api/profile/${username}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bio: editedBio }),
+      });
+      if (!res.ok) throw new Error('Failed to save bio');
+      const data = await res.json();
+      setBio(data.data.bio);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Error saving bio:", err);
     }
   };
 
@@ -74,6 +101,31 @@ export const UserInfo = ({ username, profilePicture, walletAddress, createdAt }:
             <span className="font-medium text-gray-900 truncate">{formatDate(createdAt)}</span>
           </div>
         </div>
+
+        <div className="w-full mb-6">
+          {isEditing ? (
+            <div className="flex flex-col items-center">
+              <textarea
+                value={editedBio}
+                onChange={(e) => setEditedBio(e.target.value)}
+                className="w-full h-24 p-2 border rounded-md"
+              />
+              <button onClick={handleSaveBio} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md flex items-center">
+                <Save className="w-4 h-4 mr-2" /> Save
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center">
+              <p className="text-gray-600 text-sm">{bio || "No bio yet."}</p>
+              {isOwner && (
+                <button onClick={() => setIsEditing(true)} className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-md flex items-center">
+                  <Edit className="w-4 h-4 mr-2" /> Edit Bio
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         <button
           onClick={handleCopyAddress}
           className="w-full rounded-2xl px-4 py-5 bg-grey-50 hover:shadow-md active:shadow-sm transition-all duration-200 touch-manipulation active:scale-[0.98] group"

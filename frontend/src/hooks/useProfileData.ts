@@ -7,6 +7,7 @@ export const useProfileData = (username?: string) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [supports, setSupports] = useState<Support[]>([]);
   const [userWalletAddress, setUserWalletAddress] = useState("");
+  const [bio, setBio] = useState("");
 
   useEffect(() => {
     if (!username) return;
@@ -18,6 +19,7 @@ export const useProfileData = (username?: string) => {
         setUserWalletAddress(data.data.walletAddress)
         setReviews(data.data.reviews || []);
         setSupports(data.data.supports || []);
+        setBio(data.data.bio || "");
       } catch (err) {
         console.error("Error fetching profile data:", err);
       }
@@ -26,5 +28,5 @@ export const useProfileData = (username?: string) => {
     fetchProfile();
   }, [username]);
 
-  return { reviews, supports, userWalletAddress };
+  return { reviews, supports, userWalletAddress, bio, setBio };
 };

@@ -18,6 +18,7 @@ model User {
   profilePicture   String?
   discordUsername  String?
   twitterUsername  String?
+  bio              String?
   isAdmin          Boolean?           @default(false) // 👈 add default here
   reviews          Review[]
   collections      Collection[]

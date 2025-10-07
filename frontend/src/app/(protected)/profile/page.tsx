@@ -7,6 +7,8 @@ import { CircularIcon } from "@worldcoin/mini-apps-ui-kit-react";
 import { CheckCircleSolid } from "iconoir-react";
 import { useRouter } from "next/navigation";
 import { MiniKit, Permission, RequestPermissionPayload } from "@worldcoin/minikit-js";
+import { useProfileData } from "@/hooks/useProfileData";
+import { UserInfo } from "@/components/Profile/UserInfo";
 
 interface Movie {
   id: string;
@@ -38,14 +40,9 @@ interface Support {
 export default function Profile() {
   const { data: session } = useSession();
   const router = useRouter();
-  const userWalletAddress = session?.user.walletAddress || "0x1234567890abcdef1234567890abcdef12345678";
   const userName = session?.user.username || "Gerald";
+  const { reviews, supports, userWalletAddress, bio, setBio } = useProfileData(userName);
   const [tab, setTab] = useState("review");
-  const [copied, setCopied] = useState(false);
-  // const [activityFilter, setActivityFilter] = useState("all");
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [supports, setSupports] = useState<Support[]>([]);
-
   const [isInstalled, setIsInstalled] = useState(false);
   const [notifGranted, setNotifGranted] = useState<boolean | undefined>();
   const [showSettings, setShowSettings] = useState(false);
@@ -107,36 +104,6 @@ export default function Profile() {
   useEffect(() => {
     getPermissions();
   }, [getPermissions]);
-
-  const handleCopyAddress = async () => {
-    try {
-      await navigator.clipboard.writeText(userWalletAddress);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      console.log("Copy failed");
-    }
-  };
-
-  useEffect(() => {
-    if (!userName) return;
-
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(`/api/profile/${userName}`);
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const data = await res.json();
-        console.log("Profile API response:", data);
-
-        setReviews(data.data.reviews || []);
-        setSupports(data.data.supports || []);
-      } catch (err) {
-        console.error("Error fetching profile data:", err);
-      }
-    };
-
-    fetchProfile();
-  }, [userName]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -376,69 +343,15 @@ export default function Profile() {
 
       <div className="max-w-sm mx-auto px-4">
         <section className="pt-8 pb-8">
-          <div className="flex flex-col items-center text-center">
-            <div className="relative mb-6">
-              <div className="w-32 h-32 rounded-full border-3 border-gray-200 shadow-lg overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500">
-                {session?.user.profilePicture ? (
-                  <Image
-                    src={session.user.profilePicture}
-                    alt="User Avatar"
-                    width={128}
-                    height={128}
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
-                    <svg
-                      className="w-16 h-16 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-1 mb-6">
-              <div className="flex items-center justify-center">
-                <h2 className="text-xl font-bold text-black">{userName}</h2>
-                <CircularIcon size="sm">
-                  <CheckCircleSolid className="text-blue-600" />
-                </CircularIcon>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span className="w-4 h-4 flex-shrink-0"><Calendar className="w-4 h-4 text-gray-400" /></span>
-                <span>Joined:</span>
-                <span className="font-medium text-gray-900 truncate">{formatDate(session?.user.createdAt || new Date().toISOString())}</span>
-              </div>
-            </div>
-            <button
-              onClick={handleCopyAddress}
-              className="w-full rounded-2xl px-4 py-5 bg-grey-50 hover:shadow-md active:shadow-sm transition-all duration-200 touch-manipulation active:scale-[0.98] group"
-            >
-              <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
-                <span className="text-xs font-mono text-gray-700 truncate w-[calc(100%-28px)]">
-                  {userWalletAddress.slice(0, 5)}...{userWalletAddress.slice(-4)}
-                </span>
-
-                {copied ? (
-                  <Check className="w-5 h-5 text-green-600 transition-transform duration-200 scale-105 flex-shrink-0" strokeWidth={2.5} />
-                ) : (
-                  <Copy className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" strokeWidth={2} />
-                )}
-              </div>
-
-              {copied && (
-                <p className="text-xs text-green-600 mt-4 font-medium text-center animate-fadeIn">
-                  Copied to clipboard!
-                </p>
-              )}
-            </button>
-          </div>
+          <UserInfo
+            username={userName}
+            profilePicture={session?.user.profilePicture}
+            walletAddress={userWalletAddress}
+            createdAt={session?.user.createdAt || new Date().toISOString()}
+            bio={bio}
+            setBio={setBio}
+            isOwner={true}
+          />
         </section>
 
 

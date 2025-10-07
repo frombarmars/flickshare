@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { auth } from '@/auth';
 
 export async function GET(
   req: NextRequest,
@@ -17,6 +18,7 @@ export async function GET(
         username: true,
         profilePicture: true,
         twitterUsername: true,
+        bio: true,
         createdAt: true,
         updatedAt: true,
         reviews: {
@@ -62,6 +64,46 @@ export async function GET(
     console.error('Failed to fetch user:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch user' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ username: string }> }
+) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const params = await context.params;
+  const username = params.username;
+
+  if (session.user.username !== username && !session.user.isAdmin) {
+    return NextResponse.json(
+      { success: false, error: "Forbidden" },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { bio } = await req.json();
+
+    const updatedUser = await prisma.user.update({
+      where: { username },
+      data: { bio },
+    });
+
+    return NextResponse.json({ success: true, data: updatedUser });
+  } catch (error) {
+    console.error('Failed to update user:', error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update user" },
       { status: 500 }
     );
   }

@@ -9,6 +9,7 @@ Table User {
   profilePicture String
   discordUsername String
   twitterUsername String
+  bio String
   isAdmin Boolean [default: false]
   reviews Review [not null]
   collections Collection [not null]

@@ -16,7 +16,7 @@ export default function Profile() {
   const username = params.username as string;
   const [tab, setTab] = useState("review");
 
-  const { reviews, supports, userWalletAddress } = useProfileData(username);
+  const { reviews, supports, userWalletAddress, bio, setBio } = useProfileData(username);
 
   const tabContent = {
     review: <ReviewList reviews={reviews} />,
@@ -44,6 +44,9 @@ export default function Profile() {
           profilePicture={session?.user.profilePicture}
           walletAddress={userWalletAddress}
           createdAt={session?.user.createdAt || new Date().toISOString()}
+          bio={bio}
+          setBio={setBio}
+          isOwner={session?.user.username === username}
         />
 
         <Tabs tab={tab} setTab={setTab} />

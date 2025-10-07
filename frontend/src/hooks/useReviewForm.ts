@@ -21,7 +21,7 @@ export const useReviewForm = () => {
     }
   }, [wordCount]);
 
-  const validateForm = (movie: string): FormErrors => {
+  const validateForm = (movie: string, wordCount: number, review: string, rating: number): FormErrors => {
     const newErrors: FormErrors = {};
     if (!movie.trim()) newErrors.movie = "Movie title is required";
     if (!review.trim()) {
