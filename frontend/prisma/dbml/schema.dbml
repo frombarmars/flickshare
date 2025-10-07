@@ -24,6 +24,9 @@ Table User {
   ReviewLike ReviewLike [not null]
   PointTransaction PointTransaction [not null]
   totalPoints Int [not null, default: 0]
+  receivedNotifications Notification [not null]
+  sentNotifications Notification [not null]
+  Comment Comment [not null]
 }
 
 Table Movie {
@@ -85,6 +88,7 @@ Table Review {
   bannedAt DateTime
   bannedBy String
   banReason String
+  Comment Comment [not null]
 }
 
 Table Collection {
@@ -192,6 +196,33 @@ Table PointTransaction {
   createdAt DateTime [default: `now()`, not null]
 }
 
+Table Comment {
+  id String [pk]
+  review Review [not null]
+  reviewId String [not null]
+  author User [not null]
+  authorId String [not null]
+  content String [not null]
+  parent Comment
+  parentId String
+  replies Comment [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Notification {
+  id String [pk]
+  recipient User [not null]
+  recipientId String [not null]
+  triggeredBy User
+  triggeredById String
+  type String [not null]
+  entityId String
+  message String
+  isRead Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+}
+
 Ref: User.referredById - Referral.id
 
 Ref: MovieGenre.movieId > Movie.id
@@ -231,3 +262,13 @@ Ref: ReviewLike.reviewId > Review.id
 Ref: ReviewLike.userId > User.id
 
 Ref: PointTransaction.userId > User.id
+
+Ref: Comment.reviewId > Review.id
+
+Ref: Comment.authorId > User.id
+
+Ref: Comment.parentId - Comment.id [delete: No Action]
+
+Ref: Notification.recipientId > User.id
+
+Ref: Notification.triggeredById > User.id

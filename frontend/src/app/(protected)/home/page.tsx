@@ -4,7 +4,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import UsersFeedPage from "@/components/UsersFeedPage/page";
 import MovieFeedPage from "@/components/MoviesFeedPage/page";
 import ReviewsFeedPage from "@/components/ReviewsFeedPage/page";
-import Navigation from "@/components/Navtop/page";
+import Navigation from "@/components/Navtop";
 
 export default function Home() {
   usePermissions();
