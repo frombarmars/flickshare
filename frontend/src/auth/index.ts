@@ -38,7 +38,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const expectedSignedNonce = hashNonce({ nonce });
 
         if (signedNonce !== expectedSignedNonce) {
-          console.log('Invalid signed nonce');
           return null;
         }
         const finalPayload: MiniAppWalletAuthSuccessPayload =
@@ -46,7 +45,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const result = await verifySiweMessage(finalPayload, nonce);
 
         if (!result.isValid || !result.siweMessageData.address) {
-          console.log('Invalid final payload');
           return null;
         }
 
@@ -72,8 +70,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               updatedAt: existingUser.updatedAt.toISOString(),
             };
           } else {
-            console.log('User not found in database, creating new user...');
-            console.log(inviteCode);
 
             const userInfo = await MiniKit.getUserInfo(finalPayload.address);
             const fallbackUsername = userInfo.username || `User ${finalPayload.address.slice(0, 6)}`;
@@ -86,10 +82,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               });
 
               if (!inviteRecord) {
-                console.log('Invite code not found');
                 inviteRecord = null;
               } else if (inviteRecord.expiresAt <= new Date()) {
-                console.log('Invite code expired');
                 inviteRecord = null;
               }
             }
@@ -142,9 +136,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                   { once: true } // only once per user
                 );
 
-                console.log(`Referral created: ${referral.id} (referrer: ${inviteRecord.userId})`);
               } catch (referralError) {
-                console.error('Error creating referral:', referralError);
               }
             }
 
@@ -163,12 +155,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 
         } catch (error) {
-          console.error('Database error during authentication:', error);
 
           // Fallback: If database fails, still allow authentication with MiniKit data
           try {
             const userInfo = await MiniKit.getUserInfo(finalPayload.address);
-            console.log('Fallback: Using MiniKit data only');
             const fallbackUsername = userInfo.username || `User ${finalPayload.address.slice(0, 6)}`;
 
             return {
@@ -183,7 +173,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               updatedAt: new Date().toISOString(),
             };
           } catch (miniKitError) {
-            console.error('MiniKit getUserInfo also failed:', miniKitError);
             return null;
           }
         }

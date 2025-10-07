@@ -57,7 +57,6 @@ export default function ReviewsFeedPage() {
         hasMoreRef.current = false;
       }
     } catch (err) {
-      console.error("Error fetching reviews:", err);
     } finally {
       setLoading(false);
       loadingRef.current = false;
@@ -87,7 +86,6 @@ export default function ReviewsFeedPage() {
               }
             }
           } catch (error) {
-            console.error("Error fetching new review:", error);
           }
         });
       },
@@ -192,7 +190,6 @@ export default function ReviewsFeedPage() {
         });
 
       if (finalPayload.status === "error") {
-        console.log(finalPayload);
         throw new Error("Transaction failed: " + finalPayload.status);
       }
       setTransactionId(finalPayload.transaction_id);
@@ -204,9 +201,8 @@ export default function ReviewsFeedPage() {
           userId: session?.user?.id,
           txHash: finalPayload.transaction_id,
         }),
-      }).catch((err) => console.error("DB sync failed:", err));
+      }).catch((err) => {});
     } catch (err) {
-      console.error(err);
       // Revert UI if failed
       setReviews((prev) =>
         prev.map((r) =>

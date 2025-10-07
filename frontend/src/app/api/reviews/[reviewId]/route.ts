@@ -18,7 +18,6 @@ export async function GET(
       );
     }
 
-    console.log(reviewId);
 
     const review = await prisma.review.findFirst({
       where: { numericId: parseInt(reviewId) },
@@ -113,7 +112,6 @@ export async function GET(
       transactions,
     });
   } catch (err) {
-    console.error("Error fetching review:", err);
     return NextResponse.json(
       { error: "Failed to fetch review" },
       { status: 500 }

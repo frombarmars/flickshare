@@ -17,6 +17,7 @@ import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 import { useSession } from "next-auth/react";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
 import { toast } from "react-toastify";
+import { CommentSection } from "@/components/Comments/CommentSection";
 
 const ReviewSupportUI = () => {
   const params = useParams<{ reviewId: string }>();
@@ -304,6 +305,8 @@ const ReviewSupportUI = () => {
               </div>
             </div>
           )}
+
+          {reviewId && <CommentSection reviewId={reviewId} />}
         </>
       )}
 

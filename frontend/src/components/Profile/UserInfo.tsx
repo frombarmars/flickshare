@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Copy, Check, Calendar, Edit, Save } from "lucide-react";
@@ -30,7 +29,6 @@ export const UserInfo = ({ username, profilePicture, walletAddress, createdAt, b
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      console.log("Copy failed");
     }
   };
 
@@ -48,7 +46,6 @@ export const UserInfo = ({ username, profilePicture, walletAddress, createdAt, b
       setBio(data.data.bio);
       setIsEditing(false);
     } catch (err) {
-      console.error("Error saving bio:", err);
     }
   };
 
@@ -102,24 +99,25 @@ export const UserInfo = ({ username, profilePicture, walletAddress, createdAt, b
           </div>
         </div>
 
-        <div className="w-full mb-6">
+        <div className="w-full mb-6 p-4 bg-gray-50 rounded-lg">
           {isEditing ? (
             <div className="flex flex-col items-center">
               <textarea
                 value={editedBio}
                 onChange={(e) => setEditedBio(e.target.value)}
-                className="w-full h-24 p-2 border rounded-md"
+                className="w-full h-24 p-2 border rounded-md bg-white"
+                placeholder="Tell us about yourself..."
               />
-              <button onClick={handleSaveBio} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md flex items-center">
-                <Save className="w-4 h-4 mr-2" /> Save
+              <button onClick={handleSaveBio} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md flex items-center hover:bg-blue-600">
+                <Save className="w-4 h-4 mr-2" /> Save Bio
               </button>
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <p className="text-gray-600 text-sm">{bio || "No bio yet."}</p>
+              <p className="text-gray-700 text-sm text-center">{bio || "This user hasn't set a bio yet."}</p>
               {isOwner && (
-                <button onClick={() => setIsEditing(true)} className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-md flex items-center">
-                  <Edit className="w-4 h-4 mr-2" /> Edit Bio
+                <button onClick={() => setIsEditing(true)} className="mt-4 px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-xs font-semibold flex items-center hover:bg-gray-300">
+                  <Edit className="w-3 h-3 mr-1" /> Edit Bio
                 </button>
               )}
             </div>

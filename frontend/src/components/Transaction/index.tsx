@@ -47,13 +47,11 @@
 //   useEffect(() => {
 //     if (transactionId && !isConfirming) {
 //       if (isConfirmed) {
-//         console.log('Transaction confirmed!');
 //         setButtonState('success');
 //         setTimeout(() => {
 //           setButtonState(undefined);
 //         }, 3000);
 //       } else if (isError) {
-//         console.error('Transaction failed:', error);
 //         setButtonState('failed');
 //         setTimeout(() => {
 //           setButtonState(undefined);
@@ -81,20 +79,14 @@
 //   //     });
 
 //   //     if (finalPayload.status === 'success') {
-//   //       console.log(
-//   //         'Transaction submitted, waiting for confirmation:',
-//   //         finalPayload.transaction_id,
-//   //       );
 //   //       setTransactionId(finalPayload.transaction_id);
 //   //     } else {
-//   //       console.error('Transaction submission failed:', finalPayload);
 //   //       setButtonState('failed');
 //   //       setTimeout(() => {
 //   //         setButtonState(undefined);
 //   //       }, 3000);
 //   //     }
 //   //   } catch (err) {
-//   //     console.error('Error sending transaction:', err);
 //   //     setButtonState('failed');
 //   //     setTimeout(() => {
 //   //       setButtonState(undefined);
@@ -156,17 +148,11 @@
 //         });
 
 //       if (finalPayload.status === 'success') {
-//         console.log(
-//           'Transaction submitted, waiting for confirmation:',
-//           finalPayload.transaction_id,
-//         );
 //         setTransactionId(finalPayload.transaction_id);
 //       } else {
-//         console.error('Transaction submission failed:', finalPayload);
 //         setButtonState('failed');
 //       }
 //     } catch (err) {
-//       console.error('Error sending transaction:', err);
 //       setButtonState('failed');
 //     }
 //   };

@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log(body);
     
     const { txHash, userId, reviewId, amount } = body;
 
@@ -24,9 +23,25 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
+      include: { movie: { select: { title: true } } },
+    });
+
+    if (review && review.reviewerId) {
+      await prisma.notification.create({
+        data: {
+          recipientId: review.reviewerId,
+          triggeredById: userId, // Associate the notification with the user who supported the review
+          type: "SUPPORT",
+          message: `supported your review for ${review.movie.title} with ${amount} WLDs`,
+          entityId: reviewId,
+        },
+      });
+    }
+
     return NextResponse.json({ success: true, support });
   } catch (err) {
-    console.error("Error saving support:", err);
     return NextResponse.json(
       { error: "Failed to save support" },
       { status: 500 }

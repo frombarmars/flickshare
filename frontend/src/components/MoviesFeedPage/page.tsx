@@ -57,7 +57,6 @@ export default function MovieFeedPage() {
       }
 
       const data = await response.json();
-      console.log(data.movies);
 
       if (data.movies.length) {
         setMovies((prev) => [...prev, ...data.movies]);
@@ -67,7 +66,6 @@ export default function MovieFeedPage() {
         setHasMore(false);
       }
     } catch (err) {
-      console.error("Error fetching movies:", err);
     } finally {
       setLoading(false);
       loadingRef.current = false;

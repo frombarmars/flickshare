@@ -33,11 +33,9 @@ export const UserInfo = () => {
       if (!user?.walletAddress) return;
 
       const updatedUser = await updateXUsername(user.walletAddress, xUsernameInput);
-      console.log('Updated:', updatedUser);
       await update(); // 🔁 Force session refresh
       setIsEditingXUsername(false);
     } catch (error) {
-      console.error('Failed to update xUsername:', error);
     }
   };
 

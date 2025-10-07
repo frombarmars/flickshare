@@ -15,8 +15,6 @@ export async function getUserMintedNFT(tokenId: number): Promise<INFTMetadata | 
             args: [tokenId],
         }) as string;
 
-        console.log("Token URI:", tokenURI);
-
         // Fetch metadata from the tokenURI
         try {
             const response = await fetch(tokenURI);
@@ -24,10 +22,8 @@ export async function getUserMintedNFT(tokenId: number): Promise<INFTMetadata | 
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const metadata: INFTMetadata = await response.json();
-            console.log("NFT Metadata:", metadata);
             return metadata;
         } catch (error) {
-            console.error("Error fetching NFT metadata:", error);
             return null;
         }
     }

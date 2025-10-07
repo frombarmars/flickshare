@@ -7,16 +7,23 @@ export async function POST(req: NextRequest) {
 
     // Convert reviewId to the correct type if needed
     const numericReviewId = parseInt(reviewId, 10);
-    console.log("Review Numeric ID in api:");
-    console.log(numericReviewId);
 
     // Find the review with better error handling
     const currentReview = await prisma.review.findFirst({
       where: { numericId: numericReviewId },
+      include :
+      {
+        movie :
+        {
+          select :
+          {
+            title : true,
+          }
+        }
+      }
     });
 
     if (!currentReview) {
-      console.error(`Review with numericId ${numericReviewId} not found in database`);
       return NextResponse.json({
         error: "Review not found in database",
         details: `Review ID: ${numericReviewId}`
@@ -47,10 +54,22 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log(`Like created successfully for review ${numericReviewId}, user ${userId}`);
+
+    // Create a notification for the review author
+    if (currentReview.reviewerId) {
+      await prisma.notification.create({
+        data: {
+          recipientId: currentReview.reviewerId,
+          triggeredById: userId, // Associate the notification with the user who liked the review
+          type: "LIKE",
+          message: `liked your review for the movie ${currentReview.movie.title}`,
+          entityId: reviewIdOffChain,
+        },
+      });
+    }
+
     return NextResponse.json({ like });
   } catch (err) {
-    console.error("Error in like API:", err);
     return NextResponse.json({
       error: "Failed to save like",
       details: err instanceof Error ? err.message : String(err)

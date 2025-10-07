@@ -11,8 +11,6 @@ export async function getReviewCounter() {
     abi: FlickShareAbi,
     functionName: "reviewCounter",
   });
-  console.log("Wowowow");
-  console.log(counter);
   
   return Number(counter); // convert BigInt to number
 }
