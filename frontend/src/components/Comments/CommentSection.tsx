@@ -21,6 +21,8 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -40,7 +42,13 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
   }, [reviewId]);
 
   const handlePostComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim()) {
+      alert("Please enter a comment.");
+      return;
+    }
+
+    setIsPosting(true);
+    setError(null);
 
     try {
       const res = await fetch('/api/comments', {
@@ -51,13 +59,19 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
         body: JSON.stringify({ reviewId, content: newComment }),
       });
 
-      if (!res.ok) throw new Error('Failed to post comment');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to post comment');
+      }
 
       const data = await res.json();
       setComments([...comments, data.comment]);
       setNewComment('');
-    } catch (error) {
+    } catch (error: any) {
+      setError(error.message);
       console.error(error);
+    } finally {
+      setIsPosting(false);
     }
   };
 
@@ -87,15 +101,18 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="w-full h-20 p-2 border rounded-md bg-gray-50"
+            className="w-full h-20 p-2 border rounded-md bg-gray-50 disabled:!bg-gray-200"
             placeholder="Add a comment..."
+            disabled={isPosting}
           />
           <button
             onClick={handlePostComment}
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:!bg-gray-400"
+            disabled={isPosting}
           >
-            Post Comment
+            {isPosting ? 'Posting...' : 'Post Comment'}
           </button>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
       )}
     </div>
