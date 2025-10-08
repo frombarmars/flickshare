@@ -154,7 +154,8 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             supports: true,
-            ReviewLike: true, // 👈 count ReviewLike array
+            ReviewLike: true,
+            Comment: true, // 👈 add comment count here
           },
         },
       },
@@ -176,7 +177,8 @@ export async function GET(request: NextRequest) {
       rating: review.rating,
       reviewIdOnChain: review.numericId,
       coins: review.supports.reduce((sum, support) => sum + support.amount, 0),
-      likes: review._count.ReviewLike, // 👈 include like count
+      likes: review._count.ReviewLike,
+      commentsCount: review._count.Comment, // 👈 include total comments count
       isLiked: userId
         ? review.ReviewLike.some((like) => like.userId === userId)
         : false,

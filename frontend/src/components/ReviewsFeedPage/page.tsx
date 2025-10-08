@@ -75,7 +75,8 @@ export default function ReviewsFeedPage() {
       // 👇 logs are automatically typed with args
       onLogs: (logs) => {
         logs.forEach(async (log) => {
-          const { reviewId } = (log as unknown as { args: ReviewAddedLog }).args;
+          const { reviewId } = (log as unknown as { args: ReviewAddedLog })
+            .args;
 
           try {
             const response = await fetch(`/api/reviews/${reviewId}`);
@@ -85,8 +86,7 @@ export default function ReviewsFeedPage() {
                 setReviews((prev) => [review, ...prev]);
               }
             }
-          } catch (error) {
-          }
+          } catch (error) {}
         });
       },
     });
@@ -237,7 +237,7 @@ export default function ReviewsFeedPage() {
             >
               {/* Compact top bar with coin status */}
               <div
-                className="flex items-center justify-between gap-3 p-2 rounded-md active:bg-gray-100"
+                className="flex items-center justify-between gap-3 p-2 rounded-md active:bg-gray-100 hover:bg-gray-100"
                 onClick={(e) => handleAvatarClick(e, r.user)}
               >
                 <div className="flex items-center gap-2">
@@ -288,18 +288,24 @@ export default function ReviewsFeedPage() {
                     {r.text}
                   </p>
 
-                  {/* Engagement footer */}
                   <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                     <div className="flex items-center gap-2 text-xs">
                       <SupportAmount amount={r.coins} />
+
                       <div className="px-2 py-1 bg-gray-100 rounded-md">
                         <div className="flex items-center gap-1.5 text-gray-700">
                           <ThumbsUp size={11} />
                           <span>{r.likes}</span>
                         </div>
                       </div>
-                    </div>
 
+                      <div className="px-2 py-1 bg-gray-100 rounded-md">
+                        <div className="flex items-center gap-1.5 text-gray-700">
+                          💬
+                          <span>{r.commentsCount}</span>
+                        </div>
+                      </div>
+                    </div>
                     {/* Bold icon-only like button */}
                     {/* Like button inside review card */}
                     <button

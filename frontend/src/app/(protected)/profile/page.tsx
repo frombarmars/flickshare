@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { Settings, Star, Copy, Check, Calendar, Coins, X } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { CircularIcon } from "@worldcoin/mini-apps-ui-kit-react";
-import { CheckCircleSolid } from "iconoir-react";
 import { useRouter } from "next/navigation";
 import { MiniKit, Permission, RequestPermissionPayload } from "@worldcoin/minikit-js";
 import { useProfileData } from "@/hooks/useProfileData";
@@ -220,79 +218,6 @@ export default function Profile() {
         ))}
       </div>
     ),
-    // activity: (
-    //   <div className="space-y-4 px-4 pb-6">
-    //     <div className="flex items-center gap-2">
-    //       {[
-    //         { key: "all", label: "All" },
-    //         { key: "review", label: "Reviews" },
-    //         { key: "support", label: "Support" },
-    //         { key: "verify", label: "Verifications" },
-    //       ].map((f) => (
-    //         <button
-    //           key={f.key}
-    //           onClick={() => setActivityFilter(f.key)}
-    //           className={`text-sm px-3 py-1 rounded-lg font-medium transition-all duration-150 ${activityFilter === f.key
-    //             ? "bg-white text-black shadow-sm border border-gray-200"
-    //             : "text-gray-600 hover:bg-gray-800 hover:text-white"
-    //             }`}
-    //         >
-    //           {f.label}
-    //         </button>
-    //       ))}
-    //     </div>
-
-    //     <div className="mt-3 space-y-3">
-    //       {activityHistory.filter(a => activityFilter === "all" ? true : a.type === activityFilter).length === 0 ? (
-    //         <div className="flex flex-col items-center justify-center py-12">
-    //           <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
-    //             <Activity className="w-8 h-8 text-gray-400" strokeWidth={1.5} />
-    //           </div>
-    //           <p className="text-sm text-gray-500 text-center max-w-xs">
-    //             No activity for this filter yet. Start reviewing movies or send support to see activity here.
-    //           </p>
-    //         </div>
-    //       ) : (
-    //         activityHistory
-    //           .filter(a => activityFilter === "all" ? true : a.type === activityFilter)
-    //           .map((item) => (
-    //             <div
-    //               key={item.id}
-    //               onClick={() => {
-    //                 if (item.type === "review") handleReviewClick(item.originId);
-    //                 if (item.type === "support") handleSupportClick(item.originId);
-    //               }}
-    //               className="bg-gray-50 rounded-xl p-3 flex items-start gap-3 cursor-pointer hover:bg-gray-100 transition-colors duration-150"
-    //             >
-    //               <div className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border border-gray-200 bg-white">
-    //                 {item.type === "review" && <Star className="w-5 h-5 text-yellow-400" strokeWidth={1.5} />}
-    //                 {item.type === "support" && <Coins className="w-5 h-5 text-green-600" />}
-    //                 {item.type === "verify" && <CheckCircleSolid className="w-5 h-5 text-blue-600" />}
-    //               </div>
-
-    //               <div className="flex-1 min-w-0">
-    //                 <div className="flex items-center justify-between">
-    //                   <div className="text-sm font-medium text-gray-900 truncate">{item.title}</div>
-    //                   <div className="text-xs text-gray-500 flex items-center gap-1">
-    //                     <Calendar className="w-3 h-3" />
-    //                     {formatDate(item.date)}
-    //                   </div>
-    //                 </div>
-
-    //                 {item.subtitle && <div className="text-xs text-gray-500 mt-1 truncate">{item.subtitle}</div>}
-
-    //                 {item.posterUrl && (
-    //                   <div className="mt-2 w-20 h-28 rounded-md overflow-hidden bg-gray-200">
-    //                     <Image src={item.posterUrl} alt="" width={80} height={112} className="object-cover w-full h-full" />
-    //                   </div>
-    //                 )}
-    //               </div>
-    //             </div>
-    //           ))
-    //       )}
-    //     </div>
-    //   </div>
-    // ),
   };
 
   return (

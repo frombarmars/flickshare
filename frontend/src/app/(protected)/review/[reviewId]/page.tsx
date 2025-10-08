@@ -11,6 +11,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
@@ -224,8 +225,15 @@ const ReviewSupportUI = () => {
               <h2 className="text-2xl font-bold leading-tight">
                 {review.movieTitle}
               </h2>
-              <p className="text-md text-gray-600 mt-1">
-                Review by {review.user}
+              <p className="text-md text-gray-600 mt-1 flex items-center justify-center">
+                Review by{" "}
+                <Link
+                  href={`/profile/${review.user}`}
+                  className="text-blue-500 hover:underline font-semibold flex items-center gap-1 ml-1 px-2 py-1 rounded-md hover:bg-gray-100"
+                >
+                  <User className="w-4 h-4" />
+                  {review.user}
+                </Link>
               </p>
               <div className="flex items-center my-2">
                 {[...Array(5)].map((_, i) => (
@@ -293,7 +301,9 @@ const ReviewSupportUI = () => {
                             <User className="w-5 h-5 text-gray-500" />
                         </div>
                         <div>
-                            <p className="font-semibold text-sm text-gray-900">{tx.from}</p>
+                            <Link href={`/profile/${tx.from}`} className="rounded-md hover:bg-gray-100 px-2 py-1">
+                            <p className="font-semibold text-sm text-gray-900 hover:underline">{tx.from}</p>
+                            </Link>
                             <p className="text-xs text-gray-500">
                                 {new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </p>

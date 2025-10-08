@@ -1,6 +1,6 @@
 import { useSession } from 'next-auth/react';
 import { TabItem, Tabs } from '@worldcoin/mini-apps-ui-kit-react';
-import { Home, User, Plus, Gift, Film, AlarmCheck } from 'lucide-react';
+import { Home, User, Plus, Gift, Film, BellRing } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import useSWR, { mutate } from 'swr';
 
@@ -47,7 +47,7 @@ export const Navigation = () => {
         value="notification"
         icon={
           <div className="relative">
-            <AlarmCheck color='black' strokeWidth={2} size={24} />
+            <BellRing color='black' strokeWidth={2} size={24} />
             {data?.unreadCount > 0 && (
               <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500" />
             )}
