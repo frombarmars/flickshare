@@ -7,10 +7,7 @@ export async function GET(req: NextRequest) {
   const reviewIdParam = searchParams.get("reviewId");
 
   if (!reviewIdParam) {
-    return NextResponse.json(
-      { error: "Review ID is required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Review ID is required" }, { status: 400 });
   }
 
   const reviewId = Number(reviewIdParam);
@@ -30,20 +27,10 @@ export async function GET(req: NextRequest) {
     const comments = await prisma.comment.findMany({
       where: { reviewId: reviewObject.id },
       include: {
-        author: {
-          select: {
-            username: true,
-            profilePicture: true,
-          },
-        },
+        author: { select: { username: true, profilePicture: true } },
         replies: {
           include: {
-            author: {
-              select: {
-                username: true,
-                profilePicture: true,
-              },
-            },
+            author: { select: { username: true, profilePicture: true } },
           },
         },
       },
@@ -53,10 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ comments });
   } catch (error) {
     console.error("Failed to fetch comments:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch comments" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
   }
 }
 
@@ -68,7 +52,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const { reviewId, content, parentId } = await req.json();
-
     if (!reviewId || !content) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -78,15 +61,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid Review ID" }, { status: 400 });
     }
 
+    // Find review by numericId
     const reviewObject = await prisma.review.findFirst({
       where: { numericId: reviewIdParam },
-      select: { id: true },
+      select: {
+        id: true,
+        reviewerId: true,
+        movie: { select: { title: true } },
+      },
     });
 
     if (!reviewObject) {
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
 
+    // Create the comment
     const comment = await prisma.comment.create({
       data: {
         reviewId: reviewObject.id,
@@ -98,6 +87,37 @@ export async function POST(req: NextRequest) {
         author: { select: { username: true, profilePicture: true } },
       },
     });
+
+    // 🔔 Create notifications
+    if (parentId) {
+      // It's a reply → notify parent comment's author
+      const parentComment = await prisma.comment.findUnique({
+        where: { id: parentId },
+        select: { authorId: true },
+      });
+
+      if (parentComment && parentComment.authorId !== session.user.id) {
+        await prisma.notification.create({
+          data: {
+            recipientId: parentComment.authorId,
+            triggeredById: session.user.id,
+            type: "REPLY",
+            message: `replied to your comment on ${reviewObject.movie.title}`,
+            entityId: reviewObject.id,
+          },
+        });
+      }
+    } else if (reviewObject.reviewerId !== session.user.id) {
+      await prisma.notification.create({
+        data: {
+          recipientId: reviewObject.reviewerId!,
+          triggeredById: session.user.id,
+          type: "COMMENT",
+          message: `commented on your review for ${reviewObject.movie.title}`,
+          entityId: reviewObject.id,
+        },
+      });
+    }
 
     return NextResponse.json({ comment });
   } catch (error) {
