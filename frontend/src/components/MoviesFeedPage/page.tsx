@@ -164,9 +164,10 @@ export default function MovieFeedPage() {
           <input
             type="text"
             placeholder="Search movies in the on-chain database"
-            className="flex-1 bg-transparent border-none outline-none text-xs"
+            className="flex-1 bg-transparent border-none outline-none"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ fontSize: '16px' }}
           />
         </div>
         

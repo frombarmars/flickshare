@@ -74,9 +74,6 @@ const ReviewSupportUI = () => {
       toast.info("You have already liked this review.");
       return;
     }
-    console.log("Wow");
-
-    console.log(reviewIdOnChain);
 
     setIsLiked(true);
     setLikeCount((prev) => prev + 1);

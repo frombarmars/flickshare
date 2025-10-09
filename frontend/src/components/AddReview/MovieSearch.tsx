@@ -74,6 +74,7 @@ export const MovieSearch = ({ movie, setMovie, setMovieId, error }: MovieSearchP
             ? "!border-red-300 !focus:border-red-400"
             : "!border-gray-200 !focus:border-gray-400 !hover:border-gray-300"
         }`}
+        style={{ fontSize: '16px' }}
       />
       <Search className="!absolute !right-6 !top-1/2 !-translate-y-1/2 !text-gray-400" />
       {error && (

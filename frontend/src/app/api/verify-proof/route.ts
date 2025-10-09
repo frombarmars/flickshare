@@ -27,7 +27,6 @@ export async function POST(req: NextRequest) {
     signal,
   )) as IVerifyResponse; // Wrapper on this
 
-  console.log(verifyRes);
   
   if (verifyRes.success) {
     // This is where you should perform backend actions if the verification succeeds

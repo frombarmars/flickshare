@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { EmotionProvider } from "@/providers/Emotion";
+import { NotificationProvider } from "@/context/NotificationContext";
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 import { ToastContainer } from "react-toastify";
@@ -41,15 +42,17 @@ export default function ClientProviders({
       <ErudaProvider>
         <MiniKitProvider>
           <SessionProvider session={session}>
-            {/* <LocaleProvider> */}
-            <ToastContainer
-              position="top-right"
-              autoClose={1000}
-              hideProgressBar={false}
-            />
-            {children}
-            <Analytics />
-            {/* </LocaleProvider> */}
+            <NotificationProvider>
+              {/* <LocaleProvider> */}
+              <ToastContainer
+                position="top-right"
+                autoClose={1000}
+                hideProgressBar={false}
+              />
+              {children}
+              <Analytics />
+              {/* </LocaleProvider> */}
+            </NotificationProvider>
           </SessionProvider>
         </MiniKitProvider>
       </ErudaProvider>

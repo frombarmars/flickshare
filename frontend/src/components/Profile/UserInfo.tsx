@@ -1,9 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { Copy, Check, Calendar, Edit, Save } from "lucide-react";
-import { CircularIcon } from "@worldcoin/mini-apps-ui-kit-react";
-import { CheckCircleSolid } from "iconoir-react";
+import { Copy, Check, Calendar, Edit, Coins } from "lucide-react";
 
 interface UserInfoProps {
   username: string;
@@ -13,6 +11,7 @@ interface UserInfoProps {
   bio?: string;
   setBio: (bio: string) => void;
   isOwner: boolean;
+  totalPoints?: number;
 }
 
 export const UserInfo = ({
@@ -23,35 +22,21 @@ export const UserInfo = ({
   bio,
   setBio,
   isOwner,
+  totalPoints = 0,
 }: UserInfoProps) => {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedBio, setEditedBio] = useState(bio || "");
 
-  useEffect(() => {
-    setEditedBio(bio || "");
-  }, [bio]);
-
   const handleCopyAddress = async () => {
-    try {
-      await navigator.clipboard.writeText(walletAddress);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
+    await navigator.clipboard.writeText(walletAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSaveBio = async () => {
-    try {
-      const res = await fetch(`/api/profile/${username}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bio: editedBio }),
-      });
-      if (!res.ok) throw new Error("Failed to save bio");
-      const data = await res.json();
-      setBio(data.data.bio);
-      setIsEditing(false);
-    } catch {}
+  const handleSaveBio = () => {
+    setBio(editedBio);
+    setIsEditing(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -62,123 +47,115 @@ export const UserInfo = ({
   };
 
   return (
-    <section className="pt-8 pb-8">
-      <div className="flex flex-col items-center text-center">
+    <section className="py-8">
+      <div className="flex flex-col items-center text-center space-y-6">
+        
         {/* Avatar */}
-        <div className="relative mb-5">
-          <div className="w-28 h-28 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
-            {profilePicture ? (
-              <Image
-                src={profilePicture}
-                alt="User Avatar"
-                width={112}
-                height={112}
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <div className="flex items-center justify-center w-full h-full text-gray-400 bg-gray-50">
-                <svg
-                  className="w-12 h-12"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a8.25 8.25 0 1115 0v.75H4.5v-.75z"
-                  />
-                </svg>
-              </div>
-            )}
-          </div>
+        <div className="w-24 h-24 rounded-full bg-gray-100 border overflow-hidden">
+          {profilePicture ? (
+            <Image
+              src={profilePicture}
+              alt="Profile"
+              width={96}
+              height={96}
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-500 text-lg font-medium">
+                {username[0]?.toUpperCase()}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Username + Join Date */}
-        <div className="space-y-1 mb-6">
-          <div className="flex items-center justify-center gap-1">
-            <h2 className="text-lg font-semibold text-gray-900">{username}</h2>
-            <CircularIcon size="sm">
-              <CheckCircleSolid className="text-blue-600" />
-            </CircularIcon>
-          </div>
-          <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
-            <Calendar className="w-4 h-4 text-gray-400" />
+        {/* User Info */}
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">{username}</h2>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <Calendar className="w-4 h-4" />
             <span>Joined {formatDate(createdAt)}</span>
           </div>
         </div>
 
-        {/* Bio Section */}
-        <div className="w-full max-w-xs p-4 bg-gray-50 rounded-xl border border-gray-100 mb-6">
+        {/* Points */}
+        <div className="bg-blue-50 px-6 py-3 rounded-full border border-blue-100">
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-blue-600" />
+            <span className="font-semibold text-blue-700">
+              {totalPoints.toLocaleString()} points
+            </span>
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div className="w-full max-w-md space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-700">Bio</h3>
+            {isOwner && !isEditing && (
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              >
+                <Edit className="w-4 h-4" />
+                Edit
+              </button>
+            )}
+          </div>
+
           {isEditing ? (
-            <div className="flex flex-col items-center gap-2">
+            <div className="space-y-3">
               <textarea
                 value={editedBio}
                 onChange={(e) => setEditedBio(e.target.value)}
-                className="w-full h-20 p-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-all"
-                placeholder="Write something about yourself..."
+                className="w-full h-20 p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Tell us about yourself..."
+                style={{ fontSize: '16px' }}
               />
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 justify-end">
                 <button
-                  onClick={handleSaveBio}
-                  className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded-lg flex items-center gap-1 hover:bg-blue-600 transition-colors"
-                >
-                  <Save className="w-3.5 h-3.5" /> Save
-                </button>
-                <button
-                  onClick={() => {
-                    setEditedBio(bio || "");
-                    setIsEditing(false);
-                  }}
-                  className="px-3 py-1.5 text-xs bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  onClick={() => setIsEditing(false)}
+                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
                 >
                   Cancel
+                </button>
+                <button
+                  onClick={handleSaveBio}
+                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <p
-                className={`text-sm text-gray-700 text-center ${
-                  bio ? "" : "italic text-gray-400"
-                }`}
-              >
-                {bio || "No bio yet."}
-              </p>
-              {isOwner && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="text-xs text-gray-500 hover:text-black flex items-center gap-1 transition-colors"
-                >
-                  <Edit className="w-3.5 h-3.5" /> Edit Bio
-                </button>
-              )}
-            </div>
+            <p className="text-gray-600 text-sm text-left">
+              {bio || (isOwner ? "Add a bio to introduce yourself." : "No bio yet.")}
+            </p>
           )}
         </div>
 
-        {/* Wallet Section */}
-        <button
-          onClick={handleCopyAddress}
-          className="w-full max-w-xs px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl hover:shadow-md active:scale-[0.98] transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-gray-700 truncate w-[calc(100%-28px)]">
-              {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-            </span>
+        {/* Wallet */}
+        <div className="w-full max-w-md">
+          <button
+            onClick={handleCopyAddress}
+            className="w-full p-4 bg-gray-50 border rounded-lg hover:bg-gray-100 flex items-center justify-between"
+          >
+            <div className="text-left">
+              <p className="text-xs text-gray-500">Wallet Address</p>
+              <p className="text-sm font-mono text-gray-800">
+                {walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}
+              </p>
+            </div>
             {copied ? (
-              <Check className="w-5 h-5 text-green-600 transition-transform duration-200 scale-105" />
+              <Check className="w-5 h-5 text-green-600" />
             ) : (
-              <Copy className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" />
+              <Copy className="w-5 h-5 text-gray-400" />
             )}
-          </div>
+          </button>
           {copied && (
-            <p className="text-[11px] text-green-600 mt-2 font-medium text-center">
-              Copied!
-            </p>
+            <p className="text-xs text-green-600 mt-2">Copied to clipboard!</p>
           )}
-        </button>
+        </div>
       </div>
     </section>
   );

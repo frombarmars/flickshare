@@ -81,7 +81,6 @@ const SupportPage = () => {
           functionName: "balanceOf",
           args: [userWalletAddress],
         })) as bigint;
-        console.log(balance);
 
         // convert from wei
         const balanceInWLD = Number(balance) / 1e18;
@@ -495,6 +494,7 @@ const SupportPage = () => {
                 onChange={handleCustomAmountChange}
                 placeholder="Enter amount"
                 className="!w-full !p-3 !border !border-gray-200 !rounded-2xl !text-black !placeholder-gray-400 !focus:outline-none !focus:border-black !transition-all !focus:ring-2 !focus:ring-black !focus:ring-opacity-20"
+                style={{ fontSize: '16px' }}
                 autoFocus
               />
               {errors.customAmount && (

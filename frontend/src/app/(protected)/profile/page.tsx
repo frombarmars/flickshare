@@ -39,11 +39,13 @@ export default function Profile() {
   const { data: session } = useSession();
   const router = useRouter();
   const userName = session?.user.username || "Gerald";
+  const userId = session?.user?.id || "";
   const { reviews, supports, userWalletAddress, bio, setBio } = useProfileData(userName);
   const [tab, setTab] = useState("review");
   const [isInstalled, setIsInstalled] = useState(false);
   const [notifGranted, setNotifGranted] = useState<boolean | undefined>();
   const [showSettings, setShowSettings] = useState(false);
+  const [totalPoints, setTotalPoints] = useState(0);
 
   // 1. Detect MiniKit availability
   useEffect(() => {
@@ -102,6 +104,20 @@ export default function Profile() {
   useEffect(() => {
     getPermissions();
   }, [getPermissions]);
+
+  // 5. Fetch user points - simplified
+  useEffect(() => {
+    const fetchPoints = async () => {
+      if (!userId) return;
+      try {
+        const data = await fetch(`/api/points/summary/${userId}`).then(r => r.json());
+        if (data.ok) setTotalPoints(data.totalPoints || 0);
+      } catch (err) {
+        console.error("Failed to load points", err);
+      }
+    };
+    fetchPoints();
+  }, [userId]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -276,6 +292,7 @@ export default function Profile() {
             bio={bio}
             setBio={setBio}
             isOwner={true}
+            totalPoints={totalPoints}
           />
         </section>
 

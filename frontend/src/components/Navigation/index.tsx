@@ -1,19 +1,8 @@
-import { useSession } from 'next-auth/react';
 import { TabItem, Tabs } from '@worldcoin/mini-apps-ui-kit-react';
 import { Home, User, Plus, Gift, Film, BellRing } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import useSWR, { mutate } from 'swr';
-
-/**
- * This component uses the UI Kit to navigate between pages
- * Bottom navigation is the most common navigation pattern in Mini Apps
- * We require mobile first design patterns for mini apps
- * Read More: https://docs.world.org/mini-apps/design/app-guidelines#mobile-first
- */
-
 import { useDevice } from '@/hooks/useDevice';
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { useNotificationCount } from '@/context/NotificationContext';
 
 /**
  * A bottom navigation component that navigates between
@@ -25,18 +14,16 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export const Navigation = () => {
   const [value, setValue] = useState('');
   const os = useDevice();
-  const { data: session } = useSession();
-  const userId = session?.user?.id;
-  const { data } = useSWR(userId ? `/api/notifications/unread-count/${userId}` : null, fetcher, { refreshInterval: 5000 });
+  const { unreadCount, refresh } = useNotificationCount();
 
   useEffect(() => {
     if (value) {
       if (value === 'notification') {
-        mutate(userId ? `/api/notifications/unread-count/${userId}` : null);
+        refresh(); // Simple refresh when going to notifications
       }
       window.location.href = `/${value}`;
     }
-  }, [value, userId]);
+  }, [value, refresh]);
 
   return (
     <Tabs value={value} onValueChange={setValue} className={`h-12 border-t border-gray-500 custom-tabs z-40 ${os === 'android' ? 'mb-0 shadow-md' : ''}`}>
@@ -47,9 +34,16 @@ export const Navigation = () => {
         value="notification"
         icon={
           <div className="relative">
-            <BellRing color='black' strokeWidth={2} size={24} />
-            {data?.unreadCount > 0 && (
-              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500" />
+            <BellRing 
+              color={unreadCount > 0 ? '#2563eb' : 'black'} 
+              strokeWidth={2} 
+              size={24} 
+              className={unreadCount > 0 ? 'animate-pulse' : ''}
+            />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-semibold shadow-lg animate-bounce">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
             )}
           </div>
         }

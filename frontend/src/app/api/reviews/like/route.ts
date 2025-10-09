@@ -56,14 +56,14 @@ export async function POST(req: NextRequest) {
 
 
     // Create a notification for the review author
-    if (currentReview.reviewerId) {
+    if (currentReview.reviewerId && currentReview.numericId) {
       await prisma.notification.create({
         data: {
           recipientId: currentReview.reviewerId,
           triggeredById: userId, // Associate the notification with the user who liked the review
           type: "LIKE",
           message: `liked your review for the movie ${currentReview.movie.title}`,
-          entityId: reviewIdOffChain,
+          entityId: currentReview.numericId.toString(), // Use numericId instead of ObjectId
         },
       });
     }

@@ -28,14 +28,14 @@ export async function POST(req: NextRequest) {
       include: { movie: { select: { title: true } } },
     });
 
-    if (review && review.reviewerId) {
+    if (review && review.reviewerId && review.numericId) {
       await prisma.notification.create({
         data: {
           recipientId: review.reviewerId,
           triggeredById: userId, // Associate the notification with the user who supported the review
           type: "SUPPORT",
           message: `supported your review for ${review.movie.title} with ${amount} WLDs`,
-          entityId: reviewId,
+          entityId: review.numericId.toString(), // Use numericId instead of ObjectId
         },
       });
     }

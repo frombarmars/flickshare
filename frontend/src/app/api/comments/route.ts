@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
       select: {
         id: true,
         reviewerId: true,
+        numericId: true,
         movie: { select: { title: true } },
       },
     });
@@ -96,25 +97,25 @@ export async function POST(req: NextRequest) {
         select: { authorId: true },
       });
 
-      if (parentComment && parentComment.authorId !== session.user.id) {
+      if (parentComment && parentComment.authorId !== session.user.id && reviewObject.numericId) {
         await prisma.notification.create({
           data: {
             recipientId: parentComment.authorId,
             triggeredById: session.user.id,
             type: "REPLY",
             message: `replied to your comment on ${reviewObject.movie.title}`,
-            entityId: reviewObject.id,
+            entityId: reviewObject.numericId.toString(), // Use numericId instead of ObjectId
           },
         });
       }
-    } else if (reviewObject.reviewerId !== session.user.id) {
+    } else if (reviewObject.reviewerId !== session.user.id && reviewObject.numericId) {
       await prisma.notification.create({
         data: {
           recipientId: reviewObject.reviewerId!,
           triggeredById: session.user.id,
           type: "COMMENT",
           message: `commented on your review for ${reviewObject.movie.title}`,
-          entityId: reviewObject.id,
+          entityId: reviewObject.numericId.toString(), // Use numericId instead of ObjectId
         },
       });
     }

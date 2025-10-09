@@ -61,7 +61,7 @@ export default function ReviewsFeedPage() {
       setLoading(false);
       loadingRef.current = false;
     }
-  }, []);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     fetchReviews();

@@ -27,6 +27,7 @@ export const ReviewForm = ({ review, setReview, wordCount, error }: ReviewFormPr
         onChange={(e) => setReview(e.target.value)}
         rows={6}
         className="!w-full !px-5 !py-4 !text-gray-700 !placeholder-gray-400 !resize-none !focus:outline-none !bg-transparent"
+        style={{ fontSize: '16px' }}
       />
       {error && (
         <div className="px-5 pb-4">

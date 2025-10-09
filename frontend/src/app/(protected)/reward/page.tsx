@@ -71,15 +71,14 @@ export default function RewardProgram() {
 
   const handleAction = async (action: string) => {
     try {
-      const res = await fetch(`/api/points/${action}`, {
+      const data = await fetch(`/api/points/${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-      });
+      }).then(r => r.json());
 
-      const data = await res.json();
       if (data.ok) {
-        setAirdropPoints((prev) => prev + data.points);
-        setCompletedTasks((prev) => ({ ...prev, [action]: true }));
+        setAirdropPoints(prev => prev + data.points);
+        setCompletedTasks(prev => ({ ...prev, [action]: true }));
       } else {
         alert(data.error || "Failed to complete task.");
       }
@@ -93,8 +92,7 @@ export default function RewardProgram() {
     if (!userId) return;
     const fetchSummary = async () => {
       try {
-        const res = await fetch(`/api/points/summary/${userId}`);
-        const data = await res.json();
+        const data = await fetch(`/api/points/summary/${userId}`).then(r => r.json());
         if (data.ok) {
           setAirdropPoints(data.totalPoints);
           setCompletedTasks(data.completedTasks);
@@ -106,7 +104,7 @@ export default function RewardProgram() {
       }
     };
     fetchSummary();
-  }, [userId]); // 👈 remove completedTasks and airdropPoints
+  }, [userId]);
 
   useEffect(() => {
     const fetchInviteCode = async () => {
@@ -226,8 +224,7 @@ export default function RewardProgram() {
   const refreshPoints = useCallback(async () => {
     if (!userId) return;
     try {
-      const res = await fetch(`/api/points/summary/${userId}`);
-      const data = await res.json();
+      const data = await fetch(`/api/points/summary/${userId}`).then(r => r.json());
       if (data.ok) {
         setAirdropPoints(data.totalPoints);
         setCompletedTasks(data.completedTasks);
@@ -421,17 +418,13 @@ export default function RewardProgram() {
   };
 
   return (
-    <main className="!w-full !min-h-screen !bg-white !text-gray-900 !overflow-x-hidden">
+    <main className="w-full min-h-screen bg-white text-gray-900 overflow-x-hidden">
       {/* Mobile Header */}
-      <header className="!bg-white !border-b !border-gray-100 !px-4 !py-4 !sticky !top-0 !z-20 !safe-area-top">
-        <div className="!max-w-sm !mx-auto">
-          <h1 className="!text-xl !font-bold !text-black !text-center">
+      <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-20 safe-area-top">
+        <div className="max-w-sm mx-auto">
+          <h1 className="text-xl font-bold text-black text-center">
             Reward Program
           </h1>
-          <div className="!flex !items-center !gap-2 !bg-gray-100 !px-3 !py-1 !rounded-full mt-2">
-            <Coins className="!w-4 !h-4 !text-yellow-600" strokeWidth={2} />
-            <span className="!font-semibold !text-black">{airdropPoints}</span>
-          </div>
         </div>
       </header>
 
@@ -492,7 +485,7 @@ export default function RewardProgram() {
                 <button
                   onClick={handleShowNFT}
                   disabled={nftLoading}
-                  className="!w-full !bg-gradient-to-r !from-blue-500 !to-blue-600 !text-white !p-4 !rounded-xl active:!from-blue-600 active:!to-blue-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 !mt-4 flex !items-center !justify-center !gap-2 select-none"
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl active:from-blue-600 active:to-blue-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 mt-4 flex items-center justify-center gap-2 select-none"
                 >
                   {nftLoading ? (
                     <Loader className="w-5 h-5 animate-spin" />
@@ -582,7 +575,7 @@ export default function RewardProgram() {
               <button
                 onClick={claimNFT}
                 disabled={nftLoading || isNftConfirming}
-                className="!w-full !bg-gradient-to-r !from-yellow-500 !to-orange-500 !text-white !p-4 !rounded-xl active:!from-yellow-700 active:!to-orange-700 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-blue-500 !transition-transform !duration-150 disabled:!opacity-50 disabled:!cursor-not-allowed !flex !items-center !justify-center !gap-2 !shadow-md !transform !relative !select-none"
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-xl active:from-yellow-700 active:to-orange-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md transform relative select-none"
               >
                 {nftLoading || isNftConfirming ? (
                   <>
@@ -649,25 +642,25 @@ export default function RewardProgram() {
             {/* Review a movie */}
             <button
               onClick={() => router.push("/new")}
-              className="!w-full !bg-gradient-to-br !from-yellow-50 !to-orange-50 !border-2 !border-yellow-300 !rounded-2xl !p-5 !shadow-md active:!shadow-sm active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-yellow-500 !transition-all !duration-150 group hover:!shadow-lg hover:!border-yellow-400 select-none"
+              className="w-full bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-2xl p-5 shadow-md active:shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-yellow-500 transition-all duration-150 group hover:shadow-lg hover:border-yellow-400 select-none"
             >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-gradient-to-br !from-yellow-400 !to-orange-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md group-active:!shadow-sm">
-                  <Star className="!w-6 !h-6 !text-white" strokeWidth={2.5} />
+              <div className="flex items-center">
+                <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center mr-4 shadow-md group-active:shadow-sm">
+                  <Star className="w-6 h-6 text-white" strokeWidth={2.5} />
                 </div>
-                <div className="!flex-1 !text-left">
-                  <h4 className="!font-bold !text-black !text-base !mb-1">
+                <div className="flex-1 text-left">
+                  <h4 className="font-bold text-black text-base mb-1">
                     Review a movie
                   </h4>
-                  <p className="!text-gray-600 !text-sm !mb-2">
+                  <p className="text-gray-600 text-sm mb-2">
                     Share your thoughts on the films
                   </p>
-                  <div className="!flex !items-center !bg-white/70 !rounded-lg !px-2 !py-1 !inline-flex">
+                  <div className="flex items-center bg-white/70 rounded-lg px-2 py-1">
                     <Coins
-                      className="!w-4 !h-4 !text-yellow-600 !mr-1"
+                      className="w-4 h-4 text-yellow-600 mr-1"
                       strokeWidth={2}
                     />
-                    <span className="!font-bold !text-gray-800 !text-sm">
+                    <span className="font-bold text-gray-800 text-sm">
                       10 points
                     </span>
                   </div>
@@ -678,25 +671,25 @@ export default function RewardProgram() {
             {/* Support a review */}
             <button
               onClick={() => router.push("/home")}
-              className="!w-full !bg-gradient-to-br !from-green-50 !to-emerald-50 !border-2 !border-green-300 !rounded-2xl !p-5 !shadow-md active:!shadow-sm active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-green-500 !transition-all !duration-150 group hover:!shadow-lg hover:!border-green-400 select-none"
+              className="w-full bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-5 shadow-md active:shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-green-500 transition-all duration-150 group hover:shadow-lg hover:border-green-400 select-none"
             >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-gradient-to-br !from-green-400 !to-emerald-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md group-active:!shadow-sm">
-                  <ThumbsUp className="!w-6 !h-6 !text-white" strokeWidth={2.5} />
+                              <div className="flex items-center">
+                <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center mr-4 shadow-md group-active:shadow-sm">
+                  <ThumbsUp className="w-6 h-6 text-white" strokeWidth={2.5} />
                 </div>
-                <div className="!flex-1 !text-left">
-                  <h4 className="!font-bold !text-black !text-base !mb-1">
+                <div className="flex-1 text-left">
+                  <h4 className="font-bold text-black text-base mb-1">
                     Support a review
                   </h4>
-                  <p className="!text-gray-600 !text-sm !mb-2">
+                  <p className="text-gray-600 text-sm mb-2">
                     Help promote quality content
                   </p>
-                  <div className="!flex !items-center !bg-white/70 !rounded-lg !px-2 !py-1 !inline-flex">
+                  <div className="flex items-center bg-white/70 rounded-lg px-2 py-1">
                     <Coins
-                      className="!w-4 !h-4 !text-yellow-600 !mr-1"
+                      className="w-4 h-4 text-yellow-600 mr-1"
                       strokeWidth={2}
                     />
-                    <span className="!font-bold !text-gray-800 !text-sm">
+                    <span className="font-bold text-gray-800 text-sm">
                       10 points / 1 WLD
                     </span>
                   </div>
@@ -706,30 +699,30 @@ export default function RewardProgram() {
 
             {/* Daily check-in - Unique style */}
             <button
-              className="!w-full !bg-gradient-to-br !from-blue-500 !to-blue-600 !text-white !rounded-2xl !p-5 !shadow-lg active:!shadow-md active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-blue-400 !transition-all !duration-150 !disabled:opacity-50 !disabled:cursor-not-allowed hover:!shadow-xl hover:!from-blue-600 hover:!to-blue-700 select-none"
+              className="w-full bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-5 shadow-lg active:shadow-md active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-400 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:from-blue-600 hover:to-blue-700 select-none"
               onClick={dailyCheckIn}
               disabled={loading || isConfirming}
             >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-blue-400 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
+                              <div className="flex items-center">
+                <div className="w-14 h-14 bg-blue-400 rounded-xl flex items-center justify-center mr-4 shadow-md">
                   <CheckCircle
-                    className="!w-7 !h-7 !text-white"
+                    className="w-7 h-7 text-white"
                     strokeWidth={2.5}
                   />
                 </div>
-                <div className="!flex-1 !text-left">
-                  <h4 className="!font-bold !text-white !text-base !mb-1">
+                <div className="flex-1 text-left">
+                  <h4 className="font-bold text-white text-base mb-1">
                     Daily Check-in
                   </h4>
-                  <p className="!text-blue-100 !text-sm !mb-2">
+                  <p className="text-blue-100 text-sm mb-2">
                     Earn rewards by checking in daily
                   </p>
-                  <div className="!flex !items-center !bg-blue-400/30 !rounded-lg !px-2 !py-1 !inline-flex">
+                  <div className="flex items-center bg-blue-400/30 rounded-lg px-2 py-1">
                     <Coins
-                      className="!w-4 !h-4 !text-blue-100 !mr-1"
+                      className="w-4 h-4 text-blue-100 mr-1"
                       strokeWidth={2}
                     />
-                    <span className="!font-bold !text-white !text-sm">
+                    <span className="font-bold text-white text-sm">
                       5 points
                     </span>
                   </div>
@@ -757,9 +750,9 @@ export default function RewardProgram() {
           <div className="mt-3 mb-6">
             <button
               onClick={() => router.push("/leaderboard")}
-              className="!w-full !bg-white !border !border-gray-300 !shadow-sm hover:!shadow-md !text-gray-800 !py-3 !px-4 !rounded-lg !font-medium !flex !items-center !justify-center !gap-2 !transition-all !duration-200 hover:!bg-gray-50 active:!bg-gray-100 active:!scale-[0.98] focus:!outline-none focus:!ring-2 focus:!ring-offset-2 focus:!ring-blue-500 !select-none"
+              className="w-full bg-white border border-gray-300 shadow-sm hover:shadow-md text-gray-800 py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 select-none"
             >
-              <Trophy className="!w-4 !h-4 !text-gray-700" strokeWidth={2} />
+              <Trophy className="w-4 h-4 text-gray-700" strokeWidth={2} />
               View Full Leaderboard
             </button>
           </div>
@@ -810,15 +803,15 @@ export default function RewardProgram() {
                     </div>
                     <button
                       onClick={handleCopyLink}
-                      className={`!flex !items-center !justify-center !w-14 !h-12 !rounded-xl ${
-                        copied ? "!bg-green-500 hover:!bg-green-600" : "!bg-indigo-600 hover:!bg-indigo-700"
-                      } !text-white !transition-all !duration-200 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 !select-none !shadow-sm`}
+                      className={`flex items-center justify-center w-14 h-12 rounded-xl ${
+                        copied ? "bg-green-500 hover:bg-green-600" : "bg-indigo-600 hover:bg-indigo-700"
+                      } text-white transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 select-none shadow-sm`}
                       aria-label="Copy invite link"
                     >
                       {copied ? (
-                        <CheckCircle className="!w-6 !h-6" />
+                        <CheckCircle className="w-6 h-6" />
                       ) : (
-                        <Clipboard className="!w-5 !h-5" />
+                        <Clipboard className="w-5 h-5" />
                       )}
                     </button>
                   </div>
@@ -836,14 +829,14 @@ export default function RewardProgram() {
                         const url = inviteCodeLink;
                         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
                       }}
-                      className="!flex !items-center !justify-center !gap-3 !py-3 !rounded-xl !text-black !bg-white !border !border-gray-200 !transition-all !duration-200 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 !select-none hover:!bg-gray-50 !shadow-sm"
+                      className="flex items-center justify-center gap-3 py-3 rounded-xl text-black bg-white border border-gray-200 transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 select-none hover:bg-gray-50 shadow-sm"
                     >
-                      <div className="!w-5 !h-5">
-                        <svg className="!w-full !h-full" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <div className="w-5 h-5">
+                        <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                         </svg>
                       </div>
-                      <span className="!text-sm !font-medium">Share invite link on X now!</span>
+                      <span className="text-sm font-medium">Share invite link on X now!</span>
                     </button>
                   </div>
                 </div>
@@ -870,11 +863,11 @@ export default function RewardProgram() {
             <button
               onClick={() => handleAction("FOLLOW_DISCORD")}
               disabled={!!completedTasks["FOLLOW_DISCORD"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
+              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
                 completedTasks["FOLLOW_DISCORD"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
+                  ? "opacity-60 cursor-not-allowed"
+                  : "active:bg-gray-50"
+              } select-none`}
             >
               <div className="flex items-center">
                 <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center mr-4 shadow-md">
@@ -915,11 +908,11 @@ export default function RewardProgram() {
             <button
               onClick={() => handleAction("FOLLOW_X")}
               disabled={!!completedTasks["FOLLOW_X"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
+              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
                 completedTasks["FOLLOW_X"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
+                  ? "opacity-60 cursor-not-allowed"
+                  : "active:bg-gray-50"
+              } select-none`}
             >
               <div className="flex items-center">
                 <div className="w-14 h-14 bg-black rounded-xl flex items-center justify-center mr-4 shadow-md">
@@ -957,11 +950,11 @@ export default function RewardProgram() {
             <button
               onClick={() => handleAction("FOLLOW_INSTAGRAM")}
               disabled={!!completedTasks["FOLLOW_INSTAGRAM"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
+              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
                 completedTasks["FOLLOW_INSTAGRAM"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
+                  ? "opacity-60 cursor-not-allowed"
+                  : "active:bg-gray-50"
+              } select-none`}
             >
               <div className="flex items-center">
                 <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-md">
@@ -1002,11 +995,11 @@ export default function RewardProgram() {
             <button
               onClick={() => handleAction("FOLLOW_FACEBOOK")}
               disabled={!!completedTasks["FOLLOW_FACEBOOK"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
+              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
                 completedTasks["FOLLOW_FACEBOOK"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
+                  ? "opacity-60 cursor-not-allowed"
+                  : "active:bg-gray-50"
+              } select-none`}
             >
               <div className="flex items-center">
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mr-4 shadow-md">

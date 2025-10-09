@@ -6,9 +6,7 @@ export async function GET(
   context: { params: Promise<{ userId: string }> }
 ) {
   const ctx = (await context.params);
-  console.log(ctx);
   const userId = ctx.userId;
-  console.log(userId);
   if (!userId) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }

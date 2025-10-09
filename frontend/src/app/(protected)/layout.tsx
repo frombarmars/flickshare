@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import FooterContent from '@/components/FooterContent';
 import { Page } from '@/components/PageLayout';
+import { NotificationProvider } from '@/components/NotificationProvider';
 import { redirect } from 'next/navigation';
 
 export default async function TabsLayout({
@@ -14,11 +15,13 @@ export default async function TabsLayout({
   }
 
   return (
-    <Page>
-      {children}
-      <Page.Footer className="fixed bottom-0 w-full bg-white border-t border-gray-200 z-50">
-        <FooterContent />
-      </Page.Footer>
-    </Page>
+    <NotificationProvider>
+      <Page>
+        {children}
+        <Page.Footer className="fixed bottom-0 w-full bg-white border-t border-gray-200 z-50">
+          <FooterContent />
+        </Page.Footer>
+      </Page>
+    </NotificationProvider>
   );
 }

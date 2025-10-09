@@ -126,10 +126,11 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            className="!w-full !h-20 !p-2.5 !text-sm !border !border-gray-200 !rounded-lg 
+            className="!w-full !h-20 !p-2.5 !text-base !border !border-gray-200 !rounded-lg 
                        !bg-gray-50 focus:!outline-none focus:!ring-2 focus:!ring-blue-500 
                        !transition-all !duration-150 !disabled:!bg-gray-100 !disabled:!text-gray-400"
             disabled={isPosting}
+            style={{ fontSize: '16px' }}
           />
           <button
             onClick={handlePostComment}

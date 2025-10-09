@@ -2,28 +2,18 @@
 
 import { Bell } from "lucide-react";
 import Link from "next/link";
-import useSWR from "swr";
-import { useSession } from "next-auth/react";
+import { useNotificationCount } from "@/context/NotificationContext";
 
 interface NavProps {
     activeTab: string;
     setActiveTab: (tab: string) => void;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 export default function Navigation({ activeTab, setActiveTab }: NavProps) {
-    const { data: session } = useSession();
-    const userId = session?.user?.id;
-    const { data } = useSWR(
-        userId ? `/api/notifications/unread-count/${userId}` : null,
-        fetcher,
-        { refreshInterval: 5000 }
-    );
-    const unreadCount = data?.unreadCount || 0;
+    const { unreadCount } = useNotificationCount();
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm bg-white max-w-md mx-auto flex items-center justify-between px-4">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm max-w-md mx-auto flex items-center justify-between px-4">
             <div className="flex justify-center items-center gap-8 flex-grow">
                 <button
                     onClick={() => setActiveTab("reviews")}
@@ -67,11 +57,15 @@ export default function Navigation({ activeTab, setActiveTab }: NavProps) {
                     )}
                 </button>
             </div>
-            <Link href="/notification" className="relative p-2">
-                <Bell className="h-6 w-6 text-gray-600" />
+            <Link href="/notification" className="relative p-2 group">
+                <Bell className={`h-6 w-6 transition-all duration-200 ${
+                    unreadCount > 0 
+                        ? 'text-blue-600 animate-pulse' 
+                        : 'text-gray-600 group-hover:text-gray-800'
+                }`} />
                 {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                        {unreadCount}
+                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-semibold shadow-lg animate-bounce">
+                        {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
             </Link>
