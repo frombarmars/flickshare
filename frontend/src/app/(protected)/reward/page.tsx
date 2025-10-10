@@ -418,17 +418,17 @@ export default function RewardProgram() {
   };
 
   return (
-    <main className="w-full min-h-screen bg-white text-gray-900 overflow-x-hidden">
+    <main className="!w-full !min-h-screen !bg-white !text-gray-900 !overflow-x-hidden">
       {/* Mobile Header */}
-      <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-20 safe-area-top">
-        <div className="max-w-sm mx-auto">
-          <h1 className="text-xl font-bold text-black text-center">
+      <header className="!bg-white !border-b !border-gray-100 !px-4 !py-4 !sticky !top-0 !z-20 safe-area-top">
+        <div className="!max-w-sm !mx-auto">
+          <h1 className="!text-xl !font-bold !text-black !text-center">
             Reward Program
           </h1>
         </div>
       </header>
 
-      <div className="max-w-sm mx-auto px-4">
+      <div className="!max-w-sm !mx-auto !px-4">
         {/*
         <section className="pb-6">
           <div className="bg-white border-2 border-yellow-400 rounded-2xl p-6 shadow-lg mb-6 relative overflow-visible animate-pulse-glow">
@@ -500,63 +500,63 @@ export default function RewardProgram() {
         </section> */}
 
         {/* NFT Claim Section - Added under Airdrop card */}
-        <section className="pb-6 mt-6">
-          <div className="bg-white border-2 border-yellow-400 rounded-2xl p-6 shadow-lg mb-6 relative overflow-visible animate-pulse-glow">
+        <section className="!pb-6 !mt-6">
+          <div className="!bg-white !border-2 !border-yellow-400 !rounded-2xl !p-6 !shadow-lg !mb-6 !relative !overflow-visible animate-pulse-glow">
             {/* Limited Edition Badge - Fixed positioning */}
-            <div className="absolute -top-3 -right-3 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full z-10 rotate-6 shadow-md">
+            <div className="!absolute !-top-3 !-right-3 !bg-yellow-500 !text-black !text-xs !font-bold !px-3 !py-1 !rounded-full !z-10 !rotate-6 !shadow-md">
               LIMITED EDITION
             </div>
             
             {/* Shimmer Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-50/30 to-transparent -skew-x-12 animate-shimmer pointer-events-none"></div>
+            <div className="!absolute !inset-0 !bg-gradient-to-r !from-transparent !via-yellow-50/30 !to-transparent !-skew-x-12 animate-shimmer !pointer-events-none"></div>
 
-            <div className="flex items-center mb-5 relative z-1">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-4 shadow-md">
-                <Gift className="w-6 h-6 text-white" strokeWidth={2} />
+            <div className="!flex !items-center !mb-5 !relative !z-1">
+              <div className="!w-12 !h-12 !bg-gradient-to-br !from-yellow-500 !to-orange-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
+                <Gift className="!w-6 !h-6 !text-white" strokeWidth={2} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-black">Early User NFT</h2>
-                <p className="text-yellow-700 text-sm font-medium">
+                <h2 className="!text-lg !font-bold !text-black">Early User NFT</h2>
+                <p className="!text-yellow-700 !text-sm !font-medium">
                   Limited edition - Only 1,000 available
                 </p>
               </div>
             </div>
 
-            <div className="space-y-3 mb-6 relative z-1">
-              <div className="flex items-start">
-                <div className="w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-bold text-yellow-700">1</span>
+            <div className="!space-y-3 !mb-6 !relative !z-1">
+              <div className="!flex !items-start">
+                <div className="!w-5 !h-5 !rounded-full !bg-yellow-100 !flex !items-center !justify-center !mr-3 !mt-0.5">
+                  <span className="!text-xs !font-bold !text-yellow-700">1</span>
                 </div>
-                <p className="text-gray-700 text-sm">
+                <p className="!text-gray-700 !text-sm">
                   Host mini movie watch parties
                 </p>
               </div>
-              <div className="flex items-start">
-                <div className="w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-bold text-yellow-700">2</span>
+              <div className="!flex !items-start">
+                <div className="!w-5 !h-5 !rounded-full !bg-yellow-100 !flex !items-center !justify-center !mr-3 !mt-0.5">
+                  <span className="!text-xs !font-bold !text-yellow-700">2</span>
                 </div>
-                <p className="text-gray-700 text-sm">
+                <p className="!text-gray-700 !text-sm">
                   Limited edition merch access
                 </p>
               </div>
-              <div className="flex items-start">
-                <div className="w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-bold text-yellow-700">3</span>
+              <div className="!flex !items-start">
+                <div className="!w-5 !h-5 !rounded-full !bg-yellow-100 !flex !items-center !justify-center !mr-3 !mt-0.5">
+                  <span className="!text-xs !font-bold !text-yellow-700">3</span>
                 </div>
-                <p className="text-gray-700 text-sm">
+                <p className="!text-gray-700 !text-sm">
                   Recognition as early supporter
                 </p>
               </div>
             </div>
 
-            <div className="bg-yellow-50 p-3 rounded-lg mb-6 border border-yellow-200 relative">
-              <div className="flex justify-between text-xs text-yellow-800 mb-1 font-medium">
+            <div className="!bg-yellow-50 !p-3 !rounded-lg !mb-6 !border !border-yellow-200 !relative">
+              <div className="!flex !justify-between !text-xs !text-yellow-800 !mb-1 !font-medium">
                 <span>NFTs claimed</span>
                 <span>{totalMintedUsers.toString()}/1000</span>
               </div>
-              <div className="w-full bg-yellow-200 rounded-full h-2 overflow-hidden">
+              <div className="!w-full !bg-yellow-200 !rounded-full !h-2 !overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full transition-all duration-700"
+                  className="!bg-gradient-to-r !from-yellow-500 !to-orange-500 !h-2 !rounded-full !transition-all !duration-700"
                   style={{
                     width: `${
                       (BigInt(totalMintedUsers) / BigInt(1000)) * BigInt(100)
@@ -564,7 +564,7 @@ export default function RewardProgram() {
                   }}
                 ></div>
               </div>
-              <p className="text-yellow-700 text-xs mt-3 font-medium">
+              <p className="!text-yellow-700 !text-xs !mt-3 !font-medium">
                 {(BigInt(1000) - BigInt(totalMintedUsers)).toString()}{" "}
                 remaining!
               </p>
@@ -575,16 +575,16 @@ export default function RewardProgram() {
               <button
                 onClick={claimNFT}
                 disabled={nftLoading || isNftConfirming}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-xl active:from-yellow-700 active:to-orange-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md transform relative select-none"
+                className="!w-full !bg-gradient-to-r !from-yellow-500 !to-orange-500 !text-white !p-4 !rounded-xl active:!from-yellow-700 active:!to-orange-700 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-blue-500 !transition-transform !duration-150 disabled:!opacity-50 disabled:!cursor-not-allowed !flex !items-center !justify-center !gap-2 !shadow-md !transform !relative !select-none"
               >
                 {nftLoading || isNftConfirming ? (
                   <>
-                    <Loader className="w-5 h-5 animate-spin" />
+                    <Loader className="!w-5 !h-5 animate-spin" />
                     {isNftConfirming ? "Confirming..." : "Claiming NFT..."}
                   </>
                 ) : (
                   <>
-                    <Gift className="w-5 h-5" />
+                    <Gift className="!w-5 !h-5" />
                     Claim Your NFT Now
                   </>
                 )}
@@ -592,23 +592,23 @@ export default function RewardProgram() {
             ) : null}
 
             {nftClaimed && (
-              <div className="text-center relative z-1 mt-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
-                  <CheckCircle className="w-10 h-10 text-green-600" />
+              <div className="!text-center !relative !z-1 !mt-4">
+                <div className="!w-16 !h-16 !bg-green-100 !rounded-full !flex !items-center !justify-center !mx-auto !mb-3 !shadow-md">
+                  <CheckCircle className="!w-10 !h-10 !text-green-600" />
                 </div>
-                <h2 className="text-lg font-bold text-black">
+                <h2 className="!text-lg !font-bold !text-black">
                   NFT Claimed Successfully!
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="!text-gray-600 !text-sm !mt-1">
                   Your exclusive Early User NFT
                 </p>
               </div>
             )}
 
             {nftErrorMessage && (
-              <div className="mt-4 p-3 bg-red-50 rounded-xl border border-red-200 flex items-start relative z-1">
-                <XCircle className="w-5 h-5 text-red-600 mr-2 flex-shrink-0" />
-                <p className="text-red-600 text-sm">{nftErrorMessage}</p>
+              <div className="!mt-4 !p-3 !bg-red-50 !rounded-xl !border !border-red-200 !flex !items-start !relative !z-1">
+                <XCircle className="!w-5 !h-5 !text-red-600 !mr-2 !flex-shrink-0" />
+                <p className="!text-red-600 !text-sm">{nftErrorMessage}</p>
               </div>
             )}
           </div>
@@ -634,33 +634,33 @@ export default function RewardProgram() {
         </section>
 
         {/* On-Chain Contributions */}
-        <section className="pb-6">
-          <h3 className="text-lg font-bold text-black mb-4">
+        <section className="!pb-6">
+          <h3 className="!text-lg !font-bold !text-black !mb-4">
             On-Chain Contributions
           </h3>
-          <div className="space-y-3">
+          <div className="!space-y-3">
             {/* Review a movie */}
             <button
               onClick={() => router.push("/new")}
-              className="w-full bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-2xl p-5 shadow-md active:shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-yellow-500 transition-all duration-150 group hover:shadow-lg hover:border-yellow-400 select-none"
+              className="!w-full !bg-gradient-to-br !from-yellow-50 !to-orange-50 !border-2 !border-yellow-300 !rounded-2xl !p-5 !shadow-md active:!shadow-sm active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-yellow-500 !transition-all !duration-150 group hover:!shadow-lg hover:!border-yellow-400 !select-none"
             >
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center mr-4 shadow-md group-active:shadow-sm">
-                  <Star className="w-6 h-6 text-white" strokeWidth={2.5} />
+              <div className="!flex !items-center">
+                <div className="!w-14 !h-14 !bg-gradient-to-br !from-yellow-400 !to-orange-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md group-active:!shadow-sm">
+                  <Star className="!w-6 !h-6 !text-white" strokeWidth={2.5} />
                 </div>
-                <div className="flex-1 text-left">
-                  <h4 className="font-bold text-black text-base mb-1">
+                <div className="!flex-1 !text-left">
+                  <h4 className="!font-bold !text-black !text-base !mb-1">
                     Review a movie
                   </h4>
-                  <p className="text-gray-600 text-sm mb-2">
+                  <p className="!text-gray-600 !text-sm !mb-2">
                     Share your thoughts on the films
                   </p>
-                  <div className="flex items-center bg-white/70 rounded-lg px-2 py-1">
+                  <div className="!flex !items-center !bg-white/70 !rounded-lg !px-2 !py-1">
                     <Coins
-                      className="w-4 h-4 text-yellow-600 mr-1"
+                      className="!w-4 !h-4 !text-yellow-600 !mr-1"
                       strokeWidth={2}
                     />
-                    <span className="font-bold text-gray-800 text-sm">
+                    <span className="!font-bold !text-gray-800 !text-sm">
                       10 points
                     </span>
                   </div>
@@ -671,25 +671,25 @@ export default function RewardProgram() {
             {/* Support a review */}
             <button
               onClick={() => router.push("/home")}
-              className="w-full bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-5 shadow-md active:shadow-sm active:scale-95 focus-visible:ring-2 focus-visible:ring-green-500 transition-all duration-150 group hover:shadow-lg hover:border-green-400 select-none"
+              className="!w-full !bg-gradient-to-br !from-green-50 !to-emerald-50 !border-2 !border-green-300 !rounded-2xl !p-5 !shadow-md active:!shadow-sm active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-green-500 !transition-all !duration-150 group hover:!shadow-lg hover:!border-green-400 !select-none"
             >
-                              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center mr-4 shadow-md group-active:shadow-sm">
-                  <ThumbsUp className="w-6 h-6 text-white" strokeWidth={2.5} />
+                              <div className="!flex !items-center">
+                <div className="!w-14 !h-14 !bg-gradient-to-br !from-green-400 !to-emerald-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md group-active:!shadow-sm">
+                  <ThumbsUp className="!w-6 !h-6 !text-white" strokeWidth={2.5} />
                 </div>
-                <div className="flex-1 text-left">
-                  <h4 className="font-bold text-black text-base mb-1">
+                <div className="!flex-1 !text-left">
+                  <h4 className="!font-bold !text-black !text-base !mb-1">
                     Support a review
                   </h4>
-                  <p className="text-gray-600 text-sm mb-2">
+                  <p className="!text-gray-600 !text-sm !mb-2">
                     Help promote quality content
                   </p>
-                  <div className="flex items-center bg-white/70 rounded-lg px-2 py-1">
+                  <div className="!flex !items-center !bg-white/70 !rounded-lg !px-2 !py-1">
                     <Coins
-                      className="w-4 h-4 text-yellow-600 mr-1"
+                      className="!w-4 !h-4 !text-yellow-600 !mr-1"
                       strokeWidth={2}
                     />
-                    <span className="font-bold text-gray-800 text-sm">
+                    <span className="!font-bold !text-gray-800 !text-sm">
                       10 points / 1 WLD
                     </span>
                   </div>
@@ -699,30 +699,30 @@ export default function RewardProgram() {
 
             {/* Daily check-in - Unique style */}
             <button
-              className="w-full bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-5 shadow-lg active:shadow-md active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-400 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:from-blue-600 hover:to-blue-700 select-none"
+              className="!w-full !bg-gradient-to-br !from-blue-500 !to-blue-600 !text-white !rounded-2xl !p-5 !shadow-lg active:!shadow-md active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-blue-400 !transition-all !duration-150 disabled:!opacity-50 disabled:!cursor-not-allowed hover:!shadow-xl hover:!from-blue-600 hover:!to-blue-700 !select-none"
               onClick={dailyCheckIn}
               disabled={loading || isConfirming}
             >
-                              <div className="flex items-center">
-                <div className="w-14 h-14 bg-blue-400 rounded-xl flex items-center justify-center mr-4 shadow-md">
+                              <div className="!flex !items-center">
+                <div className="!w-14 !h-14 !bg-blue-400 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
                   <CheckCircle
-                    className="w-7 h-7 text-white"
+                    className="!w-7 !h-7 !text-white"
                     strokeWidth={2.5}
                   />
                 </div>
-                <div className="flex-1 text-left">
-                  <h4 className="font-bold text-white text-base mb-1">
+                <div className="!flex-1 !text-left">
+                  <h4 className="!font-bold !text-white !text-base !mb-1">
                     Daily Check-in
                   </h4>
-                  <p className="text-blue-100 text-sm mb-2">
+                  <p className="!text-blue-100 !text-sm !mb-2">
                     Earn rewards by checking in daily
                   </p>
-                  <div className="flex items-center bg-blue-400/30 rounded-lg px-2 py-1">
+                  <div className="!flex !items-center !bg-blue-400/30 !rounded-lg !px-2 !py-1">
                     <Coins
-                      className="w-4 h-4 text-blue-100 mr-1"
+                      className="!w-4 !h-4 !text-blue-100 !mr-1"
                       strokeWidth={2}
                     />
-                    <span className="font-bold text-white text-sm">
+                    <span className="!font-bold !text-white !text-sm">
                       5 points
                     </span>
                   </div>
@@ -732,14 +732,14 @@ export default function RewardProgram() {
 
             {/* Messages */}
             {errors.submit && (
-              <div className="text-center p-4 bg-red-50 rounded-2xl border border-red-200">
-                <p className="text-red-600 text-sm">{errors.submit}</p>
+              <div className="!text-center !p-4 !bg-red-50 !rounded-2xl !border !border-red-200">
+                <p className="!text-red-600 !text-sm">{errors.submit}</p>
               </div>
             )}
 
             {successMessage && (
-              <div className="text-center p-4 bg-green-50 rounded-2xl border border-green-200">
-                <p className="text-green-600 text-sm font-medium">
+              <div className="!text-center !p-4 !bg-green-50 !rounded-2xl !border !border-green-200">
+                <p className="!text-green-600 !text-sm !font-medium">
                   {successMessage}
                 </p>
               </div>
@@ -747,42 +747,42 @@ export default function RewardProgram() {
           </div>
 
           {/* Leaderboard */}
-          <div className="mt-3 mb-6">
+          <div className="!mt-3 !mb-6">
             <button
               onClick={() => router.push("/leaderboard")}
-              className="w-full bg-white border border-gray-300 shadow-sm hover:shadow-md text-gray-800 py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 select-none"
+              className="!w-full !bg-white !border !border-gray-300 !shadow-sm hover:!shadow-md !text-gray-800 !py-3 !px-4 !rounded-lg !font-medium !flex !items-center !justify-center !gap-2 !transition-all !duration-200 hover:!bg-gray-50 active:!bg-gray-100 active:!scale-[0.98] focus:!outline-none focus:!ring-2 focus:!ring-offset-2 focus:!ring-blue-500 !select-none"
             >
-              <Trophy className="w-4 h-4 text-gray-700" strokeWidth={2} />
+              <Trophy className="!w-4 !h-4 !text-gray-700" strokeWidth={2} />
               View Full Leaderboard
             </button>
           </div>
         </section>
 
       {/* Off-Chain Contributions */}
-      <section className="pb-8">
-        <div className="flex items-center mb-6">
-          <h3 className="text-xl font-bold text-black">Off-Chain Contributions</h3>
-          <div className="ml-3 px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+      <section className="!pb-8">
+        <div className="!flex !items-center !mb-6">
+          <h3 className="!text-xl !font-bold !text-black">Off-Chain Contributions</h3>
+          <div className="!ml-3 !px-2.5 !py-1 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
             Earn Points
           </div>
         </div>
         
-        <div className="space-y-4">
+        <div className="!space-y-4">
           {/* Enhanced Invite a friend section */}
-          <div className="w-full bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center mb-4">
-              <div className="w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-md">
-                <UserPlus className="w-7 h-7 text-white" strokeWidth={2} />
+          <div className="!w-full !bg-gradient-to-br !from-indigo-50 !to-purple-50 !border !border-indigo-100 !rounded-2xl !p-5 !shadow-sm hover:!shadow-md !transition-shadow">
+            <div className="!flex !items-center !mb-4">
+              <div className="!w-14 !h-14 !bg-gradient-to-r !from-indigo-500 !to-purple-600 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
+                <UserPlus className="!w-7 !h-7 !text-white" strokeWidth={2} />
               </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-black text-lg mb-1">
+              <div className="!flex-1">
+                <h4 className="!font-bold !text-black !text-lg !mb-1">
                   Invite a friend
                 </h4>
-                <div className="flex items-center">
-                  <p className="text-gray-600 text-xs">
+                <div className="!flex !items-center">
+                  <p className="!text-gray-600 !text-xs">
                     Earn 50 points for each friend who joins
                   </p>
-                  <div className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                  <div className="!ml-2 !px-2 !py-0.5 !bg-amber-100 !text-amber-700 !text-xs !font-medium !rounded-full">
                     +50
                   </div>
                 </div>
@@ -791,37 +791,37 @@ export default function RewardProgram() {
 
             {inviteCodeLink ? (
               <>
-                <div className="mb-5">
-                  <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wider">
+                <div className="!mb-5">
+                  <p className="!text-xs !text-gray-500 !mb-2 !font-medium !uppercase !tracking-wider">
                     Your personal invite link:
                   </p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm overflow-hidden">
-                      <p className="text-xs text-gray-700 truncate font-mono">
+                  <div className="!flex !items-center !gap-3">
+                    <div className="!flex-1 !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !shadow-sm !overflow-hidden">
+                      <p className="!text-xs !text-gray-700 !truncate !font-mono">
                         {inviteCodeLink}
                       </p>
                     </div>
                     <button
                       onClick={handleCopyLink}
-                      className={`flex items-center justify-center w-14 h-12 rounded-xl ${
-                        copied ? "bg-green-500 hover:bg-green-600" : "bg-indigo-600 hover:bg-indigo-700"
-                      } text-white transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 select-none shadow-sm`}
+                      className={`!flex !items-center !justify-center !w-14 !h-12 !rounded-xl ${
+                        copied ? "!bg-green-500 hover:!bg-green-600" : "!bg-indigo-600 hover:!bg-indigo-700"
+                      } !text-white !transition-all !duration-200 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 !select-none !shadow-sm`}
                       aria-label="Copy invite link"
                     >
                       {copied ? (
-                        <CheckCircle className="w-6 h-6" />
+                        <CheckCircle className="!w-6 !h-6" />
                       ) : (
-                        <Clipboard className="w-5 h-5" />
+                        <Clipboard className="!w-5 !h-5" />
                       )}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-xs text-gray-500 mb-3 font-medium uppercase tracking-wider">
+                  <p className="!text-xs !text-gray-500 !mb-3 !font-medium !uppercase !tracking-wider">
                     Share via:
                   </p>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="!grid !grid-cols-1 !gap-3">
                     <button
                       onClick={() => {
                         // Share to X functionality
@@ -829,23 +829,23 @@ export default function RewardProgram() {
                         const url = inviteCodeLink;
                         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
                       }}
-                      className="flex items-center justify-center gap-3 py-3 rounded-xl text-black bg-white border border-gray-200 transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 select-none hover:bg-gray-50 shadow-sm"
+                      className="!flex !items-center !justify-center !gap-3 !py-3 !rounded-xl !text-black !bg-white !border !border-gray-200 !transition-all !duration-200 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 !select-none hover:!bg-gray-50 !shadow-sm"
                     >
-                      <div className="w-5 h-5">
-                        <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <div className="!w-5 !h-5">
+                        <svg className="!w-full !h-full" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                         </svg>
                       </div>
-                      <span className="text-sm font-medium">Share invite link on X now!</span>
+                      <span className="!text-sm !font-medium">Share invite link on X now!</span>
                     </button>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center py-6">
-                <div className="animate-pulse flex items-center">
-                  <div className="w-5 h-5 bg-indigo-400 rounded-full mr-3"></div>
-                  <span className="text-sm text-gray-500">
+              <div className="!flex !items-center !justify-center !py-6">
+                <div className="animate-pulse !flex !items-center">
+                  <div className="!w-5 !h-5 !bg-indigo-400 !rounded-full !mr-3"></div>
+                  <span className="!text-sm !text-gray-500">
                     Generating your invite link...
                   </span>
                 </div>
@@ -858,40 +858,40 @@ export default function RewardProgram() {
             href="https://discord.gg/A4KCFGM9ks"
             target="_blank"
             rel="noopener noreferrer"
-            className="block"
+            className="!block"
           >
             <button
               onClick={() => handleAction("FOLLOW_DISCORD")}
               disabled={!!completedTasks["FOLLOW_DISCORD"]}
-              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
+              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
                 completedTasks["FOLLOW_DISCORD"]
-                  ? "opacity-60 cursor-not-allowed"
-                  : "active:bg-gray-50"
-              } select-none`}
+                  ? "!opacity-60 !cursor-not-allowed"
+                  : "active:!bg-gray-50"
+              } !select-none`}
             >
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center mr-4 shadow-md">
+              <div className="!flex !items-center">
+                <div className="!w-14 !h-14 !bg-gradient-to-br !from-indigo-600 !to-purple-700 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
                   <Discord
-                    className="w-6 h-6 text-white"
+                    className="!w-6 !h-6 !text-white"
                     strokeWidth={2}
                   />
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="flex items-center mb-1">
-                    <h4 className="font-semibold text-black text-lg">Join our Discord</h4>
-                    <div className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                <div className="!flex-1 !text-left">
+                  <div className="!flex !items-center !mb-1">
+                    <h4 className="!font-semibold !text-black !text-lg">Join our Discord</h4>
+                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
                       +20
                     </div>
                   </div>
-                  <p className="text-gray-500 text-sm">
+                  <p className="!text-gray-500 !text-sm">
                     Join our community discussions
                   </p>
                 </div>
                 {completedTasks["FOLLOW_DISCORD"] ? (
-                  <CheckCircle className="w-6 h-6 text-green-500 ml-2" />
+                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center ml-2 group-hover:bg-indigo-100 transition-colors">
-                    <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-indigo-600 transition-colors" />
+                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
+                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
                   </div>
                 )}
               </div>
@@ -903,37 +903,37 @@ export default function RewardProgram() {
             href="https://x.com/intent/follow?screen_name=FlickShare_WLD"
             target="_blank"
             rel="noopener noreferrer"
-            className="block"
+            className="!block"
           >
             <button
               onClick={() => handleAction("FOLLOW_X")}
               disabled={!!completedTasks["FOLLOW_X"]}
-              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
+              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
                 completedTasks["FOLLOW_X"]
-                  ? "opacity-60 cursor-not-allowed"
-                  : "active:bg-gray-50"
-              } select-none`}
+                  ? "!opacity-60 !cursor-not-allowed"
+                  : "active:!bg-gray-50"
+              } !select-none`}
             >
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-black rounded-xl flex items-center justify-center mr-4 shadow-md">
-                  <X className="w-6 h-6 text-white" strokeWidth={2} />
+              <div className="!flex !items-center">
+                <div className="!w-14 !h-14 !bg-black !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
+                  <X className="!w-6 !h-6 !text-white" strokeWidth={2} />
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="flex items-center mb-1">
-                    <h4 className="font-semibold text-black text-lg">Follow us on X</h4>
-                    <div className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                <div className="!flex-1 !text-left">
+                  <div className="!flex !items-center !mb-1">
+                    <h4 className="!font-semibold !text-black !text-lg">Follow us on X</h4>
+                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
                       +20
                     </div>
                   </div>
-                  <p className="text-gray-500 text-sm">
+                  <p className="!text-gray-500 !text-sm">
                     Stay updated with latest news
                   </p>
                 </div>
                 {completedTasks["FOLLOW_X"] ? (
-                  <CheckCircle className="w-6 h-6 text-green-500 ml-2" />
+                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center ml-2 group-hover:bg-indigo-100 transition-colors">
-                    <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-indigo-600 transition-colors" />
+                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
+                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
                   </div>
                 )}
               </div>
@@ -945,40 +945,40 @@ export default function RewardProgram() {
             href="https://www.instagram.com/flickshare_on_world/"
             target="_blank"
             rel="noopener noreferrer"
-            className="block"
+            className="!block"
           >
             <button
               onClick={() => handleAction("FOLLOW_INSTAGRAM")}
               disabled={!!completedTasks["FOLLOW_INSTAGRAM"]}
-              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
+              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
                 completedTasks["FOLLOW_INSTAGRAM"]
-                  ? "opacity-60 cursor-not-allowed"
-                  : "active:bg-gray-50"
-              } select-none`}
+                  ? "!opacity-60 !cursor-not-allowed"
+                  : "active:!bg-gray-50"
+              } !select-none`}
             >
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-md">
+              <div className="!flex !items-center">
+                <div className="!w-14 !h-14 !bg-gradient-to-br !from-pink-500 !to-purple-600 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
                   <Instagram
-                    className="w-6 h-6 text-white"
+                    className="!w-6 !h-6 !text-white"
                     strokeWidth={2}
                   />
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="flex items-center mb-1">
-                    <h4 className="font-semibold text-black text-lg">Follow us on Instagram</h4>
-                    <div className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                <div className="!flex-1 !text-left">
+                  <div className="!flex !items-center !mb-1">
+                    <h4 className="!font-semibold !text-black !text-lg">Follow us on Instagram</h4>
+                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
                       +20
                     </div>
                   </div>
-                  <p className="text-gray-500 text-sm">
+                  <p className="!text-gray-500 !text-sm">
                     See behind the scenes content
                   </p>
                 </div>
                 {completedTasks["FOLLOW_INSTAGRAM"] ? (
-                  <CheckCircle className="w-6 h-6 text-green-500 ml-2" />
+                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center ml-2 group-hover:bg-indigo-100 transition-colors">
-                    <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-indigo-600 transition-colors" />
+                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
+                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
                   </div>
                 )}
               </div>
@@ -990,40 +990,40 @@ export default function RewardProgram() {
             href="fb://profile/697609756776592"
             target="_blank"
             rel="noopener noreferrer"
-            className="block"
+            className="!block"
           >
             <button
               onClick={() => handleAction("FOLLOW_FACEBOOK")}
               disabled={!!completedTasks["FOLLOW_FACEBOOK"]}
-              className={`w-full bg-white border border-gray-200 rounded-2xl p-5 transition-all duration-200 group active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 hover:border-indigo-300 hover:shadow-sm ${
+              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
                 completedTasks["FOLLOW_FACEBOOK"]
-                  ? "opacity-60 cursor-not-allowed"
-                  : "active:bg-gray-50"
-              } select-none`}
+                  ? "!opacity-60 !cursor-not-allowed"
+                  : "active:!bg-gray-50"
+              } !select-none`}
             >
-              <div className="flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mr-4 shadow-md">
+              <div className="!flex !items-center">
+                <div className="!w-14 !h-14 !bg-gradient-to-br !from-blue-600 !to-indigo-700 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
                   <Facebook
-                    className="w-6 h-6 text-white"
+                    className="!w-6 !h-6 !text-white"
                     strokeWidth={2}
                   />
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="flex items-center mb-1">
-                    <h4 className="font-semibold text-black text-lg">Follow us on Facebook</h4>
-                    <div className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                <div className="!flex-1 !text-left">
+                  <div className="!flex !items-center !mb-1">
+                    <h4 className="!font-semibold !text-black !text-lg">Follow us on Facebook</h4>
+                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
                       +20
                     </div>
                   </div>
-                  <p className="text-gray-500 text-sm">
+                  <p className="!text-gray-500 !text-sm">
                     Join our community discussions
                   </p>
                 </div>
                 {completedTasks["FOLLOW_FACEBOOK"] ? (
-                  <CheckCircle className="w-6 h-6 text-green-500 ml-2" />
+                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center ml-2 group-hover:bg-indigo-100 transition-colors">
-                    <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-indigo-600 transition-colors" />
+                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
+                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
                   </div>
                 )}
               </div>
@@ -1033,7 +1033,7 @@ export default function RewardProgram() {
       </section>
       </div>
       {/* Mobile bottom safe area */}
-      <div className="h-20 bg-white"></div>
+      <div className="!h-20 !bg-white"></div>
     </main>
   );
 }

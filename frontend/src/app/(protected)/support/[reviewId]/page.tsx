@@ -87,10 +87,10 @@ const SupportPage = () => {
         setCurrentBalance(balanceInWLD);
         setErrors((prev) => ({ ...prev, balance: undefined }));
 
-        if (balanceInWLD < 1) {
+        if (balanceInWLD < 0.01) {
           setErrors((prev) => ({
             ...prev,
-            balance: "Your balance is too low to support this review",
+            balance: "Your balance is too low to support this review (minimum 0.01 WLD)",
           }));
         }
       } catch (err) {
@@ -142,7 +142,7 @@ const SupportPage = () => {
       setIsProcessing(false);
       setSuccessMessage(
         `Successfully sent ${selectedAmount} WLD to @${
-          reviewData?.review?.username || "the reviewer"
+          reviewData?.review?.user?.username || reviewData?.review?.username || "the reviewer"
         }!`
       );
 
@@ -158,7 +158,7 @@ const SupportPage = () => {
     transactionId,
   ]);
 
-  const presetAmounts = [5, 10, 25, 50];
+  const presetAmounts = [0.01, 0.1, 1, 5];
 
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
@@ -186,7 +186,12 @@ const SupportPage = () => {
 
     // Validate custom amount
     if (numValue > 0) {
-      if (numValue > currentBalance) {
+      if (numValue < 0.01) {
+        setErrors((prev) => ({
+          ...prev,
+          customAmount: "Minimum amount is 0.01 WLD",
+        }));
+      } else if (numValue > currentBalance) {
         setErrors((prev) => ({
           ...prev,
           customAmount: "Amount exceeds your balance",
@@ -197,7 +202,7 @@ const SupportPage = () => {
     } else if (value !== "") {
       setErrors((prev) => ({
         ...prev,
-        customAmount: "Please enter a valid amount",
+        customAmount: "Please enter a valid amount (minimum 0.01 WLD)",
       }));
     } else {
       setErrors((prev) => ({ ...prev, customAmount: undefined }));
@@ -210,8 +215,8 @@ const SupportPage = () => {
     setIsProcessing(true);
 
     // Validation
-    if (selectedAmount <= 0) {
-      setErrors({ submit: "Please select a valid amount" });
+    if (selectedAmount < 0.01) {
+      setErrors({ submit: "Minimum support amount is 0.01 WLD" });
       setIsProcessing(false);
       return;
     }
@@ -290,14 +295,14 @@ const SupportPage = () => {
 
   const getSubmitButtonText = () => {
     if (isProcessing || isConfirming) return "Processing...";
-    if (selectedAmount === 0) return "Select amount to continue";
+    if (selectedAmount < 0.01) return "Select amount to continue (min 0.01 WLD)";
     if (selectedAmount > currentBalance) return "Insufficient balance";
     return `Send ${selectedAmount} WLD`;
   };
 
   const isSubmitDisabled = () => {
     return (
-      selectedAmount === 0 ||
+      selectedAmount < 0.01 ||
       selectedAmount > currentBalance ||
       isProcessing ||
       isConfirming ||
@@ -308,7 +313,7 @@ const SupportPage = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(
       `Just supported @${
-        reviewData?.review?.username || "MovieReviewer2024"
+        reviewData?.review?.user?.username || reviewData?.review?.username || "MovieReviewer2024"
       } with ${selectedAmount} WLD on FlickShare! 🎬✨`
     );
   };
@@ -384,18 +389,18 @@ const SupportPage = () => {
               <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                 <Image
                   src={
-                    reviewData.review.userProfile ||
-                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+                    reviewData.review.avatar ||
+                    "/placeholder.jpeg"
                   }
-                  alt={reviewData.review.username}
+                  alt={reviewData.review.handle || reviewData.review.username || "User"}
                   width={48}
                   height={48}
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
               <div>
                 <div className="font-medium text-black">
-                  @{reviewData.review.username}
+                  {reviewData.review.handle || reviewData.review.username || "Anonymous"}
                 </div>
                 <div className="flex items-center mt-1">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -492,7 +497,7 @@ const SupportPage = () => {
                 inputMode="decimal"
                 value={customAmount}
                 onChange={handleCustomAmountChange}
-                placeholder="Enter amount"
+                placeholder="Enter amount (min 0.01 WLD)"
                 className="!w-full !p-3 !border !border-gray-200 !rounded-2xl !text-black !placeholder-gray-400 !focus:outline-none !focus:border-black !transition-all !focus:ring-2 !focus:ring-black !focus:ring-opacity-20"
                 style={{ fontSize: '16px' }}
                 autoFocus

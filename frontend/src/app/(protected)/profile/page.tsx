@@ -6,7 +6,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { MiniKit, Permission, RequestPermissionPayload } from "@worldcoin/minikit-js";
 import { useProfileData } from "@/hooks/useProfileData";
+import { useNotificationsData } from "@/hooks/useNotificationsData";
 import { UserInfo } from "@/components/Profile/UserInfo";
+import { NotificationsList } from "@/components/Profile/NotificationsList";
+import { isUserMintedNFT } from "@/lib/contract_utility/nftUtility";
+import { Bell } from "lucide-react";
 
 interface Movie {
   id: string;
@@ -41,11 +45,13 @@ export default function Profile() {
   const userName = session?.user.username || "Gerald";
   const userId = session?.user?.id || "";
   const { reviews, supports, userWalletAddress, bio, setBio } = useProfileData(userName);
+  const { unreadCount } = useNotificationsData();
   const [tab, setTab] = useState("review");
   const [isInstalled, setIsInstalled] = useState(false);
   const [notifGranted, setNotifGranted] = useState<boolean | undefined>();
   const [showSettings, setShowSettings] = useState(false);
   const [totalPoints, setTotalPoints] = useState(0);
+  const [hasEarlyPass, setHasEarlyPass] = useState(false);
 
   // 1. Detect MiniKit availability
   useEffect(() => {
@@ -118,6 +124,20 @@ export default function Profile() {
     };
     fetchPoints();
   }, [userId]);
+
+  // 6. Check if user has minted Early Pass NFT
+  useEffect(() => {
+    const checkEarlyPass = async () => {
+      if (!userWalletAddress) return;
+      try {
+        const tokenId = await isUserMintedNFT(userWalletAddress);
+        setHasEarlyPass(tokenId > 0);
+      } catch (err) {
+        console.error("Failed to check NFT status", err);
+      }
+    };
+    checkEarlyPass();
+  }, [userWalletAddress]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -234,6 +254,7 @@ export default function Profile() {
         ))}
       </div>
     ),
+    notifications: <NotificationsList unreadCount={unreadCount} />,
   };
 
   return (
@@ -293,23 +314,34 @@ export default function Profile() {
             setBio={setBio}
             isOwner={true}
             totalPoints={totalPoints}
+            hasEarlyPass={hasEarlyPass}
           />
         </section>
 
 
         <nav className="mb-6">
           <div className="bg-gray-50 rounded-2xl p-1 border border-gray-100">
-            <div className="grid grid-cols-2 gap-1">
-              {["review", "support"].map((t) => (
+            <div className="grid grid-cols-3 gap-1">
+              {["review", "support", "notifications"].map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
-                  className={`!py-2 !px-2 text-center text-sm font-semibold rounded-xl transition-all duration-200 touch-manipulation active:scale-95 ${tab === t
+                  className={`!py-2 !px-2 text-center text-sm font-semibold rounded-xl transition-all duration-200 touch-manipulation active:scale-95 relative ${tab === t
                     ? "!bg-white !text-black !shadow-sm border !border-gray-200"
                     : "!text-gray-600 !hover:bg-black !hover:text-white !active:bg-black !active:text-white"
                     }`}
                 >
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                  <div className="flex items-center justify-center gap-1">
+                    {t === 'notifications' && (
+                      <Bell className="w-3.5 h-3.5" />
+                    )}
+                    <span>{t.charAt(0).toUpperCase() + t.slice(1)}</span>
+                    {t === 'notifications' && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>

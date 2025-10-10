@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { awardPoints } from "@/lib/points";
 import { ENV_VARIABLES } from "@/constants/env_variables";
+import { tmdbSync } from "@/lib/tmdb-sync";
 
 /**
  * POST /api/reviews
@@ -39,57 +40,41 @@ export async function POST(req: NextRequest) {
       select: { id: true },
     });
 
-    // 2) If movie missing → fetch from TMDB and create it
+    // 2) If movie missing → use comprehensive TMDB sync service
     if (!movie) {
-      const detailsRes = await fetch(
-        `${ENV_VARIABLES.TMDB_BASE_URL}/movie/${tmdbId}?language=en-US`,
-        { headers: { Authorization: `Bearer ${ENV_VARIABLES.TMDB_API_KEY}` } }
-      );
-
-      if (!detailsRes.ok) {
+      console.log(`Syncing new movie for review submission: TMDB ID ${tmdbId}`);
+      
+      try {
+        const movieId = await tmdbSync.syncMovieToDatabase(tmdbId);
+        movie = { id: movieId };
+        console.log(`Successfully synced movie for review: ${movieId}`);
+      } catch (syncError) {
+        console.error(`Failed to sync movie with TMDB ID ${tmdbId}:`, syncError);
         return NextResponse.json(
-          { error: "Failed to fetch movie details from TMDB" },
+          { error: "Failed to fetch and sync movie data from TMDB" },
           { status: 502 }
         );
       }
-
-      const movieData = await detailsRes.json();
-
-      // Ensure genres exist (safe even if you've already seeded)
-      const genreIds: string[] = [];
-      for (const g of movieData.genres || []) {
-        const genre = await prisma.genre.upsert({
-          where: { tmdbId: g.id },
-          update: { name: g.name },
-          create: { tmdbId: g.id, name: g.name },
-        });
-        genreIds.push(genre.id);
-      }
-
-      // Create movie and link genres
-      movie = await prisma.movie.create({
-        data: {
-          tmdbId,
-          title: movieData.title,
-          description: movieData.overview,
-          releaseDate: movieData.release_date ? new Date(movieData.release_date) : null,
-          runtime: movieData.runtime,
-          posterPath: movieData.poster_path,
-          backdropPath: movieData.backdrop_path,
-          imdbId: movieData.imdb_id,
-          popularity: movieData.popularity,
-          voteAverage: movieData.vote_average,
-          voteCount: movieData.vote_count,
-          tagline: movieData.tagline,
-          status: movieData.status,
-          originalLang: movieData.original_language,
-          adult: movieData.adult,
-          movieGenres: {
-            create: genreIds.map((gid) => ({ genreId: gid })),
-          },
-        },
-        select: { id: true },
+    } else {
+      // Movie exists, check if it needs updating (older than 7 days)
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      const existingMovie = await prisma.movie.findUnique({
+        where: { tmdbId },
+        select: { updatedAt: true, title: true }
       });
+
+      if (existingMovie && existingMovie.updatedAt < weekAgo) {
+        console.log(`Updating existing movie data: ${existingMovie.title}`);
+        try {
+          await tmdbSync.updateExistingMovie(tmdbId);
+          console.log(`Successfully updated movie: ${existingMovie.title}`);
+        } catch (updateError) {
+          console.error(`Failed to update movie ${existingMovie.title}:`, updateError);
+          // Continue with existing data if update fails
+        }
+      }
     }
     // If movie exists, no update is performed.
 

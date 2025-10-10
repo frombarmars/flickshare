@@ -138,8 +138,21 @@ export default function ReviewsFeedPage() {
 
   const handleLike = async (reviewIdOnChain: number) => {
     const review = reviews.find((r) => r.reviewIdOnChain === reviewIdOnChain);
+    
+    // Check if user is trying to like their own review
+    if (review?.reviewer?.id === session?.user?.id) {
+      toast.info("You can't like your own review! 😊", {
+        position: "top-center",
+        autoClose: 2000,
+      });
+      return;
+    }
+    
     if (review?.isLiked) {
-      toast.info("You have already liked this review.");
+      toast.info("You've already liked this review! ❤️", {
+        position: "top-center",
+        autoClose: 2000,
+      });
       return;
     }
 
@@ -218,7 +231,11 @@ export default function ReviewsFeedPage() {
   const formatCoins = (coins: number) => {
     if (coins >= 1000000) return `${(coins / 1000000).toFixed(1)}M`;
     if (coins >= 1000) return `${(coins / 1000).toFixed(1)}K`;
-    return coins.toString();
+    if (coins >= 1) return coins.toFixed(2);
+    if (coins >= 0.01) return coins.toFixed(2);
+    if (coins >= 0.001) return coins.toFixed(3);
+    if (coins > 0) return '<0.001';
+    return '0';
   };
 
   return (
@@ -292,10 +309,10 @@ export default function ReviewsFeedPage() {
                     <div className="flex items-center gap-2 text-xs">
                       <SupportAmount amount={r.coins} />
 
-                      <div className="px-2 py-1 bg-gray-100 rounded-md">
-                        <div className="flex items-center gap-1.5 text-gray-700">
-                          <ThumbsUp size={11} />
-                          <span>{r.likes}</span>
+                      <div className={`px-2 py-1 rounded-md transition-colors ${r.isLiked ? 'bg-red-50 border border-red-200' : 'bg-gray-100'}`}>
+                        <div className={`flex items-center gap-1.5 ${r.isLiked ? 'text-red-600' : 'text-gray-700'}`}>
+                          <ThumbsUp size={11} className={r.isLiked ? 'fill-red-500' : ''} />
+                          <span className="font-medium">{r.likes}</span>
                         </div>
                       </div>
 
@@ -306,19 +323,38 @@ export default function ReviewsFeedPage() {
                         </div>
                       </div>
                     </div>
-                    {/* Bold icon-only like button */}
-                    {/* Like button inside review card */}
+                    {/* Enhanced like button */}
                     <button
-                      className="p-2 bg-black rounded-lg hover:bg-gray-800 transition-colors shadow-sm hover:shadow-md flex items-center justify-center"
+                      disabled={r.reviewer?.id === session?.user?.id}
+                      className={`
+                        p-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center transform active:scale-95
+                        ${r.reviewer?.id === session?.user?.id
+                          ? 'bg-gray-300 cursor-not-allowed opacity-60'
+                          : r.isLiked 
+                            ? 'bg-red-50 border-2 border-red-200 hover:bg-red-100' 
+                            : 'bg-black hover:bg-gray-800'
+                        }
+                      `}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleLike(r.reviewIdOnChain);
                       }}
+                      title={
+                        r.reviewer?.id === session?.user?.id 
+                          ? "Can't like your own review" 
+                          : r.isLiked 
+                            ? "Already liked" 
+                            : "Like this review"
+                      }
                     >
                       <ThumbsUp
-                        size={22}
-                        className={`text-black ${
-                          r.isLiked ? "fill-blue-500" : "fill-transparent"
+                        size={20}
+                        className={`transition-all duration-300 ${
+                          r.reviewer?.id === session?.user?.id
+                            ? "text-gray-500"
+                            : r.isLiked 
+                              ? "text-red-500 fill-red-500" 
+                              : "text-white"
                         }`}
                       />
                     </button>

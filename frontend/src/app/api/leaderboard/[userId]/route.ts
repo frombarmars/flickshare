@@ -9,11 +9,26 @@ export async function GET(
   try {
     const currentUserId = (await context.params).userId;
 
+    // Get total count of all users (excluding admin users)
+    const totalUsersCount = await prisma.user.count({
+      where: {
+        isAdmin: {
+          not: true // Exclude admin users from total count
+        }
+      }
+    });
+
+    // Get all users for ranking (excluding admin users)
     const users = await prisma.user.findMany({
       select: {
         id: true,
         username: true,
         totalPoints: true,
+      },
+      where: {
+        isAdmin: {
+          not: true // Exclude admin users from leaderboard
+        }
       },
       orderBy: {
         totalPoints: "desc",
@@ -47,6 +62,7 @@ export async function GET(
     return NextResponse.json({
       leaderboard: top50,
       currentUser: currentUser ?? null,
+      totalPlayers: totalUsersCount, // Return actual total count
     });
   } catch (err) {
     console.error("Leaderboard error:", err);

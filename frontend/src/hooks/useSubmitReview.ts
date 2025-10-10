@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
@@ -37,13 +36,14 @@ export const useSubmitReview = ({
   const [transactionId, setTransactionId] = useState<string>("");
   const savedToDbRef = useRef(false);
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    client,
-    appConfig: {
-      app_id: ENV_VARIABLES.WORLD_MINIAPP_ID,
-    },
-    transactionId,
-  });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      client,
+      appConfig: {
+        app_id: ENV_VARIABLES.WORLD_MINIAPP_ID,
+      },
+      transactionId,
+    });
 
   useEffect(() => {
     async function saveReview() {
@@ -70,13 +70,17 @@ export const useSubmitReview = ({
         const data = await res.json();
 
         if (res.ok) {
-          setSuccessMessage("Review confirmed on-chain and saved! +10 points awarded.");
+          setSuccessMessage(
+            "Review confirmed on-chain and saved! +10 points awarded."
+          );
           setMovie("");
           setMovieId(0);
           setReview("");
           setRating(0);
         } else {
-          setErrors({ submit: data.error || "Failed to save review, please try again." });
+          setErrors({
+            submit: data.error || "Failed to save review, please try again.",
+          });
           savedToDbRef.current = false;
         }
       } catch (err) {
@@ -87,7 +91,20 @@ export const useSubmitReview = ({
     }
 
     saveReview();
-  }, [isConfirmed, transactionId, movieId, review, rating, session?.user?.id, setErrors, setSuccessMessage, setMovie, setMovieId, setReview, setRating]);
+  }, [
+    isConfirmed,
+    transactionId,
+    movieId,
+    review,
+    rating,
+    session?.user?.id,
+    setErrors,
+    setSuccessMessage,
+    setMovie,
+    setMovieId,
+    setReview,
+    setRating,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,29 +128,30 @@ export const useSubmitReview = ({
         return;
       }
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
-            abi: FlickShareContractABI,
-            functionName: "createReview",
-            args: [
-              movieId,
-              review,
-              rating,
-              result.finalPayload.merkle_root,
-              userSignal,
-              result.finalPayload.nullifier_hash,
-              ENV_VARIABLES.WORLD_MINIAPP_ID,
-              "add-review",
-              decodeAbiParameters(
-                parseAbiParameters("uint256[8]"),
-                result.finalPayload.proof as `0x${string}`
-              )[0],
-            ],
-          },
-        ],
-      });
+      const { commandPayload, finalPayload } =
+        await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
+              abi: FlickShareContractABI,
+              functionName: "createReview",
+              args: [
+                movieId,
+                review,
+                rating,
+                result.finalPayload.merkle_root,
+                userSignal,
+                result.finalPayload.nullifier_hash,
+                ENV_VARIABLES.WORLD_MINIAPP_ID,
+                "add-review",
+                decodeAbiParameters(
+                  parseAbiParameters("uint256[8]"),
+                  result.finalPayload.proof as `0x${string}`
+                )[0],
+              ],
+            },
+          ],
+        });
 
       if (finalPayload.status === "error") {
         setErrors({ submit: "Transaction failed, please try again." });

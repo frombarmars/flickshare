@@ -1,20 +1,14 @@
 "use client";
 
-import { Bell } from "lucide-react";
-import Link from "next/link";
-import { useNotificationCount } from "@/context/NotificationContext";
-
 interface NavProps {
     activeTab: string;
     setActiveTab: (tab: string) => void;
 }
 
 export default function Navigation({ activeTab, setActiveTab }: NavProps) {
-    const { unreadCount } = useNotificationCount();
-
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm max-w-md mx-auto flex items-center justify-between px-4">
-            <div className="flex justify-center items-center gap-8 flex-grow">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm max-w-md mx-auto flex items-center justify-center px-4">
+            <div className="flex justify-center items-center gap-8">
                 <button
                     onClick={() => setActiveTab("reviews")}
                     className={`!relative !px-6 !py-4 !text-sm !font-medium !transition-all !duration-300 ${
@@ -57,18 +51,6 @@ export default function Navigation({ activeTab, setActiveTab }: NavProps) {
                     )}
                 </button>
             </div>
-            <Link href="/notification" className="relative p-2 group">
-                <Bell className={`h-6 w-6 transition-all duration-200 ${
-                    unreadCount > 0 
-                        ? 'text-blue-600 animate-pulse' 
-                        : 'text-gray-600 group-hover:text-gray-800'
-                }`} />
-                {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-semibold shadow-lg animate-bounce">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                )}
-            </Link>
         </div>
     );
 }

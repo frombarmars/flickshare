@@ -14,7 +14,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "tmdb-sync": "ts-node --esm scripts/tmdb-sync.ts",
+    "tmdb-sync:all": "ts-node --esm scripts/tmdb-sync.ts sync-all",
+    "tmdb-sync:missing": "ts-node --esm scripts/tmdb-sync.ts sync-missing"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -29,6 +32,7 @@
     "axios": "^1.11.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "dotenv": "^17.2.3",
     "ethers": "^6.15.0",
     "iconoir-react": "^7.11.0",
     "lucide-react": "^0.536.0",
@@ -60,6 +64,7 @@
     "prisma": "^6.13.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2"
   }
 }

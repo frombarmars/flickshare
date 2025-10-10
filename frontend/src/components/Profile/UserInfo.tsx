@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { Copy, Check, Calendar, Edit, Coins } from "lucide-react";
+import { Copy, Check, Calendar, Edit, Coins, Star } from "lucide-react";
 
 interface UserInfoProps {
   username: string;
@@ -12,6 +12,7 @@ interface UserInfoProps {
   setBio: (bio: string) => void;
   isOwner: boolean;
   totalPoints?: number;
+  hasEarlyPass?: boolean;
 }
 
 export const UserInfo = ({
@@ -23,6 +24,7 @@ export const UserInfo = ({
   setBio,
   isOwner,
   totalPoints = 0,
+  hasEarlyPass = false,
 }: UserInfoProps) => {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -75,6 +77,12 @@ export const UserInfo = ({
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <Calendar className="w-4 h-4" />
             <span>Joined {formatDate(createdAt)}</span>
+            {hasEarlyPass && (
+              <div className="flex items-center gap-1 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium border border-yellow-200">
+                <Star className="w-3 h-3 fill-current" />
+                <span>Early Pass</span>
+              </div>
+            )}
           </div>
         </div>
 

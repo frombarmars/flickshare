@@ -27,6 +27,9 @@ export const ENV_VARIABLES = {
   WLD_TOKEN_CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_WLD_TOKEN_CONTRACT_ADDRESS || '',
   NFT_CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS || '',
 
+  // Blockchain
+  ETHEREUM_RPC_URL: 'https://worldchain-mainnet.g.alchemy.com/public',
+
   // External Services
   X_API_KEY: process.env.X_API_KEY || '',
 };

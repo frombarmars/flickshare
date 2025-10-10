@@ -33,6 +33,19 @@ export async function GET(
                 genre: true,
               },
             },
+            crew: {
+              select: {
+                job: true,
+                person: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+              where: {
+                job: "Director"
+              },
+            },
           },
         },
         reviewer: {
@@ -98,13 +111,15 @@ export async function GET(
       reviewIdOnChain: review.numericId,
       coins: review.supports.reduce((sum, support) => sum + support.amount, 0),
       likes: review.ReviewLike.length, // 👈 include like count
-      isLiked: userId
+      isLikedByMe: userId
         ? review.ReviewLike.some((like) => like.userId === userId)
         : false,
       date: review.createdAt.toISOString().split("T")[0],
       reviewId: review.id,
       movieTitle: review.movie.title,
       posterPath: review.movie.posterPath,
+      releaseDate: review.movie.releaseDate,
+      director: review.movie.crew.length > 0 ? review.movie.crew[0].person.name : null,
     };
 
     return NextResponse.json({
