@@ -1,5 +1,13 @@
 "use client";
-import { MessageSquare, Star, Play, Calendar, User, Search, Filter } from "lucide-react";
+import {
+  MessageSquare,
+  Star,
+  Play,
+  Calendar,
+  User,
+  Search,
+  Filter,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -25,7 +33,7 @@ interface Movie {
   }>;
 }
 
-type SortOption = 'relevance' | 'mostReviewed' | 'bestRated';
+type SortOption = "relevance" | "mostReviewed" | "bestRated";
 
 export default function MovieFeedPage() {
   const router = useRouter();
@@ -34,48 +42,59 @@ export default function MovieFeedPage() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('relevance');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const scrollObserver = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const fetchMovies = useCallback(async () => {
-    if (loadingRef.current || !hasMore) return;
-    loadingRef.current = true;
-    setLoading(true);
+  const fetchMovies = useCallback(
+    async (reset = false) => {
+      if (loadingRef.current || (!hasMore && !reset)) return;
+      loadingRef.current = true;
+      setLoading(true);
 
-    try {
-      const url = nextCursor
-        ? `/api/movies?cursor=${nextCursor}&limit=6`
-        : `/api/movies?limit=6`;
+      try {
+        const params = new URLSearchParams();
+        params.set("limit", "6");
+        if (!reset && nextCursor) params.set("cursor", nextCursor);
+        if (debouncedSearchQuery.trim())
+          params.set("search", debouncedSearchQuery.trim());
 
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch movies');
-      }
+        const response = await fetch(`/api/movies?${params.toString()}`);
+        if (!response.ok) throw new Error("Failed to fetch movies");
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.movies.length) {
-        setMovies((prev) => [...prev, ...data.movies]);
+        // Update states
+        setMovies(
+          reset ? data.movies : [...(reset ? [] : movies), ...data.movies]
+        );
         setNextCursor(data.nextCursor);
-        setHasMore(!!data.nextCursor);
-      } else {
-        setHasMore(false);
+        setHasMore(data.hasMore ?? !!data.nextCursor);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+        loadingRef.current = false;
       }
-    } catch (err) {
-    } finally {
-      setLoading(false);
-      loadingRef.current = false;
-    }
-  }, [nextCursor, hasMore]);
+    },
+    [nextCursor, hasMore, debouncedSearchQuery, movies]
+  );
 
   useEffect(() => {
-    fetchMovies();
-  }, [fetchMovies]);
+    if (debouncedSearchQuery !== "") {
+      fetchMovies(true); // reset when user searches
+    } else {
+      // Reset when cleared
+      setMovies([]);
+      setNextCursor(null);
+      setHasMore(true);
+      fetchMovies(true);
+    }
+  }, [debouncedSearchQuery]);
 
   // Debounce search query for better performance
   useEffect(() => {
@@ -90,20 +109,22 @@ export default function MovieFeedPage() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Escape key to clear search
-      if (event.key === 'Escape' && searchQuery.trim()) {
-        setSearchQuery('');
+      if (event.key === "Escape" && searchQuery.trim()) {
+        setSearchQuery("");
         setFilteredMovies(movies);
       }
       // Ctrl/Cmd + F to focus search (prevent browser search)
-      if ((event.metaKey || event.ctrlKey) && event.key === 'f') {
+      if ((event.metaKey || event.ctrlKey) && event.key === "f") {
         event.preventDefault();
-        const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+        const searchInput = document.querySelector(
+          'input[placeholder*="Search"]'
+        ) as HTMLInputElement;
         searchInput?.focus();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [searchQuery, movies]);
 
   // Enhanced filter and sort movies based on search query and sort option
@@ -113,33 +134,41 @@ export default function MovieFeedPage() {
     // Enhanced filter by search query with more flexible matching
     if (debouncedSearchQuery.trim()) {
       const query = debouncedSearchQuery.toLowerCase().trim();
-      const searchTerms = query.split(' ').filter(term => term.length > 0);
-      
-      result = result.filter(movie => {
+      const searchTerms = query.split(" ").filter((term) => term.length > 0);
+
+      result = result.filter((movie) => {
         const movieTitle = movie.title.toLowerCase();
-        const movieDescription = movie.description?.toLowerCase() || '';
-        const crewNames = movie.crew?.map(crew => crew.person.name.toLowerCase()).join(' ') || '';
-        const releaseYear = new Date(movie.releaseDate).getFullYear().toString();
-        
+        const movieDescription = movie.description?.toLowerCase() || "";
+        const crewNames =
+          movie.crew?.map((crew) => crew.person.name.toLowerCase()).join(" ") ||
+          "";
+        const releaseYear = new Date(movie.releaseDate)
+          .getFullYear()
+          .toString();
+
         // Create searchable text combining all fields
-        const searchableText = `${movieTitle} ${movieDescription} ${crewNames} ${releaseYear}`.toLowerCase();
-        
+        const searchableText =
+          `${movieTitle} ${movieDescription} ${crewNames} ${releaseYear}`.toLowerCase();
+
         // More flexible search: if single term, use OR logic; if multiple terms, use AND logic
         if (searchTerms.length === 1) {
           const term = searchTerms[0];
-          return movieTitle.includes(term) || 
-                 movieDescription.includes(term) || 
-                 crewNames.includes(term) || 
-                 releaseYear.includes(term) ||
-                 searchableText.includes(term);
-        } else {
-          // For multiple terms, check if at least 70% of terms are found
-          const foundTerms = searchTerms.filter(term => 
-            movieTitle.includes(term) || 
-            movieDescription.includes(term) || 
-            crewNames.includes(term) || 
+          return (
+            movieTitle.includes(term) ||
+            movieDescription.includes(term) ||
+            crewNames.includes(term) ||
             releaseYear.includes(term) ||
             searchableText.includes(term)
+          );
+        } else {
+          // For multiple terms, check if at least 70% of terms are found
+          const foundTerms = searchTerms.filter(
+            (term) =>
+              movieTitle.includes(term) ||
+              movieDescription.includes(term) ||
+              crewNames.includes(term) ||
+              releaseYear.includes(term) ||
+              searchableText.includes(term)
           );
           return foundTerms.length >= Math.ceil(searchTerms.length * 0.7);
         }
@@ -148,55 +177,61 @@ export default function MovieFeedPage() {
 
     // Sort by selected option
     switch (sortBy) {
-      case 'mostReviewed':
+      case "mostReviewed":
         result.sort((a, b) => b._count.reviews - a._count.reviews);
         break;
-      case 'bestRated':
+      case "bestRated":
         result.sort((a, b) => b.voteAverage - a.voteAverage);
         break;
-      case 'relevance':
+      case "relevance":
       default:
         // For search results, sort by comprehensive relevance scoring
         if (debouncedSearchQuery.trim()) {
           const query = debouncedSearchQuery.toLowerCase().trim();
-          const searchTerms = query.split(' ').filter(term => term.length > 0);
-          
+          const searchTerms = query
+            .split(" ")
+            .filter((term) => term.length > 0);
+
           result.sort((a, b) => {
             const aTitle = a.title.toLowerCase();
             const bTitle = b.title.toLowerCase();
-            const aDirector = (a.crew?.find(c => c.job === "Director")?.person.name || '').toLowerCase();
-            const bDirector = (b.crew?.find(c => c.job === "Director")?.person.name || '').toLowerCase();
-            
+            const aDirector = (
+              a.crew?.find((c) => c.job === "Director")?.person.name || ""
+            ).toLowerCase();
+            const bDirector = (
+              b.crew?.find((c) => c.job === "Director")?.person.name || ""
+            ).toLowerCase();
+
             let aScore = 0;
             let bScore = 0;
-            
+
             // Calculate relevance scores
-            searchTerms.forEach(term => {
+            searchTerms.forEach((term) => {
               // Exact title match (highest score)
               if (aTitle === term) aScore += 1000;
               if (bTitle === term) bScore += 1000;
-              
+
               // Title starts with term (high score)
               if (aTitle.startsWith(term)) aScore += 500;
               if (bTitle.startsWith(term)) bScore += 500;
-              
+
               // Title contains term (medium score)
               if (aTitle.includes(term)) aScore += 100;
               if (bTitle.includes(term)) bScore += 100;
-              
+
               // Director match (lower score)
               if (aDirector.includes(term)) aScore += 50;
               if (bDirector.includes(term)) bScore += 50;
             });
-            
+
             // Add bonus for review count (small influence)
             aScore += (a._count?.reviews || 0) * 0.1;
             bScore += (b._count?.reviews || 0) * 0.1;
-            
+
             // Add bonus for rating (small influence)
             aScore += (a.voteAverage || 0) * 0.5;
             bScore += (b.voteAverage || 0) * 0.5;
-            
+
             return bScore - aScore;
           });
         } else {
@@ -215,11 +250,11 @@ export default function MovieFeedPage() {
 
   const lastMovieRef = useCallback(
     (node: HTMLElement | null) => {
-      if (loading) return;
+      if (loading || !hasMore) return;
       if (scrollObserver.current) scrollObserver.current.disconnect();
 
       scrollObserver.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting) {
           fetchMovies();
         }
       });
@@ -232,13 +267,16 @@ export default function MovieFeedPage() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowSortDropdown(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleMovieClick = (tmdbId: number) => {
@@ -251,14 +289,14 @@ export default function MovieFeedPage() {
   };
 
   const sortOptions = [
-    { value: 'relevance', label: 'Relevance' },
-    { value: 'mostReviewed', label: 'Most Reviewed' },
-    { value: 'bestRated', label: 'Best Rated' }
+    { value: "relevance", label: "Relevance" },
+    { value: "mostReviewed", label: "Most Reviewed" },
+    { value: "bestRated", label: "Best Rated" },
   ];
 
   // Get director from crew
   const getDirector = (movie: Movie) => {
-    const director = movie.crew.find(person => person.job === "Director");
+    const director = movie.crew.find((person) => person.job === "Director");
     return director ? director.person.name : "Unknown Director";
   };
 
@@ -266,28 +304,31 @@ export default function MovieFeedPage() {
     <div className="p-3 bg-white min-h-screen">
       <div className="mb-4 flex gap-2">
         <div className="!flex-1 !bg-gray-100 !rounded-lg !p-2 !flex !items-center !border !border-gray-200 !transition-all !duration-200 focus-within:!border-gray-400 focus-within:!bg-white focus-within:!shadow-sm">
-          <Search size={14} className="!text-gray-500 !mr-2 !ml-2 !flex-shrink-0" />
+          <Search
+            size={14}
+            className="!text-gray-500 !mr-2 !ml-2 !flex-shrink-0"
+          />
           <input
             type="text"
             placeholder="Search by title, director, year... (Esc to clear)"
             className="!flex-1 !bg-transparent !border-none !outline-none !text-gray-900 placeholder:!text-gray-500"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ fontSize: '16px' }}
+            style={{ fontSize: "16px" }}
             autoComplete="off"
             spellCheck="false"
             autoCapitalize="off"
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => setSearchQuery("")}
               className="!ml-2 !mr-1 !p-1 !rounded-full !bg-gray-200 hover:!bg-gray-300 !transition-colors"
             >
               <span className="!text-xs !text-gray-600">✕</span>
             </button>
           )}
         </div>
-        
+
         {/* Sort Dropdown */}
         <div className="!relative" ref={dropdownRef}>
           <button
@@ -296,14 +337,16 @@ export default function MovieFeedPage() {
           >
             <Filter size={16} className="!text-gray-700" />
           </button>
-          
+
           {showSortDropdown && (
             <div className="!absolute !right-0 !top-12 !bg-white !border !border-gray-200 !rounded-lg !shadow-lg !z-20 !min-w-[140px] !py-1">
               {sortOptions.map((option) => (
                 <button
                   key={option.value}
                   className={`!w-full !text-left !px-3 !py-2 !text-xs hover:!bg-gray-100 !transition-colors !duration-150 ${
-                    sortBy === option.value ? '!bg-gray-100 !font-semibold !text-gray-900' : '!text-gray-700'
+                    sortBy === option.value
+                      ? "!bg-gray-100 !font-semibold !text-gray-900"
+                      : "!text-gray-700"
                   }`}
                   onClick={() => handleSortChange(option.value as SortOption)}
                 >
@@ -320,8 +363,14 @@ export default function MovieFeedPage() {
         <div className="!mb-4 !p-3 !bg-blue-50 !rounded-lg !border !border-blue-200 !flex !items-center !gap-2">
           <div className="!animate-pulse !flex !space-x-1">
             <div className="!w-2 !h-2 !bg-blue-400 !rounded-full !animate-bounce"></div>
-            <div className="!w-2 !h-2 !bg-blue-400 !rounded-full !animate-bounce" style={{animationDelay: '0.1s'}}></div>
-            <div className="!w-2 !h-2 !bg-blue-400 !rounded-full !animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            <div
+              className="!w-2 !h-2 !bg-blue-400 !rounded-full !animate-bounce"
+              style={{ animationDelay: "0.1s" }}
+            ></div>
+            <div
+              className="!w-2 !h-2 !bg-blue-400 !rounded-full !animate-bounce"
+              style={{ animationDelay: "0.2s" }}
+            ></div>
           </div>
           <div className="!text-sm !text-blue-700 !font-medium">
             Searching as you type...
@@ -334,20 +383,21 @@ export default function MovieFeedPage() {
         <div className="!mb-4 !p-4 !bg-gradient-to-r !from-blue-50 !to-gray-50 !rounded-lg !border !border-blue-100">
           <div className="!flex !items-center !justify-between !mb-3">
             <div className="!text-sm !font-semibold !text-gray-900">
-              {filteredMovies.length > 0 
-                ? `Found ${filteredMovies.length} movie${filteredMovies.length !== 1 ? 's' : ''}`
-                : 'No movies found'
-              }
+              {filteredMovies.length > 0
+                ? `Found ${filteredMovies.length} movie${
+                    filteredMovies.length !== 1 ? "s" : ""
+                  }`
+                : "No movies found"}
             </div>
             <div className="!flex !items-center !space-x-2">
               <div className="!text-xs !text-gray-600 !bg-white !px-2 !py-1 !rounded-full !border !shadow-sm">
-                {sortOptions.find(opt => opt.value === sortBy)?.label}
+                {sortOptions.find((opt) => opt.value === sortBy)?.label}
               </div>
               <button
                 onClick={() => {
-                  setSearchQuery('');
+                  setSearchQuery("");
                   setFilteredMovies(movies);
-                  setSortBy('relevance');
+                  setSortBy("relevance");
                 }}
                 className="!text-xs !text-blue-600 hover:!text-blue-800 !font-medium !bg-white !px-3 !py-1 !rounded-full !border !border-blue-200 hover:!border-blue-300 !transition-colors !duration-200 !shadow-sm"
               >
@@ -357,11 +407,16 @@ export default function MovieFeedPage() {
           </div>
           <div className="!flex !items-center !justify-between">
             <div className="!text-xs !text-gray-700">
-              Searching: <span className="!font-semibold !text-blue-700 !bg-blue-100 !px-2 !py-0.5 !rounded">&quot;{debouncedSearchQuery}&quot;</span>
+              Searching:{" "}
+              <span className="!font-semibold !text-blue-700 !bg-blue-100 !px-2 !py-0.5 !rounded">
+                &quot;{debouncedSearchQuery}&quot;
+              </span>
             </div>
             {filteredMovies.length > 0 && (
               <div className="!text-xs !text-gray-500">
-                {filteredMovies.length === 1 ? 'Perfect match!' : `${filteredMovies.length} results`}
+                {filteredMovies.length === 1
+                  ? "Perfect match!"
+                  : `${filteredMovies.length} results`}
               </div>
             )}
           </div>
@@ -371,7 +426,8 @@ export default function MovieFeedPage() {
       {/* Enhanced Movies Grid - Responsive */}
       <div className="!grid !grid-cols-2 sm:!grid-cols-3 md:!grid-cols-4 lg:!grid-cols-5 !gap-3 sm:!gap-4 md:!gap-5">
         {filteredMovies.map((movie, i) => {
-          const isLast = i === filteredMovies.length - 1 && !debouncedSearchQuery;
+          const isLast =
+            i === filteredMovies.length - 1 && !debouncedSearchQuery;
           return (
             <div
               key={movie.id}
@@ -405,26 +461,35 @@ export default function MovieFeedPage() {
                 </div>
 
                 {/* Search Match Indicator */}
-                {debouncedSearchQuery.trim() && movie.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) && (
-                  <div className="!absolute !top-2 !right-2 !bg-blue-500 !text-white !text-xs !font-bold !px-2 !py-1 !rounded-full !shadow-lg">
-                    Match
-                  </div>
-                )}
+                {debouncedSearchQuery.trim() &&
+                  movie.title
+                    .toLowerCase()
+                    .includes(debouncedSearchQuery.toLowerCase()) && (
+                    <div className="!absolute !top-2 !right-2 !bg-blue-500 !text-white !text-xs !font-bold !px-2 !py-1 !rounded-full !shadow-lg">
+                      Match
+                    </div>
+                  )}
               </div>
 
               {/* Enhanced Movie Info */}
               <div className="!p-3 sm:!p-3.5">
-                <h3 className="!font-semibold !text-gray-900 !text-sm sm:!text-base !mb-2 !line-clamp-2 !leading-tight">{movie.title}</h3>
+                <h3 className="!font-semibold !text-gray-900 !text-sm sm:!text-base !mb-2 !line-clamp-2 !leading-tight">
+                  {movie.title}
+                </h3>
 
                 <div className="!flex !items-center !text-xs !text-gray-600 !mb-2">
                   <User size={10} className="!mr-1.5 !flex-shrink-0" />
-                  <span className="!line-clamp-1 !text-xs">{getDirector(movie)}</span>
+                  <span className="!line-clamp-1 !text-xs">
+                    {getDirector(movie)}
+                  </span>
                 </div>
 
                 <div className="!flex !justify-between !items-center !gap-2">
                   <div className="!flex !items-center !text-xs !text-gray-500 !bg-gray-50 !px-2 !py-1 !rounded-full">
                     <MessageSquare size={10} className="!mr-1.5" />
-                    <span className="!font-medium">{movie._count.reviews.toLocaleString()}</span>
+                    <span className="!font-medium">
+                      {movie._count.reviews.toLocaleString()}
+                    </span>
                   </div>
 
                   <div className="!text-xs !text-gray-700 !font-medium !bg-gray-100 !px-2 !py-1 !rounded-full !flex !items-center">
@@ -443,7 +508,9 @@ export default function MovieFeedPage() {
         <div className="!flex !justify-center !py-8">
           <div className="!flex !flex-col !items-center !space-y-3">
             <div className="!animate-spin !rounded-full !h-8 !w-8 !border-2 !border-gray-200 !border-t-blue-500"></div>
-            <div className="!text-sm !text-gray-600 !font-medium">Loading more movies...</div>
+            <div className="!text-sm !text-gray-600 !font-medium">
+              Loading more movies...
+            </div>
           </div>
         </div>
       )}
@@ -454,10 +521,18 @@ export default function MovieFeedPage() {
           <div className="!flex !flex-col !items-center !space-y-3">
             <div className="!animate-pulse !flex !space-x-2">
               <div className="!w-3 !h-3 !bg-blue-400 !rounded-full !animate-bounce"></div>
-              <div className="!w-3 !h-3 !bg-blue-400 !rounded-full !animate-bounce" style={{animationDelay: '0.1s'}}></div>
-              <div className="!w-3 !h-3 !bg-blue-400 !rounded-full !animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              <div
+                className="!w-3 !h-3 !bg-blue-400 !rounded-full !animate-bounce"
+                style={{ animationDelay: "0.1s" }}
+              ></div>
+              <div
+                className="!w-3 !h-3 !bg-blue-400 !rounded-full !animate-bounce"
+                style={{ animationDelay: "0.2s" }}
+              ></div>
             </div>
-            <div className="!text-sm !text-gray-600 !font-medium">Searching movies...</div>
+            <div className="!text-sm !text-gray-600 !font-medium">
+              Searching movies...
+            </div>
           </div>
         </div>
       )}
@@ -475,33 +550,38 @@ export default function MovieFeedPage() {
       )}
 
       {/* Enhanced No Results State */}
-      {debouncedSearchQuery.trim() && filteredMovies.length === 0 && !loading && (
-        <div className="!text-center !py-12 !px-4">
-          <div className="!max-w-md !mx-auto">
-            <div className="!text-6xl !mb-4">🔍</div>
-            <h3 className="!text-lg !font-semibold !text-gray-900 !mb-2">
-              No movies found
-            </h3>
-            <div className="!text-sm !text-gray-600 !mb-4">
-              We couldn&apos;t find any movies matching <span className="!font-medium !text-gray-900">&quot;{debouncedSearchQuery}&quot;</span>
+      {debouncedSearchQuery.trim() &&
+        filteredMovies.length === 0 &&
+        !loading && (
+          <div className="!text-center !py-12 !px-4">
+            <div className="!max-w-md !mx-auto">
+              <div className="!text-6xl !mb-4">🔍</div>
+              <h3 className="!text-lg !font-semibold !text-gray-900 !mb-2">
+                No movies found
+              </h3>
+              <div className="!text-sm !text-gray-600 !mb-4">
+                We couldn&apos;t find any movies matching{" "}
+                <span className="!font-medium !text-gray-900">
+                  &quot;{debouncedSearchQuery}&quot;
+                </span>
+              </div>
+              <div className="!space-y-2 !text-xs !text-gray-500">
+                <p>• Try different keywords</p>
+                <p>• Check your spelling</p>
+                <p>• Use more general terms</p>
+              </div>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setFilteredMovies(movies);
+                }}
+                className="!mt-6 !px-4 !py-2 !bg-blue-500 !text-white !text-sm !font-medium !rounded-lg hover:!bg-blue-600 !transition-colors !duration-200"
+              >
+                Clear Search
+              </button>
             </div>
-            <div className="!space-y-2 !text-xs !text-gray-500">
-              <p>• Try different keywords</p>
-              <p>• Check your spelling</p>
-              <p>• Use more general terms</p>
-            </div>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setFilteredMovies(movies);
-              }}
-              className="!mt-6 !px-4 !py-2 !bg-blue-500 !text-white !text-sm !font-medium !rounded-lg hover:!bg-blue-600 !transition-colors !duration-200"
-            >
-              Clear Search
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Empty State - No movies at all */}
       {!loading && filteredMovies.length === 0 && !debouncedSearchQuery && (
@@ -519,4 +599,4 @@ export default function MovieFeedPage() {
       )}
     </div>
   );
-};
+}
