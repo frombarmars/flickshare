@@ -369,7 +369,7 @@ export default function ReviewsFeedPage() {
       {!hasMoreRef.current && reviews.length > 0 && (
         <div className="max-w-3xl mx-auto px-3 py-6">
           <div className="text-center py-4 border-t border-gray-200">
-            <p className="text-gray-500 text-xs">You've reached the end</p>
+            <p className="text-gray-500 text-xs">You&apos;ve reached the end</p>
           </div>
         </div>
       )}

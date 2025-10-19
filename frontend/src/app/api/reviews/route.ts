@@ -106,7 +106,6 @@ export async function GET(request: NextRequest) {
     const cursor = searchParams.get("cursor");
     const limit = parseInt(searchParams.get("limit") || "4");
     const userId = searchParams.get("userId");
-    console.log("before fetch reviews");
     const reviews = await prisma.review.findMany({
       take: limit,
       skip: cursor ? 1 : 0,
@@ -148,7 +147,6 @@ export async function GET(request: NextRequest) {
         isBanned: false,
       },
     });
-    console.log("after fetch reviews");
 
     const formattedReviews = reviews.map((review) => ({
       id: review.id,

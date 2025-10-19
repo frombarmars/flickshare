@@ -94,7 +94,7 @@ export default function MovieFeedPage() {
       setHasMore(true);
       fetchMovies(true);
     }
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, fetchMovies]);
 
   // Debounce search query for better performance
   useEffect(() => {

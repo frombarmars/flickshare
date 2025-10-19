@@ -101,7 +101,7 @@ const ReviewSupportUI = () => {
         result.finalPayload.proof as `0x${string}`
       )[0];
 
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+      const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
             address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS,
