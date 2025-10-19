@@ -12,10 +12,7 @@ import {
   Coins,
   CheckCircle,
   Clipboard,
-  Mail,
-  MessageCircle,
   Twitter,
-  XCircle,
   Loader,
   Trophy,
   ArrowRight,
@@ -53,7 +50,6 @@ export default function RewardProgram() {
   const [successMessage, setSuccessMessage] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [copied, setCopied] = useState(false);
-  // NFT Claim states
   const [nftTransactionId, setNftTransactionId] = useState<string>("");
   const [nftLoading, setNftLoading] = useState(false);
   const [nftErrorMessage, setNftErrorMessage] = useState("");
@@ -61,11 +57,9 @@ export default function RewardProgram() {
   const [nftImage, setNftImage] = useState("/placeholder-nft.png");
   const [nftMetaData, setNftMetadata] = useState<INFTMetadata | null>(null);
   const [showNFTDetails, setShowNFTDetails] = useState(false);
-
   const [nftTokenId, setNftTokenId] = useState<number | null>(null);
   const [totalMintedUsers, setTotalMintedUsers] = useState<number>(0);
   type CompletedTasks = Record<string, boolean>;
-
   const [airdropPoints, setAirdropPoints] = useState<number>(0);
   const [completedTasks, setCompletedTasks] = useState<CompletedTasks>({});
 
@@ -79,12 +73,9 @@ export default function RewardProgram() {
       if (data.ok) {
         setAirdropPoints(prev => prev + data.points);
         setCompletedTasks(prev => ({ ...prev, [action]: true }));
-      } else {
-        alert(data.error || "Failed to complete task.");
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong.");
     }
   };
 
@@ -130,7 +121,6 @@ export default function RewardProgram() {
       }&path=${encodeURIComponent("/?invite=" + inviteCode)}`
     : "";
 
-  // Track tx confirmation
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       client: client,
@@ -156,7 +146,6 @@ export default function RewardProgram() {
     try {
       setLoading(true);
 
-      // Step 1: Precheck with DB
       const precheck = await fetch(`/api/check-in/precheck/${userId}`, {
         method: "POST",
       });
@@ -169,7 +158,6 @@ export default function RewardProgram() {
         return;
       }
 
-      // Step 2: Worldcoin Verify
       const userSignal = session?.user?.walletAddress;
       const result = await MiniKit.commandsAsync.verify({
         action: "daily-checkin",
@@ -178,11 +166,10 @@ export default function RewardProgram() {
       });
 
       if (result.finalPayload.status === "error") {
-        setErrors({ submit: "Verification failed, please try again." });
+        setErrors({ submit: "Verification failed" });
         return;
       }
 
-      // Step 3: On-chain Transaction
       const proofArray = decodeAbiParameters(
         parseAbiParameters("uint256[8]"),
         result.finalPayload.proof as `0x${string}`
@@ -208,14 +195,14 @@ export default function RewardProgram() {
         });
 
       if (finalPayload.status === "error") {
-        setErrors({ submit: "Transaction failed, please try again." });
+        setErrors({ submit: "Transaction failed" });
         return;
       }
 
       setTransactionId(finalPayload.transaction_id);
     } catch (err) {
       console.error("Error during check-in:", err);
-      setErrors({ submit: "Something went wrong. Please try again." });
+      setErrors({ submit: "Something went wrong" });
     } finally {
       setLoading(false);
     }
@@ -243,21 +230,21 @@ export default function RewardProgram() {
           method: "POST",
         });
         const confirmData = await confirmRes.json();
-        await refreshPoints(); // 👈 update points after confirm
+        await refreshPoints();
         if (confirmData.ok) {
-          setSuccessMessage("Daily check-in confirmed!");
+          setSuccessMessage("Check-in confirmed!");
           setAirdropPoints(confirmData.totalPoints);
         } else {
           setErrors({ submit: confirmData.message });
         }
       } catch (err) {
         console.error("Error confirming check-in:", err);
-        setErrors({ submit: "Something went wrong during confirmation." });
+        setErrors({ submit: "Confirmation failed" });
       }
     };
 
     confirmCheckIn();
-  }, [isConfirmed, userId, refreshPoints]); // <-- runs only when tx is confirmed
+  }, [isConfirmed, userId, refreshPoints]);
 
   useEffect(() => {
     if (isNftConfirmed) {
@@ -266,9 +253,6 @@ export default function RewardProgram() {
     }
   }, [isNftConfirmed]);
 
-  // Replace your dailyCheckIn function with this:
-
-  // Replace your claimNFT function with this:
   const claimNFT = async () => {
     setNftLoading(true);
     setNftErrorMessage("");
@@ -308,13 +292,13 @@ export default function RewardProgram() {
         });
 
       if (finalPayload.status === "error") {
-        setNftErrorMessage("NFT claim transaction failed. Please try again.");
+        setNftErrorMessage("Claim failed");
       } else {
         setNftTransactionId(finalPayload.transaction_id);
       }
     } catch (err) {
       console.error(err);
-      setNftErrorMessage("Something went wrong. Please try again.");
+      setNftErrorMessage("Something went wrong");
     } finally {
       setNftLoading(false);
     }
@@ -325,58 +309,6 @@ export default function RewardProgram() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const shareOptions = [
-    {
-      name: "WhatsApp",
-      icon: <MessageCircle className="w-4 h-4" />,
-      color: "bg-green-500 hover:bg-green-600",
-      share: () => {
-        window.open(
-          `https://wa.me/?text=${encodeURIComponent(
-            `Join me on FlickShare! ${inviteCodeLink}`
-          )}`,
-          "_blank"
-        );
-      },
-    },
-    {
-      name: "Telegram",
-      icon: <MessageCircle className="w-4 h-4" />,
-      color: "bg-blue-400 hover:bg-blue-500",
-      share: () => {
-        window.open(
-          `https://t.me/share/url?url=${encodeURIComponent(
-            inviteCodeLink
-          )}&text=${encodeURIComponent("Join me on FlickShare!")}`,
-          "_blank"
-        );
-      },
-    },
-    {
-      name: "Twitter",
-      icon: <Twitter className="w-4 h-4" />,
-      color: "bg-black hover:bg-gray-800",
-      share: () => {
-        window.open(
-          `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-            `Join me on FlickShare! ${inviteCodeLink}`
-          )}`,
-          "_blank"
-        );
-      },
-    },
-    {
-      name: "Email",
-      icon: <Mail className="w-4 h-4" />,
-      color: "bg-gray-600 hover:bg-gray-700",
-      share: () => {
-        window.open(
-          `mailto:?subject=Join me on FlickShare&body=Check out this awesome app: ${inviteCodeLink}`
-        );
-      },
-    },
-  ];
 
   useEffect(() => {
     const checkIfUserMintedNFT = async () => {
@@ -411,629 +343,321 @@ export default function RewardProgram() {
       }
     } catch (error) {
       console.error("Error fetching NFT metadata:", error);
-      setNftErrorMessage("Failed to load NFT details");
+      setNftErrorMessage("Failed to load NFT");
     } finally {
       setNftLoading(false);
     }
   };
 
   return (
-    <main className="!w-full !min-h-screen !bg-white !text-gray-900 !overflow-x-hidden">
-      {/* Mobile Header */}
-      <header className="!bg-white !border-b !border-gray-100 !px-4 !py-4 !sticky !top-0 !z-20 safe-area-top">
-        <div className="!max-w-sm !mx-auto">
-          <h1 className="!text-xl !font-bold !text-black !text-center">
-            Reward Program
-          </h1>
-        </div>
+    <main className="!w-full !min-h-screen !bg-[#fafafa] !overflow-x-hidden">
+      {/* Header */}
+      <header className="!bg-white/80 !backdrop-blur-xl !border-b !border-gray-200/60 !px-4 !py-3 !sticky !top-0 !z-20">
+        <h1 className="!text-base !font-semibold !text-gray-900 !text-center">
+          Rewards
+        </h1>
       </header>
 
-      <div className="!max-w-sm !mx-auto !px-4">
-        {/*
-        <section className="pb-6">
-          <div className="bg-white border-2 border-yellow-400 rounded-2xl p-6 shadow-lg mb-6 relative overflow-visible animate-pulse-glow">
-            {!nftClaimed ? (
-              <button
-                onClick={claimNFT}
-                disabled={nftLoading || isNftConfirming}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-xl active:from-yellow-700 active:to-orange-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md transform relative select-none"
-              >
-                {nftLoading || isNftConfirming ? (
-                  <>
-                    <Loader className="w-5 h-5 animate-spin" />
-                    {isNftConfirming ? "Confirming..." : "Claiming NFT..."}
-                  </>
-                ) : (
-                  <>
-                    <Gift className="w-5 h-5" />
-                    Claim Your NFT Now
-                  </>
-                )}
-              </button>
-            ) : showNFTDetails ? (
-              <div className="text-center relative z-1">
-                <div className="flex justify-center mb-4">
-                  <div className="w-64 h-64 max-w-full rounded-2xl overflow-hidden shadow-xl border-4 !border-yellow-400 bg-white hover:scale-105 transition-transform duration-300">
-                    <Image
-                      width={256}
-                      height={256}
-                      src={nftImage}
-                      alt="NFT"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+      <div className="!max-w-2xl !mx-auto">
+        {/* NFT Claim Section */}
+        <section className="!bg-white !border-b !border-gray-100">
+          <div className="!p-4 !space-y-4">
+            <div className="!flex !items-center !justify-between">
+              <div className="!flex !items-center !gap-3">
+                <div className="!w-10 !h-10 !bg-gradient-to-br !from-yellow-500 !to-orange-500 !rounded-lg !flex !items-center !justify-center">
+                  <Gift className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
-                <h2 className="text-lg font-bold text-black">
-                  {nftMetaData?.name || "Your NFT"}
-                </h2>
-                <p className="text-gray-600 text-sm mt-1">
-                  {nftMetaData?.description || "Exclusive Early User NFT"}
-                </p>
-              </div>
-            ) : (
-              <div className="text-center relative z-1">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
-                  <CheckCircle className="w-10 h-10 text-green-600" />
+                <div>
+                  <h2 className="!text-sm !font-semibold !text-gray-900">Early User NFT</h2>
+                  <p className="!text-xs !text-gray-500">{totalMintedUsers}/1000 claimed</p>
                 </div>
-                <h2 className="!text-lg !font-bold !text-black">
-                  NFT Already Claimed!
-                </h2>
-                <p className="!text-gray-600 !text-sm !mt-1">
-                  Your exclusive Early User NFT is in your wallet
-                </p>
-
-                <button
-                  onClick={handleShowNFT}
-                  disabled={nftLoading}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl active:from-blue-600 active:to-blue-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 transition-transform duration-150 mt-4 flex items-center justify-center gap-2 select-none"
-                >
-                  {nftLoading ? (
-                    <Loader className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Trophy className="w-5 h-5" />
-                  )}
-                  Show My NFT
-                </button>
               </div>
-            )}
-          </div>
-        </section> */}
-
-        {/* NFT Claim Section - Added under Airdrop card */}
-        <section className="!pb-6 !mt-6">
-          <div className="!bg-white !border-2 !border-yellow-400 !rounded-2xl !p-6 !shadow-lg !mb-6 !relative !overflow-visible animate-pulse-glow">
-            {/* Limited Edition Badge - Fixed positioning */}
-            <div className="!absolute !-top-3 !-right-3 !bg-yellow-500 !text-black !text-xs !font-bold !px-3 !py-1 !rounded-full !z-10 !rotate-6 !shadow-md">
-              LIMITED EDITION
-            </div>
-            
-            {/* Shimmer Effect */}
-            <div className="!absolute !inset-0 !bg-gradient-to-r !from-transparent !via-yellow-50/30 !to-transparent !-skew-x-12 animate-shimmer !pointer-events-none"></div>
-
-            <div className="!flex !items-center !mb-5 !relative !z-1">
-              <div className="!w-12 !h-12 !bg-gradient-to-br !from-yellow-500 !to-orange-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
-                <Gift className="!w-6 !h-6 !text-white" strokeWidth={2} />
-              </div>
-              <div>
-                <h2 className="!text-lg !font-bold !text-black">Early User NFT</h2>
-                <p className="!text-yellow-700 !text-sm !font-medium">
-                  Limited edition - Only 1,000 available
-                </p>
-              </div>
+              {nftClaimed && (
+                <CheckCircle className="!w-5 !h-5 !text-green-600" />
+              )}
             </div>
 
-            <div className="!space-y-3 !mb-6 !relative !z-1">
-              <div className="!flex !items-start">
-                <div className="!w-5 !h-5 !rounded-full !bg-yellow-100 !flex !items-center !justify-center !mr-3 !mt-0.5">
-                  <span className="!text-xs !font-bold !text-yellow-700">1</span>
-                </div>
-                <p className="!text-gray-700 !text-sm">
-                  Host mini movie watch parties
-                </p>
-              </div>
-              <div className="!flex !items-start">
-                <div className="!w-5 !h-5 !rounded-full !bg-yellow-100 !flex !items-center !justify-center !mr-3 !mt-0.5">
-                  <span className="!text-xs !font-bold !text-yellow-700">2</span>
-                </div>
-                <p className="!text-gray-700 !text-sm">
-                  Limited edition merch access
-                </p>
-              </div>
-              <div className="!flex !items-start">
-                <div className="!w-5 !h-5 !rounded-full !bg-yellow-100 !flex !items-center !justify-center !mr-3 !mt-0.5">
-                  <span className="!text-xs !font-bold !text-yellow-700">3</span>
-                </div>
-                <p className="!text-gray-700 !text-sm">
-                  Recognition as early supporter
-                </p>
-              </div>
-            </div>
-
-            <div className="!bg-yellow-50 !p-3 !rounded-lg !mb-6 !border !border-yellow-200 !relative">
-              <div className="!flex !justify-between !text-xs !text-yellow-800 !mb-1 !font-medium">
-                <span>NFTs claimed</span>
-                <span>{totalMintedUsers.toString()}/1000</span>
-              </div>
-              <div className="!w-full !bg-yellow-200 !rounded-full !h-2 !overflow-hidden">
+            <div className="!bg-yellow-50 !rounded-lg !p-3 !space-y-2">
+              <div className="!w-full !bg-yellow-200 !rounded-full !h-1.5 !overflow-hidden">
                 <div
-                  className="!bg-gradient-to-r !from-yellow-500 !to-orange-500 !h-2 !rounded-full !transition-all !duration-700"
-                  style={{
-                    width: `${
-                      (BigInt(totalMintedUsers) / BigInt(1000)) * BigInt(100)
-                    }%`,
-                  }}
-                ></div>
+                  className="!bg-gradient-to-r !from-yellow-500 !to-orange-500 !h-1.5 !transition-all"
+                  style={{ width: `${(Number(totalMintedUsers) / 1000) * 100}%` }}
+                />
               </div>
-              <p className="!text-yellow-700 !text-xs !mt-3 !font-medium">
-                {(BigInt(1000) - BigInt(totalMintedUsers)).toString()}{" "}
-                remaining!
+              <p className="!text-[11px] !text-yellow-800">
+                {1000 - Number(totalMintedUsers)} remaining
               </p>
             </div>
 
-            {/* Add the claim button here */}
             {!nftClaimed ? (
               <button
                 onClick={claimNFT}
                 disabled={nftLoading || isNftConfirming}
-                className="!w-full !bg-gradient-to-r !from-yellow-500 !to-orange-500 !text-white !p-4 !rounded-xl active:!from-yellow-700 active:!to-orange-700 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-blue-500 !transition-transform !duration-150 disabled:!opacity-50 disabled:!cursor-not-allowed !flex !items-center !justify-center !gap-2 !shadow-md !transform !relative !select-none"
+                className="!w-full !bg-gradient-to-r !from-yellow-500 !to-orange-500 !text-white !py-3 !rounded-lg !text-sm !font-medium !transition-all disabled:!opacity-50 disabled:!cursor-not-allowed !flex !items-center !justify-center !gap-2"
               >
                 {nftLoading || isNftConfirming ? (
                   <>
-                    <Loader className="!w-5 !h-5 animate-spin" />
-                    {isNftConfirming ? "Confirming..." : "Claiming NFT..."}
+                    <Loader className="!w-4 !h-4 !animate-spin" />
+                    {isNftConfirming ? "Confirming..." : "Claiming..."}
                   </>
                 ) : (
                   <>
-                    <Gift className="!w-5 !h-5" />
-                    Claim Your NFT Now
+                    <Gift className="!w-4 !h-4" />
+                    Claim NFT
+                  </>
+                )}
+              </button>
+            ) : showNFTDetails && nftMetaData ? (
+              <div className="!text-center">
+                <Image
+                  width={200}
+                  height={200}
+                  src={nftImage}
+                  alt="NFT"
+                  className="!w-48 !h-48 !mx-auto !rounded-lg !object-cover !mb-3"
+                />
+                <h3 className="!text-sm !font-semibold !text-gray-900">{nftMetaData.name}</h3>
+                <p className="!text-xs !text-gray-600">{nftMetaData.description}</p>
+              </div>
+            ) : nftClaimed ? (
+              <button
+                onClick={handleShowNFT}
+                disabled={nftLoading}
+                className="!w-full !bg-gray-900 !text-white !py-3 !rounded-lg !text-sm !font-medium !transition-all !flex !items-center !justify-center !gap-2"
+              >
+                {nftLoading ? (
+                  <Loader className="!w-4 !h-4 !animate-spin" />
+                ) : (
+                  <>
+                    <Trophy className="!w-4 !h-4" />
+                    View NFT
                   </>
                 )}
               </button>
             ) : null}
 
-            {nftClaimed && (
-              <div className="!text-center !relative !z-1 !mt-4">
-                <div className="!w-16 !h-16 !bg-green-100 !rounded-full !flex !items-center !justify-center !mx-auto !mb-3 !shadow-md">
-                  <CheckCircle className="!w-10 !h-10 !text-green-600" />
-                </div>
-                <h2 className="!text-lg !font-bold !text-black">
-                  NFT Claimed Successfully!
-                </h2>
-                <p className="!text-gray-600 !text-sm !mt-1">
-                  Your exclusive Early User NFT
-                </p>
-              </div>
-            )}
-
             {nftErrorMessage && (
-              <div className="!mt-4 !p-3 !bg-red-50 !rounded-xl !border !border-red-200 !flex !items-start !relative !z-1">
-                <XCircle className="!w-5 !h-5 !text-red-600 !mr-2 !flex-shrink-0" />
-                <p className="!text-red-600 !text-sm">{nftErrorMessage}</p>
-              </div>
+              <p className="!text-xs !text-red-600 !text-center">{nftErrorMessage}</p>
             )}
           </div>
-
-          {/* Animations */}
-          <style>{`
-            @keyframes pulse-glow {
-              0% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
-              50% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.6); }
-              100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
-            }
-            @keyframes shimmer {
-              0% { transform: translateX(-100%) skewX(-12deg); }
-              100% { transform: translateX(200%) skewX(-12deg); }
-            }
-            .animate-pulse-glow {
-              animation: pulse-glow 2s ease-in-out infinite;
-            }
-            .animate-shimmer {
-              animation: shimmer 3s ease-in-out infinite;
-            }
-          `}</style>
         </section>
 
-        {/* On-Chain Contributions */}
-        <section className="!pb-6">
-          <h3 className="!text-lg !font-bold !text-black !mb-4">
-            On-Chain Contributions
-          </h3>
-          <div className="!space-y-3">
-            {/* Review a movie */}
+        {/* On-Chain */}
+        <section className="!bg-white !border-b !border-gray-100">
+          <div className="!px-4 !py-3 !border-b !border-gray-100">
+            <h3 className="!text-sm !font-semibold !text-gray-900">On-Chain</h3>
+          </div>
+          <div className="!divide-y !divide-gray-100">
             <button
               onClick={() => router.push("/new")}
-              className="!w-full !bg-gradient-to-br !from-yellow-50 !to-orange-50 !border-2 !border-yellow-300 !rounded-2xl !p-5 !shadow-md active:!shadow-sm active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-yellow-500 !transition-all !duration-150 group hover:!shadow-lg hover:!border-yellow-400 !select-none"
+              className="!w-full !px-4 !py-4 !flex !items-center !gap-3 hover:!bg-gray-50 !transition-colors"
             >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-gradient-to-br !from-yellow-400 !to-orange-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md group-active:!shadow-sm">
-                  <Star className="!w-6 !h-6 !text-white" strokeWidth={2.5} />
-                </div>
-                <div className="!flex-1 !text-left">
-                  <h4 className="!font-bold !text-black !text-base !mb-1">
-                    Review a movie
-                  </h4>
-                  <p className="!text-gray-600 !text-sm !mb-2">
-                    Share your thoughts on the films
-                  </p>
-                  <div className="!flex !items-center !bg-white/70 !rounded-lg !px-2 !py-1">
-                    <Coins
-                      className="!w-4 !h-4 !text-yellow-600 !mr-1"
-                      strokeWidth={2}
-                    />
-                    <span className="!font-bold !text-gray-800 !text-sm">
-                      10 points
-                    </span>
-                  </div>
-                </div>
+              <div className="!w-10 !h-10 !bg-yellow-100 !rounded-lg !flex !items-center !justify-center">
+                <Star className="!w-5 !h-5 !text-yellow-600" strokeWidth={2} />
               </div>
+              <div className="!flex-1 !text-left">
+                <h4 className="!text-sm !font-medium !text-gray-900">Review</h4>
+                <p className="!text-xs !text-gray-600">10 points</p>
+              </div>
+              <ArrowRight className="!w-4 !h-4 !text-gray-400" />
             </button>
 
-            {/* Support a review */}
             <button
               onClick={() => router.push("/home")}
-              className="!w-full !bg-gradient-to-br !from-green-50 !to-emerald-50 !border-2 !border-green-300 !rounded-2xl !p-5 !shadow-md active:!shadow-sm active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-green-500 !transition-all !duration-150 group hover:!shadow-lg hover:!border-green-400 !select-none"
+              className="!w-full !px-4 !py-4 !flex !items-center !gap-3 hover:!bg-gray-50 !transition-colors"
             >
-                              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-gradient-to-br !from-green-400 !to-emerald-500 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md group-active:!shadow-sm">
-                  <ThumbsUp className="!w-6 !h-6 !text-white" strokeWidth={2.5} />
-                </div>
-                <div className="!flex-1 !text-left">
-                  <h4 className="!font-bold !text-black !text-base !mb-1">
-                    Support a review
-                  </h4>
-                  <p className="!text-gray-600 !text-sm !mb-2">
-                    Help promote quality content
-                  </p>
-                  <div className="!flex !items-center !bg-white/70 !rounded-lg !px-2 !py-1">
-                    <Coins
-                      className="!w-4 !h-4 !text-yellow-600 !mr-1"
-                      strokeWidth={2}
-                    />
-                    <span className="!font-bold !text-gray-800 !text-sm">
-                      10 points / 1 WLD
-                    </span>
-                  </div>
-                </div>
+              <div className="!w-10 !h-10 !bg-green-100 !rounded-lg !flex !items-center !justify-center">
+                <ThumbsUp className="!w-5 !h-5 !text-green-600" strokeWidth={2} />
               </div>
+              <div className="!flex-1 !text-left">
+                <h4 className="!text-sm !font-medium !text-gray-900">Support</h4>
+                <p className="!text-xs !text-gray-600">10 points / 1 WLD</p>
+              </div>
+              <ArrowRight className="!w-4 !h-4 !text-gray-400" />
             </button>
 
-            {/* Daily check-in - Unique style */}
             <button
-              className="!w-full !bg-gradient-to-br !from-blue-500 !to-blue-600 !text-white !rounded-2xl !p-5 !shadow-lg active:!shadow-md active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-blue-400 !transition-all !duration-150 disabled:!opacity-50 disabled:!cursor-not-allowed hover:!shadow-xl hover:!from-blue-600 hover:!to-blue-700 !select-none"
               onClick={dailyCheckIn}
               disabled={loading || isConfirming}
+              className="!w-full !px-4 !py-4 !flex !items-center !gap-3 hover:!bg-gray-50 !transition-colors disabled:!opacity-50"
             >
-                              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-blue-400 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
-                  <CheckCircle
-                    className="!w-7 !h-7 !text-white"
-                    strokeWidth={2.5}
-                  />
-                </div>
-                <div className="!flex-1 !text-left">
-                  <h4 className="!font-bold !text-white !text-base !mb-1">
-                    Daily Check-in
-                  </h4>
-                  <p className="!text-blue-100 !text-sm !mb-2">
-                    Earn rewards by checking in daily
-                  </p>
-                  <div className="!flex !items-center !bg-blue-400/30 !rounded-lg !px-2 !py-1">
-                    <Coins
-                      className="!w-4 !h-4 !text-blue-100 !mr-1"
-                      strokeWidth={2}
-                    />
-                    <span className="!font-bold !text-white !text-sm">
-                      5 points
-                    </span>
-                  </div>
-                </div>
+              <div className="!w-10 !h-10 !bg-blue-100 !rounded-lg !flex !items-center !justify-center">
+                <CheckCircle className="!w-5 !h-5 !text-blue-600" strokeWidth={2} />
               </div>
+              <div className="!flex-1 !text-left">
+                <h4 className="!text-sm !font-medium !text-gray-900">Check-in</h4>
+                <p className="!text-xs !text-gray-600">5 points</p>
+              </div>
+              {loading || isConfirming ? (
+                <Loader className="!w-4 !h-4 !text-gray-400 !animate-spin" />
+              ) : (
+                <ArrowRight className="!w-4 !h-4 !text-gray-400" />
+              )}
             </button>
-
-            {/* Messages */}
-            {errors.submit && (
-              <div className="!text-center !p-4 !bg-red-50 !rounded-2xl !border !border-red-200">
-                <p className="!text-red-600 !text-sm">{errors.submit}</p>
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="!text-center !p-4 !bg-green-50 !rounded-2xl !border !border-green-200">
-                <p className="!text-green-600 !text-sm !font-medium">
-                  {successMessage}
-                </p>
-              </div>
-            )}
           </div>
 
-          {/* Leaderboard */}
-          <div className="!mt-3 !mb-6">
+          {(errors.submit || successMessage) && (
+            <div className="!px-4 !py-3 !border-t !border-gray-100">
+              {errors.submit && <p className="!text-xs !text-red-600">{errors.submit}</p>}
+              {successMessage && <p className="!text-xs !text-green-600">{successMessage}</p>}
+            </div>
+          )}
+
+          <div className="!p-4">
             <button
               onClick={() => router.push("/leaderboard")}
-              className="!w-full !bg-white !border !border-gray-300 !shadow-sm hover:!shadow-md !text-gray-800 !py-3 !px-4 !rounded-lg !font-medium !flex !items-center !justify-center !gap-2 !transition-all !duration-200 hover:!bg-gray-50 active:!bg-gray-100 active:!scale-[0.98] focus:!outline-none focus:!ring-2 focus:!ring-offset-2 focus:!ring-blue-500 !select-none"
+              className="!w-full !py-2.5 !bg-gray-900 !text-white !rounded-lg !text-sm !font-medium !flex !items-center !justify-center !gap-2 !transition-all"
             >
-              <Trophy className="!w-4 !h-4 !text-gray-700" strokeWidth={2} />
-              View Full Leaderboard
+              <Trophy className="!w-4 !h-4" />
+              Leaderboard
             </button>
           </div>
         </section>
 
-      {/* Off-Chain Contributions */}
-      <section className="!pb-8">
-        <div className="!flex !items-center !mb-6">
-          <h3 className="!text-xl !font-bold !text-black">Off-Chain Contributions</h3>
-          <div className="!ml-3 !px-2.5 !py-1 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
-            Earn Points
+        {/* Off-Chain */}
+        <section className="!bg-white !border-b !border-gray-100">
+          <div className="!px-4 !py-3 !border-b !border-gray-100">
+            <h3 className="!text-sm !font-semibold !text-gray-900">Off-Chain</h3>
           </div>
-        </div>
-        
-        <div className="!space-y-4">
-          {/* Enhanced Invite a friend section */}
-          <div className="!w-full !bg-gradient-to-br !from-indigo-50 !to-purple-50 !border !border-indigo-100 !rounded-2xl !p-5 !shadow-sm hover:!shadow-md !transition-shadow">
-            <div className="!flex !items-center !mb-4">
-              <div className="!w-14 !h-14 !bg-gradient-to-r !from-indigo-500 !to-purple-600 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
-                <UserPlus className="!w-7 !h-7 !text-white" strokeWidth={2} />
+
+          {/* Invite */}
+          <div className="!p-4 !border-b !border-gray-100">
+            <div className="!flex !items-center !gap-3 !mb-3">
+              <div className="!w-10 !h-10 !bg-indigo-100 !rounded-lg !flex !items-center !justify-center">
+                <UserPlus className="!w-5 !h-5 !text-indigo-600" strokeWidth={2} />
               </div>
               <div className="!flex-1">
-                <h4 className="!font-bold !text-black !text-lg !mb-1">
-                  Invite a friend
-                </h4>
-                <div className="!flex !items-center">
-                  <p className="!text-gray-600 !text-xs">
-                    Earn 50 points for each friend who joins
-                  </p>
-                  <div className="!ml-2 !px-2 !py-0.5 !bg-amber-100 !text-amber-700 !text-xs !font-medium !rounded-full">
-                    +50
-                  </div>
-                </div>
+                <h4 className="!text-sm !font-medium !text-gray-900">Invite</h4>
+                <p className="!text-xs !text-gray-600">50 points per friend</p>
               </div>
             </div>
 
-            {inviteCodeLink ? (
+            {inviteCodeLink && (
               <>
-                <div className="!mb-5">
-                  <p className="!text-xs !text-gray-500 !mb-2 !font-medium !uppercase !tracking-wider">
-                    Your personal invite link:
-                  </p>
-                  <div className="!flex !items-center !gap-3">
-                    <div className="!flex-1 !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !shadow-sm !overflow-hidden">
-                      <p className="!text-xs !text-gray-700 !truncate !font-mono">
-                        {inviteCodeLink}
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleCopyLink}
-                      className={`!flex !items-center !justify-center !w-14 !h-12 !rounded-xl ${
-                        copied ? "!bg-green-500 hover:!bg-green-600" : "!bg-indigo-600 hover:!bg-indigo-700"
-                      } !text-white !transition-all !duration-200 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 !select-none !shadow-sm`}
-                      aria-label="Copy invite link"
-                    >
-                      {copied ? (
-                        <CheckCircle className="!w-6 !h-6" />
-                      ) : (
-                        <Clipboard className="!w-5 !h-5" />
-                      )}
-                    </button>
+                <div className="!flex !gap-2 !mb-3">
+                  <div className="!flex-1 !bg-gray-50 !border !border-gray-200 !rounded-lg !px-3 !py-2">
+                    <p className="!text-[11px] !text-gray-700 !truncate !font-mono">
+                      {inviteCodeLink}
+                    </p>
                   </div>
+                  <button
+                    onClick={handleCopyLink}
+                    className={`!w-10 !h-10 !rounded-lg !flex !items-center !justify-center !transition-all ${
+                      copied ? "!bg-green-500" : "!bg-gray-900"
+                    } !text-white`}
+                  >
+                    {copied ? (
+                      <CheckCircle className="!w-4 !h-4" />
+                    ) : (
+                      <Clipboard className="!w-4 !h-4" />
+                    )}
+                  </button>
                 </div>
 
-                <div>
-                  <p className="!text-xs !text-gray-500 !mb-3 !font-medium !uppercase !tracking-wider">
-                    Share via:
-                  </p>
-                  <div className="!grid !grid-cols-1 !gap-3">
-                    <button
-                      onClick={() => {
-                        // Share to X functionality
-                        const text = "Join me on this platform!";
-                        const url = inviteCodeLink;
-                        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-                      }}
-                      className="!flex !items-center !justify-center !gap-3 !py-3 !rounded-xl !text-black !bg-white !border !border-gray-200 !transition-all !duration-200 active:!scale-95 focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 !select-none hover:!bg-gray-50 !shadow-sm"
-                    >
-                      <div className="!w-5 !h-5">
-                        <svg className="!w-full !h-full" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                        </svg>
-                      </div>
-                      <span className="!text-sm !font-medium">Share invite link on X now!</span>
-                    </button>
-                  </div>
-                </div>
+                <button
+                  onClick={() => {
+                    const text = "Join me on FlickShare!";
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(inviteCodeLink)}`, '_blank');
+                  }}
+                  className="!w-full !py-2.5 !bg-black !text-white !rounded-lg !text-sm !font-medium !flex !items-center !justify-center !gap-2"
+                >
+                  <X className="!w-4 !h-4" />
+                  Share on X
+                </button>
               </>
-            ) : (
-              <div className="!flex !items-center !justify-center !py-6">
-                <div className="animate-pulse !flex !items-center">
-                  <div className="!w-5 !h-5 !bg-indigo-400 !rounded-full !mr-3"></div>
-                  <span className="!text-sm !text-gray-500">
-                    Generating your invite link...
-                  </span>
-                </div>
-              </div>
             )}
           </div>
 
-          {/* Join our discord */}
-          <Link
-            href="https://discord.gg/A4KCFGM9ks"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="!block"
-          >
-            <button
-              onClick={() => handleAction("FOLLOW_DISCORD")}
-              disabled={!!completedTasks["FOLLOW_DISCORD"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
-                completedTasks["FOLLOW_DISCORD"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
-            >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-gradient-to-br !from-indigo-600 !to-purple-700 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
-                  <Discord
-                    className="!w-6 !h-6 !text-white"
-                    strokeWidth={2}
-                  />
+          {/* Social Links */}
+          <div className="!divide-y !divide-gray-100">
+            <Link href="https://discord.gg/A4KCFGM9ks" target="_blank">
+              <button
+                onClick={() => handleAction("FOLLOW_DISCORD")}
+                disabled={!!completedTasks["FOLLOW_DISCORD"]}
+                className="!w-full !px-4 !py-4 !flex !items-center !gap-3 hover:!bg-gray-50 !transition-colors disabled:!opacity-50"
+              >
+                <div className="!w-10 !h-10 !bg-indigo-100 !rounded-lg !flex !items-center !justify-center">
+                  <Discord className="!w-5 !h-5 !text-indigo-600" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <div className="!flex !items-center !mb-1">
-                    <h4 className="!font-semibold !text-black !text-lg">Join our Discord</h4>
-                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
-                      +20
-                    </div>
-                  </div>
-                  <p className="!text-gray-500 !text-sm">
-                    Join our community discussions
-                  </p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">Discord</h4>
+                  <p className="!text-xs !text-gray-600">20 points</p>
                 </div>
                 {completedTasks["FOLLOW_DISCORD"] ? (
-                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
+                  <CheckCircle className="!w-5 !h-5 !text-green-600" />
                 ) : (
-                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
-                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
-                  </div>
+                  <ArrowRight className="!w-4 !h-4 !text-gray-400" />
                 )}
-              </div>
-            </button>
-          </Link>
+              </button>
+            </Link>
 
-          {/* Follow on X */}
-          <Link
-            href="https://x.com/intent/follow?screen_name=FlickShare_WLD"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="!block"
-          >
-            <button
-              onClick={() => handleAction("FOLLOW_X")}
-              disabled={!!completedTasks["FOLLOW_X"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
-                completedTasks["FOLLOW_X"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
-            >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-black !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
-                  <X className="!w-6 !h-6 !text-white" strokeWidth={2} />
+            <Link href="https://x.com/intent/follow?screen_name=FlickShare_WLD" target="_blank">
+              <button
+                onClick={() => handleAction("FOLLOW_X")}
+                disabled={!!completedTasks["FOLLOW_X"]}
+                className="!w-full !px-4 !py-4 !flex !items-center !gap-3 hover:!bg-gray-50 !transition-colors disabled:!opacity-50"
+              >
+                <div className="!w-10 !h-10 !bg-gray-900 !rounded-lg !flex !items-center !justify-center">
+                  <X className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <div className="!flex !items-center !mb-1">
-                    <h4 className="!font-semibold !text-black !text-lg">Follow us on X</h4>
-                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
-                      +20
-                    </div>
-                  </div>
-                  <p className="!text-gray-500 !text-sm">
-                    Stay updated with latest news
-                  </p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">X (Twitter)</h4>
+                  <p className="!text-xs !text-gray-600">20 points</p>
                 </div>
                 {completedTasks["FOLLOW_X"] ? (
-                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
+                  <CheckCircle className="!w-5 !h-5 !text-green-600" />
                 ) : (
-                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
-                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
-                  </div>
+                  <ArrowRight className="!w-4 !h-4 !text-gray-400" />
                 )}
-              </div>
-            </button>
-          </Link>
+              </button>
+            </Link>
 
-          {/* Follow on Instagram */}
-          <Link
-            href="https://www.instagram.com/flickshare_on_world/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="!block"
-          >
-            <button
-              onClick={() => handleAction("FOLLOW_INSTAGRAM")}
-              disabled={!!completedTasks["FOLLOW_INSTAGRAM"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
-                completedTasks["FOLLOW_INSTAGRAM"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
-            >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-gradient-to-br !from-pink-500 !to-purple-600 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
-                  <Instagram
-                    className="!w-6 !h-6 !text-white"
-                    strokeWidth={2}
-                  />
+            <Link href="https://www.instagram.com/flickshare_on_world/" target="_blank">
+              <button
+                onClick={() => handleAction("FOLLOW_INSTAGRAM")}
+                disabled={!!completedTasks["FOLLOW_INSTAGRAM"]}
+                className="!w-full !px-4 !py-4 !flex !items-center !gap-3 hover:!bg-gray-50 !transition-colors disabled:!opacity-50"
+              >
+                <div className="!w-10 !h-10 !bg-gradient-to-br !from-pink-500 !to-purple-600 !rounded-lg !flex !items-center !justify-center">
+                  <Instagram className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <div className="!flex !items-center !mb-1">
-                    <h4 className="!font-semibold !text-black !text-lg">Follow us on Instagram</h4>
-                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
-                      +20
-                    </div>
-                  </div>
-                  <p className="!text-gray-500 !text-sm">
-                    See behind the scenes content
-                  </p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">Instagram</h4>
+                  <p className="!text-xs !text-gray-600">20 points</p>
                 </div>
                 {completedTasks["FOLLOW_INSTAGRAM"] ? (
-                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
+                  <CheckCircle className="!w-5 !h-5 !text-green-600" />
                 ) : (
-                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
-                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
-                  </div>
+                  <ArrowRight className="!w-4 !h-4 !text-gray-400" />
                 )}
-              </div>
-            </button>
-          </Link>
+              </button>
+            </Link>
 
-          {/* Follow on Facebook */}
-          <Link
-            href="fb://profile/697609756776592"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="!block"
-          >
-            <button
-              onClick={() => handleAction("FOLLOW_FACEBOOK")}
-              disabled={!!completedTasks["FOLLOW_FACEBOOK"]}
-              className={`!w-full !bg-white !border !border-gray-200 !rounded-2xl !p-5 !transition-all !duration-200 group active:!scale-[0.98] focus-visible:!ring-2 focus-visible:!ring-indigo-500 focus-visible:!ring-offset-2 hover:!border-indigo-300 hover:!shadow-sm ${
-                completedTasks["FOLLOW_FACEBOOK"]
-                  ? "!opacity-60 !cursor-not-allowed"
-                  : "active:!bg-gray-50"
-              } !select-none`}
-            >
-              <div className="!flex !items-center">
-                <div className="!w-14 !h-14 !bg-gradient-to-br !from-blue-600 !to-indigo-700 !rounded-xl !flex !items-center !justify-center !mr-4 !shadow-md">
-                  <Facebook
-                    className="!w-6 !h-6 !text-white"
-                    strokeWidth={2}
-                  />
+            <Link href="fb://profile/697609756776592" target="_blank">
+              <button
+                onClick={() => handleAction("FOLLOW_FACEBOOK")}
+                disabled={!!completedTasks["FOLLOW_FACEBOOK"]}
+                className="!w-full !px-4 !py-4 !flex !items-center !gap-3 hover:!bg-gray-50 !transition-colors disabled:!opacity-50"
+              >
+                <div className="!w-10 !h-10 !bg-blue-600 !rounded-lg !flex !items-center !justify-center">
+                  <Facebook className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <div className="!flex !items-center !mb-1">
-                    <h4 className="!font-semibold !text-black !text-lg">Follow us on Facebook</h4>
-                    <div className="!ml-2 !px-2 !py-0.5 !bg-indigo-100 !text-indigo-700 !text-xs !font-medium !rounded-full">
-                      +20
-                    </div>
-                  </div>
-                  <p className="!text-gray-500 !text-sm">
-                    Join our community discussions
-                  </p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">Facebook</h4>
+                  <p className="!text-xs !text-gray-600">20 points</p>
                 </div>
                 {completedTasks["FOLLOW_FACEBOOK"] ? (
-                  <CheckCircle className="!w-6 !h-6 !text-green-500 !ml-2" />
+                  <CheckCircle className="!w-5 !h-5 !text-green-600" />
                 ) : (
-                  <div className="!w-8 !h-8 !rounded-full !bg-gray-100 !flex !items-center !justify-center !ml-2 group-hover:!bg-indigo-100 !transition-colors">
-                    <ArrowRight className="!w-4 !h-4 !text-gray-500 group-hover:!text-indigo-600 !transition-colors" />
-                  </div>
+                  <ArrowRight className="!w-4 !h-4 !text-gray-400" />
                 )}
-              </div>
-            </button>
-          </Link>
-        </div>
-      </section>
+              </button>
+            </Link>
+          </div>
+        </section>
       </div>
-      {/* Mobile bottom safe area */}
-      <div className="!h-20 !bg-white"></div>
+
+      <div className="!h-20"></div>
     </main>
   );
 }

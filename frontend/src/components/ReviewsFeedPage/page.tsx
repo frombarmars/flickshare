@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { ChevronRight, ThumbsUp } from "lucide-react";
+import { ChevronRight, ThumbsUp, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import client from "@/lib/worldClient";
@@ -57,6 +57,7 @@ export default function ReviewsFeedPage() {
         hasMoreRef.current = false;
       }
     } catch (err) {
+      console.error("Error fetching reviews:", err);
     } finally {
       setLoading(false);
       loadingRef.current = false;
@@ -72,7 +73,6 @@ export default function ReviewsFeedPage() {
       address: ENV_VARIABLES.FLICKSHARE_CONTRACT_ADDRESS as `0x${string}`,
       abi: FlickShareContractABI,
       eventName: "ReviewAdded",
-      // 👇 logs are automatically typed with args
       onLogs: (logs) => {
         logs.forEach(async (log) => {
           const { reviewId } = (log as unknown as { args: ReviewAddedLog })
@@ -86,7 +86,9 @@ export default function ReviewsFeedPage() {
                 setReviews((prev) => [review, ...prev]);
               }
             }
-          } catch (error) {}
+          } catch (error) {
+            console.error("Error fetching new review:", error);
+          }
         });
       },
     });
@@ -115,7 +117,7 @@ export default function ReviewsFeedPage() {
   };
 
   const handleAvatarClick = (e: React.MouseEvent, username: string) => {
-    e.stopPropagation(); // Prevent triggering the review click
+    e.stopPropagation();
     router.push(`/profile/${username}`);
   };
 
@@ -139,7 +141,6 @@ export default function ReviewsFeedPage() {
   const handleLike = async (reviewIdOnChain: number) => {
     const review = reviews.find((r) => r.reviewIdOnChain === reviewIdOnChain);
     
-    // Check if user is trying to like their own review
     if (review?.reviewer?.id === session?.user?.id) {
       toast.info("You can't like your own review! 😊", {
         position: "top-center",
@@ -214,9 +215,10 @@ export default function ReviewsFeedPage() {
           userId: session?.user?.id,
           txHash: finalPayload.transaction_id,
         }),
-      }).catch((err) => {});
+      }).catch((err) => {
+        console.error("Error updating like status:", err);
+      });
     } catch (err) {
-      // Revert UI if failed
       setReviews((prev) =>
         prev.map((r) =>
           r.reviewIdOnChain === reviewIdOnChain
@@ -240,8 +242,8 @@ export default function ReviewsFeedPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Condensed reviews feed */}
-      <div className="px-3 py-3 space-y-3">
+      {/* Compact reviews feed */}
+      <div className="max-w-3xl mx-auto px-3 py-4">
         {reviews.map((r, i) => {
           const isLast = i === reviews.length - 1;
 
@@ -249,115 +251,102 @@ export default function ReviewsFeedPage() {
             <div
               key={r.id}
               ref={isLast ? lastReviewRef : null}
-              className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden active:scale-[0.99] transition-all duration-150 hover:shadow-md hover:border-gray-300"
+              className="mb-3 group"
               onClick={() => handleReviewClick(r)}
             >
-              {/* Compact top bar with coin status */}
-              <div
-                className="flex items-center justify-between gap-3 p-2 rounded-md active:bg-gray-100 hover:bg-gray-100"
-                onClick={(e) => handleAvatarClick(e, r.user)}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-                    <Image
-                      src={r.avatar || ""}
-                      alt={r.user}
-                      width={32}
-                      height={32}
-                      className="object-cover"
-                    />
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">{r.user}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
-              </div>
-
-              {/* Main content - poster + review */}
-              <div className="flex gap-4 p-4 pt-3">
-                {/* High-quality poster with subtle glow effect */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-22 h-33 relative rounded-xl overflow-hidden shadow-lg border border-gray-200">
-                    <Image
-                      src={`https://image.tmdb.org/t/p/w500${
-                        r.posterPath || "./placeholder.jpeg"
-                      }`}
-                      alt={r.movieTitle}
-                      fill
-                      className="object-cover"
-                      sizes="72px"
-                      priority={i < 3}
-                    />
-                  </div>
-                  {/* Subtle glow effect behind poster */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-500 opacity-10 blur-lg -z-10 scale-110 rounded-xl"></div>
-                </div>
-
-                {/* Content area */}
-                <div className="flex-1 min-w-0 space-y-1.5">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-base leading-tight line-clamp-1">
-                      {r.movieTitle}
-                    </h3>
-                  </div>
-
-                  {/* Review text with refined typography */}
-                  <p className="text-sm leading-relaxed text-gray-700 line-clamp-3 font-normal mb-2">
-                    {r.text}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                    <div className="flex items-center gap-2 text-xs">
-                      <SupportAmount amount={r.coins} />
-
-                      <div className={`px-2 py-1 rounded-md transition-colors ${r.isLiked ? 'bg-red-50 border border-red-200' : 'bg-gray-100'}`}>
-                        <div className={`flex items-center gap-1.5 ${r.isLiked ? 'text-red-600' : 'text-gray-700'}`}>
-                          <ThumbsUp size={11} className={r.isLiked ? 'fill-red-500' : ''} />
-                          <span className="font-medium">{r.likes}</span>
-                        </div>
-                      </div>
-
-                      <div className="px-2 py-1 bg-gray-100 rounded-md">
-                        <div className="flex items-center gap-1.5 text-gray-700">
-                          💬
-                          <span>{r.commentsCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Enhanced like button */}
-                    <button
-                      disabled={r.reviewer?.id === session?.user?.id}
-                      className={`
-                        p-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center transform active:scale-95
-                        ${r.reviewer?.id === session?.user?.id
-                          ? 'bg-gray-300 cursor-not-allowed opacity-60'
-                          : r.isLiked 
-                            ? 'bg-red-50 border-2 border-red-200 hover:bg-red-100' 
-                            : 'bg-black hover:bg-gray-800'
-                        }
-                      `}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLike(r.reviewIdOnChain);
-                      }}
-                      title={
-                        r.reviewer?.id === session?.user?.id 
-                          ? "Can't like your own review" 
-                          : r.isLiked 
-                            ? "Already liked" 
-                            : "Like this review"
-                      }
+              {/* Compact review card */}
+              <div className="bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors cursor-pointer">
+                {/* Compact top bar */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 border border-gray-200"
+                      onClick={(e) => handleAvatarClick(e, r.user)}
                     >
-                      <ThumbsUp
-                        size={20}
-                        className={`transition-all duration-300 ${
-                          r.reviewer?.id === session?.user?.id
-                            ? "text-gray-500"
-                            : r.isLiked 
-                              ? "text-red-500 fill-red-500" 
-                              : "text-white"
-                        }`}
+                      <Image
+                        src={r.avatar || ""}
+                        alt={r.user}
+                        width={32}
+                        height={32}
+                        className="object-cover"
                       />
-                    </button>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{r.user}</p>
+                      <p className="text-[10px] text-gray-500">Film enthusiast</p>
+                    </div>
+                  </div>
+                  <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
+                    <ChevronRight size={16} />
+                  </div>
+                </div>
+
+                {/* Compact content */}
+                <div className="flex gap-3">
+                  {/* Smaller poster */}
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-24 relative rounded overflow-hidden border border-gray-200">
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w500${
+                          r.posterPath || "./placeholder.jpeg"
+                        }`}
+                        alt={r.movieTitle}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                        priority={i < 3}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Content area */}
+                  <div className="flex-1 min-w-0">
+                    <div className="mb-2">
+                      <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2">
+                        {r.movieTitle}
+                      </h3>
+                    </div>
+
+                    {/* Review text */}
+                    <p className="text-gray-600 text-xs mb-3 leading-relaxed line-clamp-3">
+                      {r.text}
+                    </p>
+
+                    {/* Compact interaction bar */}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <SupportAmount amount={r.coins} />
+                        
+                        <div className="flex items-center gap-1 text-gray-500">
+                          <ThumbsUp size={12} className={r.isLiked ? 'fill-current text-gray-700' : ''} />
+                          <span className="text-xs">{r.likes}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 text-gray-500">
+                          <span className="text-xs">💬</span>
+                          <span className="text-xs">{r.commentsCount}</span>
+                        </div>
+                      </div>
+                      
+                      <button
+                        disabled={r.reviewer?.id === session?.user?.id}
+                        className={`
+                          !px-2.5 !py-1 !rounded !text-xs !font-medium !transition-colors
+                          ${r.reviewer?.id === session?.user?.id
+                            ? '!bg-gray-100 !text-gray-400 !cursor-not-allowed !border !border-gray-200'
+                            : r.isLiked 
+                              ? '!bg-gray-200 !text-gray-700 !border !border-gray-300' 
+                              : '!bg-gray-100 !text-gray-700 hover:!bg-gray-200 !border !border-gray-200 hover:!border-gray-300'
+                          }
+                        `}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike(r.reviewIdOnChain);
+                        }}
+                      >
+                        {r.isLiked ? 'Liked' : 'Like'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -366,28 +355,26 @@ export default function ReviewsFeedPage() {
         })}
       </div>
 
-      {/* Refined loading indicator */}
+      {/* Compact loading */}
       {loading && (
         <div className="flex justify-center py-6">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200"></div>
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-700 border-t-transparent absolute top-0"></div>
+          <div className="flex items-center gap-2 text-gray-500">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600"></div>
+            <span className="text-xs">Loading...</span>
           </div>
         </div>
       )}
 
-      {/* End message with clean styling */}
+      {/* End message */}
       {!hasMoreRef.current && reviews.length > 0 && (
-        <div className="text-center py-8">
-          <div className="inline-flex items-center gap-2px-4 py-3 rounded-2xl">
-            <span className="text-sm font-medium text-gray-600">
-              All reviews loaded!
-            </span>
+        <div className="max-w-3xl mx-auto px-3 py-6">
+          <div className="text-center py-4 border-t border-gray-200">
+            <p className="text-gray-500 text-xs">You've reached the end</p>
           </div>
         </div>
       )}
 
-      <div className="h-20"></div>
+      <div className="h-16"></div>
     </div>
   );
 }

@@ -21,7 +21,7 @@ export const Navigation = () => {
   }, [value]);
 
   return (
-    <Tabs value={value} onValueChange={setValue} className={`h-12 border-t border-gray-500 custom-tabs z-40 ${os === 'android' ? 'mb-0 shadow-md' : ''}`}>
+    <Tabs value={value} onValueChange={setValue} className={`h-12 border-t border-gray-500 custom-tabs z-40 sticky ${os === 'android' ? 'mb-0 shadow-md' : ''}`}>
       <TabItem value="home" icon={<Home color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
       <TabItem value="movie" icon={<Film color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
       <TabItem value="new" icon={<Plus color='black' strokeWidth={2} size={24} />} className="py-3 custom-tab-item px-4" />
