@@ -52,12 +52,16 @@ export default function Profile() {
         <div className="flex items-center justify-between max-w-sm mx-auto">
           <div className="w-10"></div>
           <h1 className="text-xl font-bold text-black">Profile</h1>
-          <button
-            aria-label="Settings"
-            className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-200 active:scale-95 touch-manipulation"
-          >
-            <Settings className="w-5 h-5" strokeWidth={2} />
-          </button>
+          {isOwner ? (
+            <button
+              aria-label="Settings"
+              className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-200 active:scale-95 touch-manipulation"
+            >
+              <Settings className="w-5 h-5" strokeWidth={2} />
+            </button>
+          ) : (
+            <div className="w-10"></div>
+          )}
         </div>
       </header>
 

@@ -89,7 +89,7 @@ export const UserInfo = ({
         {/* Points */}
         <div className="bg-blue-50 px-6 py-3 rounded-full border border-blue-100">
           <div className="flex items-center gap-2">
-            <Coins className="w-5 h-5 text-blue-600" />
+            <Image src="/wld_token.png" alt="WLD" width={20} height={20} className="object-contain" />
             <span className="font-semibold text-blue-700">
               {totalPoints.toLocaleString()} points
             </span>

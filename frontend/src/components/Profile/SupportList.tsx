@@ -1,4 +1,5 @@
 
+import Image from "next/image";
 import { Coins, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +44,7 @@ export const SupportList = ({ supports, username }: SupportListProps) => {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-900">@{username}</span>
               <div className="flex items-center gap-1 text-sm font-semibold text-green-600">
-                <Coins className="w-4 h-4" />
+                <Image src="/wld_token.png" alt="WLD" width={16} height={16} className="object-contain" />
                 {support.amount} WLD
               </div>
             </div>

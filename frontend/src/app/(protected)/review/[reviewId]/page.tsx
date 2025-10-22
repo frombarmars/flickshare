@@ -300,16 +300,16 @@ const ReviewSupportUI = () => {
                   onClick={() => handleLike(review.reviewIdOnChain)}
                   disabled={isLiking || (review?.reviewer?.id === session?.user?.id)}
                   className={`
-                    !flex !items-center !gap-1.5 !px-2.5 !py-1.5 !rounded-md !text-xs !font-medium !transition-all
+                    !flex !items-center !gap-1.5 !px-3 !py-2 !rounded-lg !text-xs !font-semibold !transition-all
                     ${review?.reviewer?.id === session?.user?.id
-                      ? '!bg-gray-100 !text-blue-400 !cursor-not-allowed'
+                      ? '!bg-gray-100 !text-gray-400 !cursor-not-allowed'
                       : isLiked 
-                        ? '!bg-red-50 !text-red-600 hover:!bg-red-100' 
-                        : '!bg-transparent hover:!bg-gray-100 !text-gray-600'
+                        ? '!bg-gray-900 !text-white hover:!bg-black !shadow-md' 
+                        : '!bg-white !border !border-gray-300 hover:!bg-gray-50 hover:!border-gray-900 !text-gray-700 hover:!text-gray-900'
                     }
                   `}
                 >
-                  <ThumbsUp className={`!w-3.5 !h-3.5 ${isLiked ? '!fill-blue-600': ''}`} />
+                  <ThumbsUp className={`!w-4 !h-4 ${isLiked ? '!fill-white': ''}`} />
                   <span>{likeCount}</span>
                 </button>
               </div>
@@ -325,7 +325,7 @@ const ReviewSupportUI = () => {
             onClick={() => router.push(`/support/${reviewId}`)}
             className="!w-full !py-3 !bg-gray-900 hover:!bg-gray-800 !text-white !rounded-xl !text-sm !font-medium !transition-all !shadow-sm !flex !items-center !justify-center !gap-2"
           >
-            <Coins className="!w-4 !h-4" />
+            <Image src="/wld_token.png" alt="WLD" width={16} height={16} className="object-contain" />
             <span>Support {review.user}</span>
           </button>
         </div>
@@ -397,7 +397,7 @@ const ReviewSupportUI = () => {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 px-4">
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                      <Coins className="w-5 h-5 text-gray-400" />
+                      <Image src="/wld_token.png" alt="WLD" width={20} height={20} className="object-contain" />
                     </div>
                     <p className="text-sm text-gray-500">No supporters yet</p>
                   </div>
@@ -425,7 +425,7 @@ const ReviewSupportUI = () => {
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <Coins className="w-3.5 h-3.5 text-gray-600" />
+                      <Image src="/wld_token.png" alt="WLD" width={14} height={14} className="object-contain" />
                       <span className="text-[10px] text-gray-500 uppercase tracking-wide">Support</span>
                     </div>
                     <div className="text-xl font-semibold text-gray-900">

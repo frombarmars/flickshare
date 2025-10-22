@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { Search, X, Award, RefreshCw } from "lucide-react";
 import { MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import FlickShareContractABI from "@/abi/FlickShareContract.json";
@@ -26,6 +26,13 @@ interface MovieSuggestion {
   release_date?: string;
 }
 
+interface SelectedMovie {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  release_date?: string;
+}
+
 
 
 
@@ -33,6 +40,7 @@ export default function AddReview() {
   const { data: session } = useSession();
   const [movie, setMovie] = useState("");
   const [movieId, setMovieId] = useState(0);
+  const [selectedMovie, setSelectedMovie] = useState<SelectedMovie | null>(null);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -119,11 +127,11 @@ export default function AddReview() {
 
         if (res.ok) {
           setSuccessMessage("Review confirmed on-chain and saved! +10 points awarded.");
-          // Reset form
-          setMovie("");
-          setMovieId(0);
-          setReview("");
-          setRating(0);
+          // Reset form after short delay
+          setTimeout(() => {
+            handleClearForm();
+            setSuccessMessage("");
+          }, 3000);
         } else {
           setErrors({ submit: data.error || "Failed to save review, please try again." });
           savedToDbRef.current = false; // allow retry if needed
@@ -177,10 +185,21 @@ export default function AddReview() {
     return () => clearTimeout(delayDebounce);
   }, [movie, fetchMovies]);
 
-  const handleMovieSelect = (title: string, id: number) => {
-    setMovie(title);
-    setMovieId(id);
+  const handleMovieSelect = (m: MovieSuggestion) => {
+    setMovie(m.title);
+    setMovieId(m.id);
+    setSelectedMovie(m);
     setShowDropdown(false);
+  };
+
+  const handleClearForm = () => {
+    setMovie("");
+    setMovieId(0);
+    setSelectedMovie(null);
+    setReview("");
+    setRating(0);
+    setErrors({});
+    setSuccessMessage("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -268,173 +287,270 @@ export default function AddReview() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center px-4 py-8">
-      <div className="w-full max-w-lg mb-8 text-center">
-        <h1 className="text-xl font-light text-gray-900">Add Review</h1>
-        {/* 👇 Daily remaining reviews info */}
-        {dailyCount !== null && (
-          <p className="mt-2 text-sm text-gray-500 text-center">
-            You can submit {remaining} more review(s) today.
-          </p>
-        )}
+    <div className="min-h-screen bg-white flex flex-col items-center px-4 py-6 pb-24">
+      {/* Header with Incentive */}
+      <div className="w-full max-w-lg mb-6">
+        <div className="text-center mb-3">
+          <h1 className="text-xl font-semibold text-gray-900">Add Review</h1>
+          {dailyCount !== null && (
+            <p className="mt-1 text-xs text-gray-600">
+              {remaining} review{remaining !== 1 ? 's' : ''} remaining today
+            </p>
+          )}
+        </div>
+        
+        {/* Reward Banner */}
+        <div className="bg-gray-900 text-white rounded-xl p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+              <Award className="w-4 h-4 text-gray-900" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm">Earn 10 Points</p>
+              <p className="text-[10px] text-gray-300">For each verified review</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <Image src="/wld_token.png" alt="Points" width={20} height={20} className="object-contain" />
+            <span className="text-base font-bold">+10</span>
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-6">
-        {/* Movie Search */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search for a movie..."
-            value={movie}
-            onChange={(e) => {
-              setMovie(e.target.value);
-              setShowDropdown(true);
-            }}
-            onFocus={() => movie && setShowDropdown(true)}
-            className={`!w-full !h-14 !px-6 !bg-gray-50 !rounded-2xl !border-2 !text-gray-700 !placeholder-gray-400 !focus:outline-none !transition-all !duration-200 ${errors.movie
-              ? "!border-red-300 !focus:border-red-400"
-              : "!border-gray-200 !focus:border-gray-400 !hover:border-gray-300"
-              }`}
-          />
-          <Search className="!absolute !right-6 !top-1/2 !-translate-y-1/2 !text-gray-400" />
-          {errors.movie && (
-            <p className="mt-2 text-sm text-red-500 px-2">{errors.movie}</p>
-          )}
-          {showDropdown && searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-200 mt-2 max-h-80 overflow-y-auto z-50">
-              {searchLoading ? (
-                <div className="p-6 text-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-                </div>
-              ) : (
-                searchResults.map((m) => (
+      <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-4">
+        {/* Movie Search with Selected Movie Display */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-gray-700 block">
+            Movie <span className="text-red-500">*</span>
+          </label>
+          
+          {selectedMovie ? (
+            /* Selected Movie Card */
+            <div className="bg-gray-50 rounded-xl p-3 border-2 border-gray-200">
+              <div className="flex items-start gap-3">
+                {selectedMovie.poster_path ? (
+                  <Image
+                    src={`https://image.tmdb.org/t/p/w185${selectedMovie.poster_path}`}
+                    alt={selectedMovie.title}
+                    width={60}
+                    height={90}
+                    className="rounded-lg object-cover shadow-sm flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-15 h-22 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-gray-400 text-[10px]">No Image</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-base leading-tight">
+                    {selectedMovie.title}
+                  </h3>
+                  {selectedMovie.release_date && (
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      {new Date(selectedMovie.release_date).getFullYear()}
+                    </p>
+                  )}
                   <button
-                    key={m.id}
                     type="button"
-                    onClick={() => handleMovieSelect(m.title, m.id)}
-                    className="!w-full !flex !items-center !gap-4 !px-4 !py-3 !hover:bg-gray-50 !transition-colors !text-left"
+                    onClick={() => {
+                      setSelectedMovie(null);
+                      setMovie("");
+                      setMovieId(0);
+                    }}
+                    className="mt-2 text-xs text-gray-700 hover:text-black font-medium flex items-center gap-1"
                   >
-                    {m.poster_path ? (
-                      <Image
-                        src={`https://image.tmdb.org/t/p/w92${m.poster_path}`}
-                        alt={m.title}
-                        width={48}
-                        height={72}
-                        className="!rounded-lg !shadow-sm"
-                      />
-                    ) : (
-                      <div className="!w-12 !h-18 !bg-gray-200 !rounded-lg !flex !items-center !justify-center">
-                        <span className="!text-gray-400 !text-xs">No Img</span>
-                      </div>
-                    )}
-                    <div className="!flex-1 !min-w-0">
-                      <p className="!font-medium !text-gray-800 !truncate">
-                        {m.title}
-                      </p>
-                      <p className="!text-sm !text-gray-500">
-                        {m.release_date
-                          ? new Date(m.release_date).getFullYear()
-                          : "Unknown"}
-                      </p>
-                    </div>
+                    <X className="w-3 h-3" />
+                    Change movie
                   </button>
-                ))
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Movie Search Input */
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search for a movie..."
+                value={movie}
+                onChange={(e) => {
+                  setMovie(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => movie && setShowDropdown(true)}
+                className={`!w-full !h-12 !px-4 !bg-gray-50 !rounded-xl !border-2 !text-gray-700 !text-sm !placeholder-gray-400 !focus:outline-none !transition-all !duration-200 ${
+                  errors.movie
+                    ? "!border-red-300 !focus:border-red-400"
+                    : "!border-gray-200 !focus:border-gray-900 !hover:border-gray-300"
+                }`}
+              />
+              <Search className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !text-gray-400 !w-4 !h-4" />
+              {showDropdown && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white rounded-2xl shadow-xl border-2 border-gray-200 mt-2 max-h-80 overflow-y-auto z-50">
+                  {searchLoading ? (
+                    <div className="p-6 text-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
+                    </div>
+                  ) : (
+                    searchResults.map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleMovieSelect(m)}
+                        className="!w-full !flex !items-center !gap-4 !px-4 !py-3 !hover:bg-gray-50 !transition-colors !text-left !border-b !border-gray-100 last:!border-b-0"
+                      >
+                        {m.poster_path ? (
+                          <Image
+                            src={`https://image.tmdb.org/t/p/w92${m.poster_path}`}
+                            alt={m.title}
+                            width={48}
+                            height={72}
+                            className="!rounded-lg !shadow-sm"
+                          />
+                        ) : (
+                          <div className="!w-12 !h-18 !bg-gray-200 !rounded-lg !flex !items-center !justify-center">
+                            <span className="!text-gray-400 !text-xs">No Img</span>
+                          </div>
+                        )}
+                        <div className="!flex-1 !min-w-0">
+                          <p className="!font-medium !text-gray-800 !truncate">
+                            {m.title}
+                          </p>
+                          <p className="!text-sm !text-gray-500">
+                            {m.release_date
+                              ? new Date(m.release_date).getFullYear()
+                              : "Unknown"}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
               )}
             </div>
+          )}
+          {errors.movie && (
+            <p className="text-xs text-red-500 px-2">{errors.movie}</p>
           )}
         </div>
 
         {/* Rating */}
-        <div className="rounded-2xl px-5 py-4 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <label className="text-gray-700 font-medium text-sm">Rating:</label>
-            <div className="flex items-center gap-0.5 mx-4">
-              {[1, 2, 3, 4, 5].map((star) => {
-                const currentRating = hoveredRating || rating;
-                return (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    className="!relative !w-8 !h-8 !flex !items-center !justify-center"
-                    aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
-                  >
-                    <svg
-                      className={`!w-8 !h-8 ${currentRating >= star ? "!text-yellow-400" : "!text-gray-300"
-                        }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-gray-700 block">
+            Rating <span className="text-red-500">*</span>
+          </label>
+          <div className="rounded-xl px-4 py-3 border-2 border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const currentRating = hoveredRating || rating;
+                  return (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      onMouseEnter={() => setHoveredRating(star)}
+                      onMouseLeave={() => setHoveredRating(0)}
+                      className="!relative !w-9 !h-9 !flex !items-center !justify-center !transition-transform hover:!scale-110"
+                      aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                     >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.84-.197-1.54-1.118l1.07-3.292A1 1 0 0 0 4.7 10.753L1.9 8.72c-.783-.57-.38-1.81.588-1.81H5.95a1 1 0 0 0 .951-.69l1.07-3.292Z" />
-                    </svg>
-                  </button>
-                );
-              })}
+                      <svg
+                        className={`!w-8 !h-8 !transition-colors ${
+                          currentRating >= star ? "!text-black" : "!text-gray-300"
+                        }`}
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.84-.197-1.54-1.118l1.07-3.292A1 1 0 0 0 4.7 10.753L1.9 8.72c-.783-.57-.38-1.81.588-1.81H5.95a1 1 0 0 0 .951-.69l1.07-3.292Z" />
+                      </svg>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="bg-white px-3 py-1.5 rounded-lg border-2 border-gray-900 min-w-[60px] text-center">
+                <span className="text-base font-bold text-gray-900">
+                  {hoveredRating > 0 ? hoveredRating : rating > 0 ? rating : "0"}
+                </span>
+                <span className="text-gray-500 text-xs ml-0.5">/5</span>
+              </div>
             </div>
-            <div className="bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm min-w-[60px] text-center">
-              <span className="text-base font-semibold text-gray-800">
-                {hoveredRating > 0 ? hoveredRating : rating > 0 ? rating : "—"}
-              </span>
-              <span className="text-gray-500 text-sm ml-0.5">/5</span>
-            </div>
+            {errors.rating && (
+              <p className="mt-2 text-xs text-red-500 text-center">{errors.rating}</p>
+            )}
           </div>
-          {errors.rating && (
-            <p className="mt-2 text-sm text-red-500 text-center">{errors.rating}</p>
-          )}
         </div>
 
         {/* Review */}
-        <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-100 flex justify-between items-center">
-            <label className="text-gray-700 font-medium">Your Review</label>
-            <span
-              className={`text-sm ${wordCount > WORD_LIMIT ? "text-red-500" : "text-gray-500"
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-gray-700 block">
+            Your Review <span className="text-red-500">*</span>
+          </label>
+          <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden hover:border-gray-900 transition-colors">
+            <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <span className="text-[10px] text-gray-600">Minimum 5 words</span>
+              <span
+                className={`text-xs font-medium ${
+                  wordCount > WORD_LIMIT ? "text-red-500" : wordCount >= 5 ? "text-green-600" : "text-gray-500"
                 }`}
-            >
-              {wordCount}/{WORD_LIMIT} words
-            </span>
-          </div>
-          <textarea
-            placeholder="Share your thoughts..."
-            value={review}
-            onChange={(e) => setReview(e.target.value)}
-            rows={6}
-            className="!w-full !px-5 !py-4 !text-gray-700 !placeholder-gray-400 !resize-none !focus:outline-none !bg-transparent"
-            style={{ fontSize: '16px' }}
-          />
-          {errors.review && (
-            <div className="px-5 pb-4">
-              <p className="text-sm text-red-500">{errors.review}</p>
+              >
+                {wordCount}/{WORD_LIMIT} words
+              </span>
             </div>
-          )}
+            <textarea
+              placeholder="Share your thoughts about this movie... What did you love? What could be better?"
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              rows={5}
+              className="!w-full !px-4 !py-3 !text-gray-700 !placeholder-gray-400 !resize-none !focus:outline-none !bg-transparent !leading-relaxed !text-sm"
+            />
+            {errors.review && (
+              <div className="px-4 pb-3 bg-red-50">
+                <p className="text-xs text-red-500">{errors.review}</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={isSubmitDisabled}
-          className="!w-full !h-14 !bg-black !hover:bg-gray-800 !disabled:bg-gray-400 !text-white !font-medium !rounded-2xl !transition-all !duration-200 shadow-lg"
-        >
-          {loading
-            ? "Submitting..."
-            : isConfirming
-              ? "Confirming on-chain..."
-              : !session?.user?.id
-                ? "Sign in to submit"
-                : "Submit Review"}
-        </button>
+        {/* Action Buttons */}
+        <div className="flex gap-2 pt-2 pb-4">
+          <button
+            type="button"
+            onClick={handleClearForm}
+            disabled={loading || isConfirming}
+            className="!px-4 !py-3 !border-2 !border-gray-200 !text-gray-700 hover:!border-gray-900 hover:!text-gray-900 !font-medium !rounded-xl !transition-all !disabled:opacity-50 !disabled:cursor-not-allowed !flex !items-center !gap-2 !text-sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Reset
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitDisabled}
+            className="!flex-1 !h-12 !bg-black !hover:bg-gray-800 !disabled:bg-gray-400 !text-white !font-semibold !rounded-xl !transition-all !duration-200 !shadow-lg !active:scale-[0.98] !text-sm"
+          >
+            {loading
+              ? "Submitting..."
+              : isConfirming
+                ? "Confirming..."
+                : !session?.user?.id
+                  ? "Sign in to submit"
+                  : "Submit Review"}
+          </button>
+        </div>
 
         {/* Messages */}
         {errors.submit && (
-          <div className="text-center p-4 bg-red-50 rounded-2xl border border-red-200">
-            <p className="text-red-600 text-sm">{errors.submit}</p>
+          <div className="text-center p-3 bg-white rounded-xl border-2 border-gray-900">
+            <p className="text-gray-900 text-xs font-medium">{errors.submit}</p>
           </div>
         )}
         {successMessage && (
-          <div className="text-center p-4 bg-green-50 rounded-2xl border border-green-200">
-            <p className="text-green-600 text-sm font-medium">{successMessage}</p>
+          <div className="text-center p-4 bg-gray-900 text-white rounded-xl border-2 border-gray-900 animate-pulse">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                <Award className="w-4 h-4 text-gray-900" />
+              </div>
+              <p className="text-base font-bold">Success!</p>
+            </div>
+            <p className="text-xs text-gray-200">{successMessage}</p>
           </div>
         )}
       </form>

@@ -376,7 +376,7 @@ const MovieDetailsPage = () => {
                           <span className="!text-xs sm:!text-sm !font-medium">{review.likes?.length || 0}</span>
                         </div>
                         <div className="!flex !items-center !gap-1 sm:!gap-1.5 !text-gray-600">
-                          <Coins className="!w-3 !h-3 sm:!w-4 sm:!h-4" />
+                          <Image src="/wld_token.png" alt="WLD" width={16} height={16} className="object-contain !w-3 !h-3 sm:!w-4 sm:!h-4" />
                           <div className="!text-xs sm:!text-sm">
                             <SupportAmount
                               amount={(review.supports || []).reduce(

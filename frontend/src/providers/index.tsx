@@ -6,8 +6,10 @@ import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { EmotionProvider } from "@/providers/Emotion";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { initializeMiniKit } from "@/lib/minikit-setup";
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 
 const ErudaProvider = dynamic(
@@ -19,6 +21,19 @@ const ErudaProvider = dynamic(
 interface ClientProvidersProps {
   children: ReactNode;
   session: Session | null; // Use the appropriate type for session from next-auth
+}
+
+/**
+ * MiniKit Initializer Component
+ * Initializes MiniKit on mount to set up event handlers
+ */
+function MiniKitInitializer() {
+  useEffect(() => {
+    // Initialize MiniKit when component mounts
+    initializeMiniKit();
+  }, []);
+
+  return null;
 }
 
 /**
@@ -41,6 +56,7 @@ export default function ClientProviders({
     <EmotionProvider>
       <ErudaProvider>
         <MiniKitProvider>
+          <MiniKitInitializer />
           <SessionProvider session={session}>
             <NotificationProvider>
               {/* <LocaleProvider> */}
