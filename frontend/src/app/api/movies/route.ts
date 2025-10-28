@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
       orderBy: { releaseDate: "desc" },
       include: {
         _count: { select: { reviews: true } },
+        reviews: { select: { rating: true } },
         crew: {
           where: { job: "Director" },
           include: { person: { select: { name: true } } },
@@ -52,8 +53,22 @@ export async function GET(request: NextRequest) {
     const paginatedMovies = hasMore ? movies.slice(0, -1) : movies;
     const nextCursor = hasMore ? paginatedMovies.at(-1)?.id ?? null : null;
 
+    // Calculate average rating from our own reviews
+    const moviesWithAvgRating = paginatedMovies.map((movie) => {
+      const avgRating = movie.reviews.length > 0
+        ? movie.reviews.reduce((sum, review) => sum + review.rating, 0) / movie.reviews.length
+        : 0;
+      
+      // Remove reviews array from response, keep only avgRating
+      const { reviews, ...movieWithoutReviews } = movie;
+      return {
+        ...movieWithoutReviews,
+        avgRating: Number(avgRating.toFixed(1)),
+      };
+    });
+
     return NextResponse.json({
-      movies: paginatedMovies,
+      movies: moviesWithAvgRating,
       nextCursor,
       hasMore,
     });

@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import { ENV_VARIABLES } from "@/constants/env_variables";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
 import { getReviewCounter } from "@/lib/contract_utility/getReviewCounter";
+import { Rating } from "@/components/AddReview/Rating";
 
 
 interface FormErrors {
@@ -43,7 +44,6 @@ export default function AddReview() {
   const [selectedMovie, setSelectedMovie] = useState<SelectedMovie | null>(null);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -190,6 +190,14 @@ export default function AddReview() {
     setMovieId(m.id);
     setSelectedMovie(m);
     setShowDropdown(false);
+    setErrors((prev) => ({ ...prev, movie: undefined }));
+  };
+
+  const handleChangeMovie = () => {
+    setSelectedMovie(null);
+    setMovie("");
+    setMovieId(0);
+    setErrors((prev) => ({ ...prev, movie: undefined }));
   };
 
   const handleClearForm = () => {
@@ -352,14 +360,14 @@ export default function AddReview() {
                   )}
                   <button
                     type="button"
-                    onClick={() => {
-                      setSelectedMovie(null);
-                      setMovie("");
-                      setMovieId(0);
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleChangeMovie();
                     }}
-                    className="mt-2 text-xs text-gray-700 hover:text-black font-medium flex items-center gap-1"
+                    className="!mt-2 !text-xs !text-gray-700 hover:!text-black !font-medium !flex !items-center !gap-1 !transition-colors !bg-transparent !border-0 !p-0 !cursor-pointer"
                   >
-                    <X className="w-3 h-3" />
+                    <RefreshCw className="!w-3 !h-3" />
                     Change movie
                   </button>
                 </div>
@@ -438,45 +446,7 @@ export default function AddReview() {
           <label className="text-xs font-medium text-gray-700 block">
             Rating <span className="text-red-500">*</span>
           </label>
-          <div className="rounded-xl px-4 py-3 border-2 border-gray-200 bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => {
-                  const currentRating = hoveredRating || rating;
-                  return (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoveredRating(star)}
-                      onMouseLeave={() => setHoveredRating(0)}
-                      className="!relative !w-9 !h-9 !flex !items-center !justify-center !transition-transform hover:!scale-110"
-                      aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
-                    >
-                      <svg
-                        className={`!w-8 !h-8 !transition-colors ${
-                          currentRating >= star ? "!text-black" : "!text-gray-300"
-                        }`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.84-.197-1.54-1.118l1.07-3.292A1 1 0 0 0 4.7 10.753L1.9 8.72c-.783-.57-.38-1.81.588-1.81H5.95a1 1 0 0 0 .951-.69l1.07-3.292Z" />
-                      </svg>
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="bg-white px-3 py-1.5 rounded-lg border-2 border-gray-900 min-w-[60px] text-center">
-                <span className="text-base font-bold text-gray-900">
-                  {hoveredRating > 0 ? hoveredRating : rating > 0 ? rating : "0"}
-                </span>
-                <span className="text-gray-500 text-xs ml-0.5">/5</span>
-              </div>
-            </div>
-            {errors.rating && (
-              <p className="mt-2 text-xs text-red-500 text-center">{errors.rating}</p>
-            )}
-          </div>
+          <Rating rating={rating} setRating={setRating} error={errors.rating} />
         </div>
 
         {/* Review */}
