@@ -11,6 +11,12 @@ import { ENV_VARIABLES } from "@/constants/env_variables";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
 import { getReviewCounter } from "@/lib/contract_utility/getReviewCounter";
 import { Rating } from "@/components/AddReview/Rating";
+import { useTranslation } from "@/translations";
+import { 
+  ReviewGuidelinesModal, 
+  ReviewGuidelinesBanner, 
+  ReviewGuidelinesNudge 
+} from "@/components/ReviewGuidelines";
 
 
 interface FormErrors {
@@ -39,6 +45,7 @@ interface SelectedMovie {
 
 export default function AddReview() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [movie, setMovie] = useState("");
   const [movieId, setMovieId] = useState(0);
   const [selectedMovie, setSelectedMovie] = useState<SelectedMovie | null>(null);
@@ -53,6 +60,13 @@ export default function AddReview() {
   const [transactionId, setTransactionId] = useState<string>("");
   const [dailyCount, setDailyCount] = useState<number | null>(null);
   const [remaining, setRemaining] = useState<number>(5);
+  
+  // Guidelines state
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
+  const [showGuidelinesBanner, setShowGuidelinesBanner] = useState(false);
+  const [showGuidelinesNudge, setShowGuidelinesNudge] = useState(false);
+  const [userReviewCount, setUserReviewCount] = useState<number>(0);
+  const [hasSeenGuidelines, setHasSeenGuidelines] = useState(false);
 
   const savedToDbRef = useRef(false); // prevent double POST after confirmation
   const WORD_LIMIT = 200;
@@ -61,16 +75,16 @@ export default function AddReview() {
 
   const validateForm = (): FormErrors => {
     const newErrors: FormErrors = {};
-    if (!movie.trim()) newErrors.movie = "Movie title is required";
+    if (!movie.trim()) newErrors.movie = t.review('movieTitleRequired');
     if (!review.trim()) {
-      newErrors.review = "Please write a review";
+      newErrors.review = t.review('pleaseWriteReview');
     } else if (wordCount < 5) {
-      newErrors.review = "Review must be at least 5 words.";
+      newErrors.review = t.review('reviewMinWords');
     } else if (wordCount > WORD_LIMIT) {
-      newErrors.review = `Review must be ${WORD_LIMIT} words or less`;
+      newErrors.review = t.review('reviewMaxWords').replace('{{limit}}', WORD_LIMIT.toString());
     }
-    if (rating === 0) newErrors.rating = "Please select a rating";
-    if (!session?.user?.id) newErrors.submit = "Please sign in to submit a review";
+    if (rating === 0) newErrors.rating = t.review('pleaseSelectRating');
+    if (!session?.user?.id) newErrors.submit = t.review('signInToSubmit');
     return newErrors;
   };
 
@@ -89,6 +103,44 @@ export default function AddReview() {
     }
 
     fetchDailyCount();
+  }, [session?.user?.id]);
+
+  // Fetch user's total review count and guidelines status
+  useEffect(() => {
+    async function fetchUserStatus() {
+      if (!session?.user?.id) return;
+
+      try {
+        // Get total review count
+        const reviewsRes = await fetch(`/api/reviews?userId=${session.user.id}&limit=1`);
+        const reviewsData = await reviewsRes.json();
+        const totalReviews = reviewsData.total || 0;
+        setUserReviewCount(totalReviews);
+
+        // Check if user has seen guidelines (from session or localStorage)
+        const hasSeenKey = `guidelines_seen_${session.user.id}`;
+        const localHasSeen = localStorage.getItem(hasSeenKey) === 'true';
+        setHasSeenGuidelines(localHasSeen);
+
+        // Determine which guideline to show
+        if (totalReviews === 0) {
+          // New user - show full modal
+          if (!localHasSeen) {
+            setShowGuidelinesModal(true);
+          }
+        } else if (totalReviews > 0 && totalReviews < 5 && !localHasSeen) {
+          // Returning user who hasn't seen guidelines - show banner
+          setShowGuidelinesBanner(true);
+        } else if (totalReviews >= 5 || localHasSeen) {
+          // Verified user or has read before - show subtle nudge
+          setShowGuidelinesNudge(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user status", err);
+      }
+    }
+
+    fetchUserStatus();
   }, [session?.user?.id]);
   // Track tx confirmation
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -126,7 +178,7 @@ export default function AddReview() {
         const data = await res.json();
 
         if (res.ok) {
-          setSuccessMessage("Review confirmed on-chain and saved! +10 points awarded.");
+          setSuccessMessage(t.review('reviewConfirmed'));
           // Reset form after short delay
           setTimeout(() => {
             handleClearForm();
@@ -144,7 +196,7 @@ export default function AddReview() {
     }
 
     saveReview();
-  }, [isConfirmed, transactionId, movieId, review, rating, session?.user?.id]);
+  }, [t,isConfirmed, transactionId, movieId, review, rating, session?.user?.id]);
 
   // Fetch from TMDB (Bearer auth)
   const fetchMovies = useCallback(
@@ -200,6 +252,35 @@ export default function AddReview() {
     setErrors((prev) => ({ ...prev, movie: undefined }));
   };
 
+  // Guidelines handlers
+  const handleGuidelinesConfirm = async () => {
+    setShowGuidelinesModal(false);
+    setHasSeenGuidelines(true);
+    
+    if (session?.user?.id) {
+      // Save to localStorage
+      const hasSeenKey = `guidelines_seen_${session.user.id}`;
+      localStorage.setItem(hasSeenKey, 'true');
+      
+      // Call API to save to database (optional, in background)
+      try {
+        await fetch('/api/user/guidelines', { method: 'POST' });
+      } catch (err) {
+        console.error('Failed to save guidelines status', err);
+      }
+    }
+  };
+
+  const handleBannerDismiss = () => {
+    setShowGuidelinesBanner(false);
+    setHasSeenGuidelines(true);
+    
+    if (session?.user?.id) {
+      const hasSeenKey = `guidelines_seen_${session.user.id}`;
+      localStorage.setItem(hasSeenKey, 'true');
+    }
+  };
+
   const handleClearForm = () => {
     setMovie("");
     setMovieId(0);
@@ -234,7 +315,7 @@ export default function AddReview() {
       });
 
       if (result.finalPayload.status === "error") {
-        setErrors({ submit: "Verification failed, please try again." });
+        setErrors({ submit: t.review('verificationFailed') });
         setLoading(false);
         return;
       }
@@ -264,13 +345,13 @@ export default function AddReview() {
       });
 
       if (finalPayload.status === "error") {
-        setErrors({ submit: "Transaction failed, please try again." });
+        setErrors({ submit: t.review('transactionFailed') });
       } else {
         setTransactionId(finalPayload.transaction_id);
       }
     } catch (err) {
       console.error("Error sending transaction:", err);
-      setErrors({ submit: "Something went wrong. Please try again." });
+      setErrors({ submit: t.review('somethingWentWrong') });
     } finally {
       setLoading(false);
     }
@@ -284,10 +365,10 @@ export default function AddReview() {
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
         <div className="max-w-md text-center">
           <h1 className="text-xl font-semibold text-gray-800">
-            Daily Limit Reached
+            {t.review('dailyLimitReached')}
           </h1>
           <p className="mt-2 text-gray-600">
-            You’ve already submitted 5 reviews today. Please come back tomorrow.
+            {t.review('alreadySubmitted5Reviews')}
           </p>
         </div>
       </div>
@@ -296,13 +377,21 @@ export default function AddReview() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-4 py-6 pb-24">
+      {/* Review Guidelines Modal */}
+      {showGuidelinesModal && (
+        <ReviewGuidelinesModal
+          onClose={() => setShowGuidelinesModal(false)}
+          onConfirm={handleGuidelinesConfirm}
+        />
+      )}
+
       {/* Header with Incentive */}
       <div className="w-full max-w-lg mb-6">
         <div className="text-center mb-3">
-          <h1 className="text-xl font-semibold text-gray-900">Add Review</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{t.review('addReview')}</h1>
           {dailyCount !== null && (
             <p className="mt-1 text-xs text-gray-600">
-              {remaining} review{remaining !== 1 ? 's' : ''} remaining today
+              {remaining} {remaining !== 1 ? t.review('reviewsRemaining') : t.review('reviewRemaining')}
             </p>
           )}
         </div>
@@ -314,8 +403,8 @@ export default function AddReview() {
               <Award className="w-4 h-4 text-gray-900" />
             </div>
             <div>
-              <p className="font-semibold text-sm">Earn 10 Points</p>
-              <p className="text-[10px] text-gray-300">For each verified review</p>
+              <p className="font-semibold text-sm">{t.review('earnPoints')}</p>
+              <p className="text-[10px] text-gray-300">{t.review('forEachVerifiedReview')}</p>
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -325,11 +414,18 @@ export default function AddReview() {
         </div>
       </div>
 
+      {/* Review Guidelines Banner */}
+      {showGuidelinesBanner && (
+        <div className="w-full max-w-lg mb-4">
+          <ReviewGuidelinesBanner onDismiss={handleBannerDismiss} />
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-4">
         {/* Movie Search with Selected Movie Display */}
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-700 block">
-            Movie <span className="text-red-500">*</span>
+            {t.review('movie')} <span className="text-red-500">{t.review('required')}</span>
           </label>
           
           {selectedMovie ? (
@@ -346,7 +442,7 @@ export default function AddReview() {
                   />
                 ) : (
                   <div className="w-15 h-22 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-gray-400 text-[10px]">No Image</span>
+                    <span className="text-gray-400 text-[10px]">{t.review('noImage')}</span>
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
@@ -368,7 +464,7 @@ export default function AddReview() {
                     className="!mt-2 !text-xs !text-gray-700 hover:!text-black !font-medium !flex !items-center !gap-1 !transition-colors !bg-transparent !border-0 !p-0 !cursor-pointer"
                   >
                     <RefreshCw className="!w-3 !h-3" />
-                    Change movie
+                    {t.review('changeMovie')}
                   </button>
                 </div>
               </div>
@@ -378,7 +474,7 @@ export default function AddReview() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search for a movie..."
+                placeholder={t.review('searchForMovie')}
                 value={movie}
                 onChange={(e) => {
                   setMovie(e.target.value);
@@ -416,7 +512,7 @@ export default function AddReview() {
                           />
                         ) : (
                           <div className="!w-12 !h-18 !bg-gray-200 !rounded-lg !flex !items-center !justify-center">
-                            <span className="!text-gray-400 !text-xs">No Img</span>
+                            <span className="!text-gray-400 !text-xs">{t.review('noImage')}</span>
                           </div>
                         )}
                         <div className="!flex-1 !min-w-0">
@@ -426,7 +522,7 @@ export default function AddReview() {
                           <p className="!text-sm !text-gray-500">
                             {m.release_date
                               ? new Date(m.release_date).getFullYear()
-                              : "Unknown"}
+                              : t.review('unknown')}
                           </p>
                         </div>
                       </button>
@@ -444,29 +540,36 @@ export default function AddReview() {
         {/* Rating */}
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-700 block">
-            Rating <span className="text-red-500">*</span>
+            {t.review('rating')} <span className="text-red-500">{t.review('required')}</span>
           </label>
           <Rating rating={rating} setRating={setRating} error={errors.rating} />
         </div>
 
+        {/* Review Guidelines Nudge */}
+        {showGuidelinesNudge && (
+          <div className="w-full">
+            <ReviewGuidelinesNudge />
+          </div>
+        )}
+
         {/* Review */}
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-700 block">
-            Your Review <span className="text-red-500">*</span>
+            {t.review('yourReview')} <span className="text-red-500">{t.review('required')}</span>
           </label>
           <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden hover:border-gray-900 transition-colors">
             <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <span className="text-[10px] text-gray-600">Minimum 5 words</span>
+              <span className="text-[10px] text-gray-600">{t.review('minimumWords')}</span>
               <span
                 className={`text-xs font-medium ${
                   wordCount > WORD_LIMIT ? "text-red-500" : wordCount >= 5 ? "text-green-600" : "text-gray-500"
                 }`}
               >
-                {wordCount}/{WORD_LIMIT} words
+                {wordCount}/{WORD_LIMIT} {t.review('words')}
               </span>
             </div>
             <textarea
-              placeholder="Share your thoughts about this movie... What did you love? What could be better?"
+              placeholder={t.review('shareYourThoughts')}
               value={review}
               onChange={(e) => setReview(e.target.value)}
               rows={5}
@@ -489,7 +592,7 @@ export default function AddReview() {
             className="!px-4 !py-3 !border-2 !border-gray-200 !text-gray-700 hover:!border-gray-900 hover:!text-gray-900 !font-medium !rounded-xl !transition-all !disabled:opacity-50 !disabled:cursor-not-allowed !flex !items-center !gap-2 !text-sm"
           >
             <RefreshCw className="w-4 h-4" />
-            Reset
+            {t.review('reset')}
           </button>
           <button
             type="submit"
@@ -497,12 +600,12 @@ export default function AddReview() {
             className="!flex-1 !h-12 !bg-black !hover:bg-gray-800 !disabled:bg-gray-400 !text-white !font-semibold !rounded-xl !transition-all !duration-200 !shadow-lg !active:scale-[0.98] !text-sm"
           >
             {loading
-              ? "Submitting..."
+              ? t.review('submitting')
               : isConfirming
-                ? "Confirming..."
+                ? t.review('confirming')
                 : !session?.user?.id
-                  ? "Sign in to submit"
-                  : "Submit Review"}
+                  ? t.review('signInToSubmit')
+                  : t.review('submitReview')}
           </button>
         </div>
 

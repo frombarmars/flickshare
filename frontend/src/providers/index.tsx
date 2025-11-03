@@ -1,5 +1,5 @@
 "use client";
-// import { LocaleProvider } from '@/context/LocaleContext';
+import { LocaleProvider } from '@/context/LocaleContext';
 import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
 import { Analytics } from "@vercel/analytics/next";
 import { Session } from "next-auth";
@@ -59,15 +59,15 @@ export default function ClientProviders({
           <MiniKitInitializer />
           <SessionProvider session={session}>
             <NotificationProvider>
-              {/* <LocaleProvider> */}
-              <ToastContainer
-                position="top-right"
-                autoClose={1000}
-                hideProgressBar={false}
-              />
-              {children}
-              <Analytics />
-              {/* </LocaleProvider> */}
+              <LocaleProvider>
+                <ToastContainer
+                  position="top-right"
+                  autoClose={1000}
+                  hideProgressBar={false}
+                />
+                {children}
+                <Analytics />
+              </LocaleProvider>
             </NotificationProvider>
           </SessionProvider>
         </MiniKitProvider>

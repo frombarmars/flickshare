@@ -19,12 +19,38 @@ export default function Profile() {
   const username = params.username as string;
   const [tab, setTab] = useState("review");
   const [hasEarlyPass, setHasEarlyPass] = useState(false);
+  const [totalWLDEarned, setTotalWLDEarned] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0);
 
-  const { reviews, supports, userWalletAddress, bio, setBio } = useProfileData(username);
+  const { reviews, supports, userWalletAddress, userId, bio, setBio } = useProfileData(username);
   
   // Only fetch notifications for the current user's profile
   const isOwner = session?.user.username === username;
   const { unreadCount } = useNotificationsData();
+
+  // Fetch user points
+  useEffect(() => {
+    const fetchPoints = async () => {
+      if (!userId) {
+        console.log('No userId available for fetching points');
+        return;
+      }
+      try {
+        console.log('Fetching points for userId:', userId);
+        const data = await fetch(`/api/points/summary/${userId}`).then((r) =>
+          r.json()
+        );
+        console.log('Points API response:', data);
+        if (data.ok) {
+          setTotalPoints(data.totalPoints || 0);
+          console.log('Total points set to:', data.totalPoints);
+        }
+      } catch (err) {
+        console.error("Failed to load points", err);
+      }
+    };
+    fetchPoints();
+  }, [userId]);
 
   // Check if user has minted Early Pass NFT
   useEffect(() => {
@@ -39,6 +65,37 @@ export default function Profile() {
     };
     checkEarlyPass();
   }, [userWalletAddress]);
+
+  // Calculate total WLD earned from all reviews
+  useEffect(() => {
+    const fetchWLDEarnings = async () => {
+      if (reviews.length === 0) {
+        setTotalWLDEarned(0);
+        return;
+      }
+      
+      try {
+        // Fetch support amounts for each review
+        const promises = reviews.map(review => 
+          fetch(`/api/reviews/${review.numericId}`).then(r => r.json())
+        );
+        
+        const reviewsData = await Promise.all(promises);
+        const total = reviewsData.reduce((sum, data) => {
+          // API returns { review: { coins: ... } }
+          return sum + (data.review?.coins || 0);
+        }, 0);
+        
+        setTotalWLDEarned(total);
+        console.log('Total WLD Earned:', total, 'from', reviewsData.length, 'reviews');
+      } catch (err) {
+        console.error("Failed to calculate WLD earnings", err);
+        setTotalWLDEarned(0);
+      }
+    };
+    
+    fetchWLDEarnings();
+  }, [reviews]);
 
   const tabContent = {
     review: <ReviewList reviews={reviews} />,
@@ -75,6 +132,8 @@ export default function Profile() {
           setBio={setBio}
           isOwner={isOwner}
           hasEarlyPass={hasEarlyPass}
+          totalPoints={totalPoints}
+          totalWLDEarned={totalWLDEarned}
         />
 
         <Tabs 

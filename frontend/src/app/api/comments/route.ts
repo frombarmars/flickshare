@@ -25,12 +25,28 @@ export async function GET(req: NextRequest) {
     }
 
     const comments = await prisma.comment.findMany({
-      where: { reviewId: reviewObject.id },
+      where: { 
+        reviewId: reviewObject.id,
+        author: {
+          OR: [
+            { isAdmin: false },
+            { isAdmin: null },
+          ],
+        },
+      },
       include: {
-        author: { select: { username: true, profilePicture: true } },
+        author: { select: { username: true, profilePicture: true, isAdmin: true } },
         replies: {
+          where: {
+            author: {
+              OR: [
+                { isAdmin: false },
+                { isAdmin: null },
+              ],
+            },
+          },
           include: {
-            author: { select: { username: true, profilePicture: true } },
+            author: { select: { username: true, profilePicture: true, isAdmin: true } },
           },
         },
       },

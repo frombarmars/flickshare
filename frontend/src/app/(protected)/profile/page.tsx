@@ -15,6 +15,8 @@ import { UserInfo } from "@/components/Profile/UserInfo";
 import { NotificationsList } from "@/components/Profile/NotificationsList";
 import { isUserMintedNFT } from "@/lib/contract_utility/nftUtility";
 import { Bell } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTranslation } from "@/translations";
 
 interface Movie {
   id: string;
@@ -46,6 +48,7 @@ interface Support {
 export default function Profile() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   const userName = session?.user.username || "Gerald";
   const userId = session?.user?.id || "";
   const { reviews, supports, userWalletAddress, bio, setBio } =
@@ -57,6 +60,7 @@ export default function Profile() {
   const [showSettings, setShowSettings] = useState(false);
   const [totalPoints, setTotalPoints] = useState(0);
   const [hasEarlyPass, setHasEarlyPass] = useState(false);
+  const [totalWLDEarned, setTotalWLDEarned] = useState(0);
 
   // 1. Detect MiniKit availability
   useEffect(() => {
@@ -151,12 +155,20 @@ export default function Profile() {
   // 5. Fetch user points - simplified
   useEffect(() => {
     const fetchPoints = async () => {
-      if (!userId) return;
+      if (!userId) {
+        console.log('No userId available for fetching points');
+        return;
+      }
       try {
+        console.log('Fetching points for userId:', userId);
         const data = await fetch(`/api/points/summary/${userId}`).then((r) =>
           r.json()
         );
-        if (data.ok) setTotalPoints(data.totalPoints || 0);
+        console.log('Points API response:', data);
+        if (data.ok) {
+          setTotalPoints(data.totalPoints || 0);
+          console.log('Total points set to:', data.totalPoints);
+        }
       } catch (err) {
         console.error("Failed to load points", err);
       }
@@ -177,6 +189,37 @@ export default function Profile() {
     };
     checkEarlyPass();
   }, [userWalletAddress]);
+
+  // 7. Calculate total WLD earned from all reviews
+  useEffect(() => {
+    const fetchWLDEarnings = async () => {
+      if (!userId || reviews.length === 0) {
+        setTotalWLDEarned(0);
+        return;
+      }
+      
+      try {
+        // Fetch support amounts for each review
+        const promises = reviews.map(review => 
+          fetch(`/api/reviews/${review.numericId}`).then(r => r.json())
+        );
+        
+        const reviewsData = await Promise.all(promises);
+        const total = reviewsData.reduce((sum, data) => {
+          // API returns { review: { coins: ... } }
+          return sum + (data.review?.coins || 0);
+        }, 0);
+        
+        setTotalWLDEarned(total);
+        console.log('Total WLD Earned:', total, 'from', reviewsData.length, 'reviews');
+      } catch (err) {
+        console.error("Failed to calculate WLD earnings", err);
+        setTotalWLDEarned(0);
+      }
+    };
+    
+    fetchWLDEarnings();
+  }, [userId, reviews]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -200,9 +243,9 @@ export default function Profile() {
     review: (
       <div className="space-y-2">
         <div className="flex items-center justify-between mb-3 px-4">
-          <h3 className="text-lg font-semibold text-gray-900">Your Reviews</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t.profile('yourReviews')}</h3>
           <span className="text-sm text-gray-500">
-            {reviews.length} reviews
+            {reviews.length} {t.profile('reviewsCount')}
           </span>
         </div>
 
@@ -224,7 +267,7 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <span className="text-xs text-gray-400">No Image</span>
+                    <span className="text-xs text-gray-400">{t.profile('noImage')}</span>
                   </div>
                 )}
               </div>
@@ -264,9 +307,9 @@ export default function Profile() {
     support: (
       <div className="space-y-3">
         <div className="flex items-center justify-between mb-4 px-4">
-          <h3 className="text-lg font-semibold text-gray-900">Support Given</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t.profile('supportGiven')}</h3>
           <span className="text-sm text-gray-500">
-            {supports.length} transactions
+            {supports.length} {t.profile('transactions')}
           </span>
         </div>
 
@@ -289,13 +332,13 @@ export default function Profile() {
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs text-gray-600">
-                  <span>To:</span>
+                  <span>{t.profile('to')}</span>
                   <span className="font-medium">
                     @{support.review.reviewer.username}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-600">
-                  <span>Review:</span>
+                  <span>{t.profile('review')}</span>
                   <span className="font-medium truncate max-w-32">
                     {support.review.movie.title}
                   </span>
@@ -319,7 +362,7 @@ export default function Profile() {
       <header className="bg-white border-b px-4 py-4 sticky top-0 z-20">
         <div className="flex items-center justify-between max-w-sm mx-auto">
           <div className="w-10"></div>
-          <h1 className="text-xl font-bold">Profile</h1>
+          <h1 className="text-xl font-bold">{t.profile('profile')}</h1>
           <button
             onClick={() => setShowSettings(true)}
             className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-xl"
@@ -342,58 +385,73 @@ export default function Profile() {
             <button
               onClick={() => setShowSettings(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition-colors touch-manipulation active:scale-95"
-              aria-label="Close settings"
+              aria-label={t.common('close')}
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h2 className="text-xl font-bold mb-6 text-gray-900">Settings</h2>
+            <h2 className="text-xl font-bold mb-6 text-gray-900">{t.profile('settings')}</h2>
 
-            {/* Notifications */}
-            <div
-              className={`flex items-center justify-between p-4 rounded-xl transition-all duration-200 ${
-                notifGranted === true
-                  ? "bg-green-50 border-2 border-green-200"
-                  : "bg-gray-50 border-2 border-transparent"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Bell
-                  className={`w-5 h-5 ${
-                    notifGranted === true ? "text-green-600" : "text-gray-600"
-                  }`}
-                />
-                <span
-                  className={`text-sm font-medium ${
-                    notifGranted === true ? "text-green-900" : "text-gray-900"
-                  }`}
-                >
-                  Notifications
-                </span>
-              </div>
-              {notifGranted === true ? (
-                <div className="flex items-center gap-2 text-green-600 bg-green-100 px-3 py-1.5 rounded-lg">
-                  <Check className="w-4 h-4" strokeWidth={2.5} />
-                  <span className="text-xs font-semibold">Enabled</span>
+            <div className="space-y-4">
+              {/* Notifications */}
+              <div
+                className={`flex items-center justify-between p-4 rounded-xl transition-all duration-200 ${
+                  notifGranted === true
+                    ? "bg-green-50 border-2 border-green-200"
+                    : "bg-gray-50 border-2 border-transparent"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Bell
+                    className={`w-5 h-5 ${
+                      notifGranted === true ? "text-green-600" : "text-gray-600"
+                    }`}
+                  />
+                  <span
+                    className={`text-sm font-medium ${
+                      notifGranted === true ? "text-green-900" : "text-gray-900"
+                    }`}
+                  >
+                    {t.profile('notifications')}
+                  </span>
                 </div>
-              ) : (
-                <button
-                  onClick={requestPermission}
-                  disabled={!isInstalled}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg text-white transition-colors active:scale-95 touch-manipulation ${
-                    !isInstalled
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-black hover:bg-gray-800 cursor-pointer"
-                  }`}
-                  style={{
-                    pointerEvents: 'auto',
-                    position: 'relative',
-                    zIndex: 1
-                  }}
-                >
-                  {!isInstalled ? 'Initializing...' : 'Enable'}
-                </button>
-              )}
+                {notifGranted === true ? (
+                  <div className="flex items-center gap-2 text-green-600 bg-green-100 px-3 py-1.5 rounded-lg">
+                    <Check className="w-4 h-4" strokeWidth={2.5} />
+                    <span className="text-xs font-semibold">{t.common('enabled')}</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={requestPermission}
+                    disabled={!isInstalled}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg text-white transition-colors active:scale-95 touch-manipulation ${
+                      !isInstalled
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-black hover:bg-gray-800 cursor-pointer"
+                    }`}
+                    style={{
+                      pointerEvents: 'auto',
+                      position: 'relative',
+                      zIndex: 1
+                    }}
+                  >
+                    {!isInstalled ? t.common('loading') : t.common('enable')}
+                  </button>
+                )}
+              </div>
+
+              {/* Language Switcher */}
+              <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border-2 border-transparent">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-900">
+                    {t.profile('language')}
+                  </span>
+                </div>
+                <LanguageSwitcher />
+              </div>
             </div>
           </div>
         </div>
@@ -411,26 +469,27 @@ export default function Profile() {
             isOwner={true}
             totalPoints={totalPoints}
             hasEarlyPass={hasEarlyPass}
+            totalWLDEarned={totalWLDEarned}
           />
         </section>
 
         <nav className="mb-6">
           <div className="bg-gray-50 rounded-2xl p-1 border border-gray-100">
             <div className="grid grid-cols-3 gap-1">
-              {["review", "support", "notifications"].map((t) => (
+              {["review", "support", "notifications"].map((tabName) => (
                 <button
-                  key={t}
-                  onClick={() => setTab(t)}
+                  key={tabName}
+                  onClick={() => setTab(tabName)}
                   className={`!py-2 !px-2 text-center text-sm font-semibold rounded-xl transition-all duration-200 touch-manipulation active:scale-95 relative ${
-                    tab === t
+                    tab === tabName
                       ? "!bg-white !text-black !shadow-sm border !border-gray-200"
                       : "!text-gray-600 !hover:bg-black !hover:text-white !active:bg-black !active:text-white"
                   }`}
                 >
                   <div className="flex items-center justify-center gap-1">
-                    {t === "notifications" && <Bell className="w-3.5 h-3.5" />}
-                    <span>{t.charAt(0).toUpperCase() + t.slice(1)}</span>
-                    {t === "notifications" && unreadCount > 0 && (
+                    {tabName === "notifications" && <Bell className="w-3.5 h-3.5" />}
+                    <span>{tabName === "review" ? t.common('review') : tabName === "support" ? t.common('support') : t.profile('notifications')}</span>
+                    {tabName === "notifications" && unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                         {unreadCount > 9 ? "9+" : unreadCount}
                       </span>

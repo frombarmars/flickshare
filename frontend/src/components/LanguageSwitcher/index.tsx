@@ -1,26 +1,40 @@
 'use client';
 import { useLocale } from "@/context/LocaleContext";
+import { useState, useEffect } from "react";
 
 export default function LanguageSwitcher() {
   const { locale, changeLocale } = useLocale();
+  const [activeLocale, setActiveLocale] = useState(locale);
+
+  // Sync with context locale changes
+  useEffect(() => {
+    setActiveLocale(locale);
+  }, [locale]);
+
+  const handleLocaleChange = (newLocale: string) => {
+    setActiveLocale(newLocale); // Immediate visual feedback
+    changeLocale(newLocale); // Update context
+  };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+    <div className="inline-flex items-center gap-1 bg-white rounded-lg p-1 border border-gray-300 shadow-sm">
       <button
-        onClick={() => changeLocale('th')}
-        className={`min-w-[64px] px-4 py-2 rounded-xl text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${locale === 'th'
-          ? 'bg-gray-400 text-gray-800 hover:bg-gray-200'
-          : 'bg-blue-600 text-white'
-          }`}
+        onClick={() => handleLocaleChange('th')}
+        className={`min-w-[56px] px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 ${
+          activeLocale === 'th'
+            ? 'bg-gray-900 text-white shadow-sm'
+            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        }`}
       >
         ไทย
       </button>
       <button
-        onClick={() => changeLocale('en')}
-        className={`min-w-[64px] px-4 py-2 rounded-xl text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${locale === 'en'
-          ? 'bg-gray-400 text-gray-800 hover:bg-gray-200'
-          : 'bg-blue-600 text-white'
-          }`}
+        onClick={() => handleLocaleChange('en')}
+        className={`min-w-[56px] px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 ${
+          activeLocale === 'en'
+            ? 'bg-gray-900 text-white shadow-sm'
+            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        }`}
       >
         EN
       </button>

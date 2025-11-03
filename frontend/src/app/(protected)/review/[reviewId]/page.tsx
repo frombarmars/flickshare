@@ -12,10 +12,12 @@ import { useSession } from "next-auth/react";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
 import { toast } from "react-toastify";
 import { CommentSection } from "@/components/Comments/CommentSection";
+import { useTranslation } from "@/translations";
 
 const ReviewSupportUI = () => {
   const params = useParams<{ reviewId: string }>();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const reviewId = params?.reviewId;
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [review, setReview] = useState<any | null>(null);
@@ -25,7 +27,7 @@ const ReviewSupportUI = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
-  const [activeTab, setActiveTab] = useState<'supporters' | 'comments' | 'analytics'>('supporters');
+  const [activeTab, setActiveTab] = useState<'supporters' | 'comments' | 'analytics'>('comments');
   const router = useRouter();
 
   useEffect(() => {
@@ -62,7 +64,7 @@ const ReviewSupportUI = () => {
 
   const handleLike = async (reviewIdOnChain: number) => {
     if (review?.reviewer?.id === session?.user?.id) {
-      toast.info("You can't like your own review", {
+      toast.info(t.review('cantLikeOwnReview'), {
         position: "top-center",
         autoClose: 2000,
       });
@@ -70,7 +72,7 @@ const ReviewSupportUI = () => {
     }
 
     if (isLiked) {
-      toast.info("You already liked this review", {
+      toast.info(t.review('alreadyLiked'), {
         position: "top-center",
         autoClose: 2000,
       });
@@ -134,11 +136,11 @@ const ReviewSupportUI = () => {
         }),
       });
 
-      toast.success("Review liked!", { position: "top-center", autoClose: 2000 });
+      toast.success(t.review('reviewLiked'), { position: "top-center", autoClose: 2000 });
     } catch (err) {
       setIsLiked(false);
       setLikeCount((prev) => Math.max(0, prev - 1));
-      toast.error("Failed to like review", { position: "top-center", autoClose: 2000 });
+      toast.error(t.review('failedToLike'), { position: "top-center", autoClose: 2000 });
     } finally {
       setIsLiking(false);
     }
@@ -217,13 +219,13 @@ const ReviewSupportUI = () => {
                 className="!flex !items-center !gap-3 !w-full !px-4 !py-3 !bg-black hover:!bg-gray-900 !rounded-lg !transition-all"
               >
                 <XIcon />
-                <span className="!text-sm !font-medium !text-white">Share on X</span>
+                <span className="!text-sm !font-medium !text-white">{t.review('shareOnX')}</span>
               </button>
               <button 
                 onClick={() => setShowShareOptions(false)}
                 className="!w-full !py-3 !text-sm !text-gray-600 hover:!bg-gray-50 !rounded-lg !transition-all"
               >
-                Cancel
+                {t.common('cancel')}
               </button>
             </div>
           </div>
@@ -326,7 +328,7 @@ const ReviewSupportUI = () => {
             className="!w-full !py-3 !bg-gray-900 hover:!bg-gray-800 !text-white !rounded-xl !text-sm !font-medium !transition-all !shadow-sm !flex !items-center !justify-center !gap-2"
           >
             <Image src="/wld_token.png" alt="WLD" width={16} height={16} className="object-contain" />
-            <span>Support {review.user}</span>
+            <span>{t.review('support')} {review.user}</span>
           </button>
         </div>
 
@@ -342,7 +344,7 @@ const ReviewSupportUI = () => {
                   : '!border-transparent !text-gray-500 hover:!text-gray-700'
               }`}
             >
-              Comments
+              {t.review('comments')}
             </button>
             <button
               onClick={() => setActiveTab('supporters')}
@@ -352,7 +354,7 @@ const ReviewSupportUI = () => {
                   : '!border-transparent !text-gray-500 hover:!text-gray-700'
               }`}
             >
-              Supporters
+              {t.review('supporters')}
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
@@ -362,7 +364,7 @@ const ReviewSupportUI = () => {
                   : '!border-transparent !text-gray-500 hover:!text-gray-700'
               }`}
             >
-              Analytics
+              {t.review('analytics')}
             </button>
           </div>
 
@@ -399,7 +401,7 @@ const ReviewSupportUI = () => {
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                       <Image src="/wld_token.png" alt="WLD" width={20} height={20} className="object-contain" />
                     </div>
-                    <p className="text-sm text-gray-500">No supporters yet</p>
+                    <p className="text-sm text-gray-500">{t.review('noSupportersYet')}</p>
                   </div>
                 )}
               </>
@@ -419,14 +421,14 @@ const ReviewSupportUI = () => {
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <ThumbsUp className="w-3.5 h-3.5 text-gray-600" />
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">Likes</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">{t.review('likes')}</span>
                     </div>
                     <p className="text-xl font-semibold text-gray-900">{likeCount}</p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Image src="/wld_token.png" alt="WLD" width={14} height={14} className="object-contain" />
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">Support</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">{t.review('support')}</span>
                     </div>
                     <div className="text-xl font-semibold text-gray-900">
                       <SupportAmount amount={review.coins} />
@@ -435,14 +437,14 @@ const ReviewSupportUI = () => {
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <User className="w-3.5 h-3.5 text-gray-600" />
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">Supporters</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">{t.review('supporters')}</span>
                     </div>
                     <p className="text-xl font-semibold text-gray-900">{transactions.length}</p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Star className="w-3.5 h-3.5 text-gray-600" />
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">Rating</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">{t.common('rating')}</span>
                     </div>
                     <p className="text-xl font-semibold text-gray-900">{review.rating}/5</p>
                   </div>
@@ -450,7 +452,7 @@ const ReviewSupportUI = () => {
                 
                 {transactions.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Top Supporter</h4>
+                    <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t.review('topSupporter')}</h4>
                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3">
                       <Link
                         href={`/profile/${transactions[0].from}`}

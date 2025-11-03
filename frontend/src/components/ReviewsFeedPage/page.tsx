@@ -12,6 +12,7 @@ import { SupportAmount } from "@/components/SupportAmount";
 import { useSession } from "next-auth/react";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { toast } from "react-toastify";
+import { useTranslation } from "@/translations";
 
 type ReviewAddedLog = {
   reviewer: string;
@@ -23,6 +24,7 @@ type ReviewAddedLog = {
 };
 
 export default function ReviewsFeedPage() {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [transactionId, setTransactionId] = useState("");
@@ -344,7 +346,7 @@ export default function ReviewsFeedPage() {
                           handleLike(r.reviewIdOnChain);
                         }}
                       >
-                        {r.isLiked ? 'Liked' : 'Like'}
+                        {r.isLiked ? t.common('liked') : t.common('like')}
                       </button>
                     </div>
                   </div>
@@ -360,7 +362,7 @@ export default function ReviewsFeedPage() {
         <div className="flex justify-center py-6">
           <div className="flex items-center gap-2 text-gray-500">
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600"></div>
-            <span className="text-xs">Loading...</span>
+            <span className="text-xs">{t.common('loading')}</span>
           </div>
         </div>
       )}
@@ -369,7 +371,7 @@ export default function ReviewsFeedPage() {
       {!hasMoreRef.current && reviews.length > 0 && (
         <div className="max-w-3xl mx-auto px-3 py-6">
           <div className="text-center py-4 border-t border-gray-200">
-            <p className="text-gray-500 text-xs">You&apos;ve reached the end</p>
+            <p className="text-gray-500 text-xs">{t.common('allReviewsLoaded')}</p>
           </div>
         </div>
       )}

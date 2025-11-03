@@ -117,6 +117,7 @@ export async function GET(request: NextRequest) {
             username: true,
             profilePicture: true,
             walletAddress: true,
+            isAdmin: true,
           },
         },
         movie: {
@@ -145,6 +146,12 @@ export async function GET(request: NextRequest) {
       },
       where: {
         isBanned: false,
+        reviewer: {
+          OR: [
+            { isAdmin: false },
+            { isAdmin: null },
+          ],
+        },
       },
     });
 

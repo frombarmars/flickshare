@@ -12,6 +12,11 @@ import { ENV_VARIABLES } from "@/constants/env_variables";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
 import { getReviewCounter } from "@/lib/contract_utility/getReviewCounter";
 import { Rating } from "@/components/AddReview/Rating";
+import {
+  ReviewGuidelinesModal,
+  ReviewGuidelinesBanner,
+  ReviewGuidelinesNudge,
+} from "@/components/ReviewGuidelines";
 
 interface FormErrors {
   movie?: string;
@@ -56,6 +61,13 @@ export default function AddReview() {
   const [dailyCount, setDailyCount] = useState<number | null>(null);
   const [remaining, setRemaining] = useState<number>(5);
   const [fetchingMovie, setFetchingMovie] = useState(false);
+
+  // Review guidelines state
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
+  const [showGuidelinesBanner, setShowGuidelinesBanner] = useState(false);
+  const [showGuidelinesNudge, setShowGuidelinesNudge] = useState(false);
+  const [userReviewCount, setUserReviewCount] = useState<number>(0);
+  const [hasSeenGuidelines, setHasSeenGuidelines] = useState(false);
 
   const savedToDbRef = useRef(false); // prevent double POST after confirmation
   const WORD_LIMIT = 200;
@@ -133,6 +145,42 @@ export default function AddReview() {
 
     fetchDailyCount();
   }, [session?.user?.id]);
+
+  // Fetch user review count and determine which guideline to show
+  useEffect(() => {
+    async function fetchUserReviewCount() {
+      if (!session?.user?.id) return;
+
+      try {
+        const res = await fetch(`/api/reviews/count?userId=${session.user.id}`);
+        const data = await res.json();
+        const totalReviews = data.totalCount || 0;
+        setUserReviewCount(totalReviews);
+
+        // Check localStorage for guidelines seen status
+        const localKey = `guidelines_seen_${session.user.id}`;
+        const localHasSeen = localStorage.getItem(localKey) === "true";
+        setHasSeenGuidelines(localHasSeen);
+
+        // Determine which guideline to show
+        if (totalReviews === 0 && !localHasSeen) {
+          // New user: show full modal
+          setShowGuidelinesModal(true);
+        } else if (totalReviews > 0 && totalReviews < 5 && !localHasSeen) {
+          // Returning user who hasn't seen guidelines: show banner
+          setShowGuidelinesBanner(true);
+        } else if (totalReviews >= 5 || localHasSeen) {
+          // Verified user or has seen guidelines: show subtle nudge
+          setShowGuidelinesNudge(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user review count", err);
+      }
+    }
+
+    fetchUserReviewCount();
+  }, [session?.user?.id]);
+
   // Track tx confirmation
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -244,6 +292,48 @@ export default function AddReview() {
     setErrors((prev) => ({ ...prev, movie: undefined }));
   };
 
+  // Handle guidelines modal confirmation
+  const handleGuidelinesConfirm = async () => {
+    setShowGuidelinesModal(false);
+    setHasSeenGuidelines(true);
+    
+    // Save to localStorage
+    if (session?.user?.id) {
+      const localKey = `guidelines_seen_${session.user.id}`;
+      localStorage.setItem(localKey, "true");
+
+      // Save to database
+      try {
+        await fetch("/api/user/guidelines", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: session.user.id }),
+        });
+      } catch (err) {
+        console.error("Failed to save guidelines status", err);
+      }
+    }
+  };
+
+  // Handle banner dismissal
+  const handleBannerDismiss = () => {
+    setShowGuidelinesBanner(false);
+    setHasSeenGuidelines(true);
+    
+    // Save to localStorage
+    if (session?.user?.id) {
+      const localKey = `guidelines_seen_${session.user.id}`;
+      localStorage.setItem(localKey, "true");
+
+      // Save to database
+      fetch("/api/user/guidelines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: session.user.id }),
+      }).catch(err => console.error("Failed to save guidelines status", err));
+    }
+  };
+
   const handleClearForm = () => {
     setMovie("");
     setMovieId(0);
@@ -352,6 +442,14 @@ export default function AddReview() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-4 py-6 pb-24">
+      {/* Review Guidelines Modal */}
+      {showGuidelinesModal && (
+        <ReviewGuidelinesModal
+          onClose={() => setShowGuidelinesModal(false)}
+          onConfirm={handleGuidelinesConfirm}
+        />
+      )}
+
       {/* Header with Incentive */}
       <div className="w-full max-w-lg mb-6">
         <div className="text-center mb-3">
@@ -388,6 +486,13 @@ export default function AddReview() {
           </div>
         </div>
       </div>
+
+      {/* Review Guidelines Banner */}
+      {showGuidelinesBanner && (
+        <div className="w-full max-w-lg mb-4">
+          <ReviewGuidelinesBanner onDismiss={handleBannerDismiss} />
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-4">
         {/* Movie Search with Selected Movie Display */}
@@ -502,6 +607,13 @@ export default function AddReview() {
           </label>
           <Rating rating={rating} setRating={setRating} error={errors.rating} />
         </div>
+
+        {/* Review Guidelines Nudge */}
+        {showGuidelinesNudge && (
+          <div className="w-full">
+            <ReviewGuidelinesNudge />
+          </div>
+        )}
 
         {/* Review */}
         <div className="space-y-2">

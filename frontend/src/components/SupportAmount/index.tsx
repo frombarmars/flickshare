@@ -21,7 +21,7 @@ export const SupportAmount: React.FC<SupportAmountProps> = ({ amount }) => {
   const validAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
   
   return (
-    <div className="px-2 py-1 bg-gray-100 rounded-md min-w-[60px]">
+    <div className="inline-flex px-2 py-1 bg-gray-100 rounded-md min-w-[60px]">
       <div className="flex items-center gap-1.5 text-gray-700">
         <Image
           src="/wld_token.png"

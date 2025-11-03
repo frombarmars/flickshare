@@ -10,14 +10,29 @@ export async function GET(req: NextRequest) {
 
     const where = q
     ? {
-        OR: [
-          { username: { contains: q } },
-          { walletAddress: { contains: q } },
-          { discordUsername: { contains: q } },
-          { twitterUsername: { contains: q } },
+        AND: [
+          {
+            OR: [
+              { username: { contains: q, mode: 'insensitive' as const } },
+              { walletAddress: { contains: q, mode: 'insensitive' as const } },
+              { discordUsername: { contains: q, mode: 'insensitive' as const } },
+              { twitterUsername: { contains: q, mode: 'insensitive' as const } },
+            ],
+          },
+          {
+            OR: [
+              { isAdmin: false },
+              { isAdmin: null },
+            ],
+          },
         ],
       }
-    : {};
+    : {
+        OR: [
+          { isAdmin: false },
+          { isAdmin: null },
+        ],
+      };
 
     const users = await prisma.user.findMany({
       take: limit,

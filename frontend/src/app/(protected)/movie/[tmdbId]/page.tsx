@@ -6,8 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useTranslation } from "@/translations";
 
 const MovieDetailsPage = () => {
+  const { t } = useTranslation();
   const params = useParams<{ tmdbId: string }>();
   const tmdbId = params?.tmdbId;
 
@@ -105,7 +107,7 @@ const MovieDetailsPage = () => {
       <div className="!min-h-screen !bg-gray-50 !flex !items-center !justify-center">
         <div className="!text-center">
           <div className="!w-16 !h-16 !border-4 !border-gray-200 !border-t-gray-600 !rounded-full !animate-spin !mx-auto !mb-4"></div>
-          <p className="!text-gray-600 !font-medium">Loading movie details...</p>
+          <p className="!text-gray-600 !font-medium">{t.common('loadingMovieDetails')}</p>
         </div>
       </div>
     );
@@ -132,7 +134,7 @@ const MovieDetailsPage = () => {
           {showShareOptions && (
             <div className="!absolute !top-12 !right-0 !bg-white !border !border-gray-200 !rounded-lg !shadow-lg !p-2 !min-w-[120px] !z-10">
               <button className="!w-full !text-left !px-3 !py-2 !text-sm hover:!bg-gray-50 !rounded">
-                Copy Link
+                {t.common('copyLink')}
               </button>
             </div>
           )}
@@ -173,7 +175,7 @@ const MovieDetailsPage = () => {
               {movie.runtime && (
                 <>
                   <span className="!text-gray-400">•</span>
-                  <span>{movie.runtime} min</span>
+                  <span>{movie.runtime} {t.common('min')}</span>
                 </>
               )}
             </div>
@@ -190,7 +192,7 @@ const MovieDetailsPage = () => {
               ))}
               {(movie.movieGenres || movie.genres || []).length > (window.innerWidth < 640 ? 2 : 3) && (
                 <span className="!px-2 sm:!px-3 !py-1 !bg-gray-50 !rounded-full !text-xs !text-gray-500">
-                  +{(movie.movieGenres || movie.genres || []).length - (window.innerWidth < 640 ? 2 : 3)} more
+                  +{(movie.movieGenres || movie.genres || []).length - (window.innerWidth < 640 ? 2 : 3)} {t.common('more')}
                 </span>
               )}
             </div>
@@ -199,7 +201,7 @@ const MovieDetailsPage = () => {
             {getDirectors().length > 0 && (
               <div className="!mb-2 !px-2 sm:!px-0">
                 <p className="!text-xs sm:!text-sm !text-gray-700">
-                  <span className="!font-semibold !text-gray-800">Director:</span>{" "}
+                  <span className="!font-semibold !text-gray-800">{t.common('director')}:</span>{" "}
                   <span className="!text-gray-600">
                     {getDirectors()
                       .slice(0, 2)
@@ -214,13 +216,13 @@ const MovieDetailsPage = () => {
             {getTopCast().length > 0 && (
               <div className="!px-2 sm:!px-0">
                 <p className="!text-xs sm:!text-sm !text-gray-700">
-                  <span className="!font-semibold !text-gray-800">Cast:</span>{" "}
+                  <span className="!font-semibold !text-gray-800">{t.common('cast')}:</span>{" "}
                   <span className="!text-gray-600">
                     {getTopCast()
                       .slice(0, window.innerWidth < 640 ? 2 : 3)
                       .map((c: any) => c.name)
                       .join(", ")}
-                    {getTopCast().length > (window.innerWidth < 640 ? 2 : 3) && " and more"}
+                    {getTopCast().length > (window.innerWidth < 640 ? 2 : 3) && ` ${t.common('andMore')}`}
                   </span>
                 </p>
               </div>
@@ -231,7 +233,7 @@ const MovieDetailsPage = () => {
         {/* Description */}
         {(movie.description || movie.overview) && (
           <div className="!mt-4 sm:!mt-5 !pt-3 sm:!pt-4 !border-t !border-gray-100">
-            <h3 className="!font-semibold !text-gray-800 !mb-2 !text-center sm:!text-left">Overview</h3>
+            <h3 className="!font-semibold !text-gray-800 !mb-2 !text-center sm:!text-left">{t.common('overview')}</h3>
             <p className="!text-gray-700 !text-sm !leading-relaxed !px-1 sm:!px-0 !text-center sm:!text-left">
               {movie.description || movie.overview}
             </p>
@@ -243,9 +245,9 @@ const MovieDetailsPage = () => {
       <div className="!mt-3 sm:!mt-4 !bg-white !shadow-sm !mx-2 sm:!mx-4 md:!mx-6 !rounded-lg">
         <div className="!p-3 sm:!p-4 md:!p-5 !border-b !border-gray-100">
           <div className="!flex !items-center !justify-between !mb-3 sm:!mb-4 !flex-wrap !gap-2">
-            <h3 className="!font-bold !text-lg sm:!text-xl !text-gray-900">Reviews</h3>
+            <h3 className="!font-bold !text-lg sm:!text-xl !text-gray-900">{t.common('reviews')}</h3>
             <span className="!text-xs sm:!text-sm !text-gray-500 !font-medium !bg-gray-100 !px-2 !py-1 !rounded-full">
-              {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+              {reviews.length} {reviews.length === 1 ? t.common('review') : t.common('reviews')}
             </span>
           </div>
 
@@ -254,7 +256,7 @@ const MovieDetailsPage = () => {
             onClick={() => (window.location.href = `/new/${tmdbId}`)}
             className="!w-full !py-3 sm:!py-4 !bg-gradient-to-r !from-gray-900 !to-gray-700 !text-white !rounded-lg sm:!rounded-xl !font-semibold !shadow-lg hover:!shadow-xl hover:!from-gray-800 hover:!to-gray-600 !transition-all !duration-200 !transform hover:!scale-[1.02] !text-sm sm:!text-base"
           >
-            ✍️ Write Your Review
+            ✍️ {t.common('writeYourReview')}
           </button>
         </div>
 
@@ -269,7 +271,7 @@ const MovieDetailsPage = () => {
                   : "!bg-white !text-gray-700 !border !border-gray-200 hover:!bg-gray-100"
               }`}
             >
-              🔥 Trending
+              🔥 {t.common('trending')}
             </button>
             <button
               onClick={() => setActiveFilter("most_liked")}
@@ -279,7 +281,7 @@ const MovieDetailsPage = () => {
                   : "!bg-white !text-gray-700 !border !border-gray-200 hover:!bg-gray-100"
               }`}
             >
-              👍 Most Liked
+              👍 {t.common('mostLiked')}
             </button>
             <button
               onClick={() => setActiveFilter("most_support")}
@@ -289,7 +291,7 @@ const MovieDetailsPage = () => {
                   : "!bg-white !text-gray-700 !border !border-gray-200 hover:!bg-gray-100"
               }`}
             >
-              💰 Most Support
+              💰 {t.common('mostSupport')}
             </button>
           </div>
         </div>
@@ -301,13 +303,13 @@ const MovieDetailsPage = () => {
               <div className="!w-12 !h-12 sm:!w-16 sm:!h-16 !bg-gray-100 !rounded-full !flex !items-center !justify-center !mx-auto !mb-3 sm:!mb-4">
                 <Star className="!w-6 !h-6 sm:!w-8 sm:!h-8 !text-gray-400" />
               </div>
-              <p className="!text-gray-500 !font-medium !mb-2 !text-sm sm:!text-base">No reviews yet</p>
-              <p className="!text-xs sm:!text-sm !text-gray-400">Be the first to share your thoughts!</p>
+              <p className="!text-gray-500 !font-medium !mb-2 !text-sm sm:!text-base">{t.common('noReviewsYet')}</p>
+              <p className="!text-xs sm:!text-sm !text-gray-400">{t.common('beFirstToShare')}</p>
             </div>
           ) : (
             <div className="!space-y-3 sm:!space-y-4 !mt-3 sm:!mt-4">
               {getSortedReviews().map((review: any) => (
-                <Link key={review.id} href={`/review/${review.id}`} className="!block">
+                <Link key={review.numericId} href={`/review/${review.numericId}`} className="!block">
                   <div className="!border !border-gray-200 !rounded-xl sm:!rounded-2xl !p-3 sm:!p-4 !bg-white hover:!bg-gray-50 !transition-all !duration-200 hover:!shadow-md hover:!border-gray-300 !transform hover:!scale-[1.01]">
                     {/* Review Header - Responsive */}
                     <div className="!flex !items-start !gap-2 sm:!gap-3 !mb-3">
@@ -332,7 +334,7 @@ const MovieDetailsPage = () => {
                             </span>
                             {/* Review Badge - Hide on very small screens */}
                             <span className="!hidden xs:!inline-block !px-1.5 sm:!px-2 !py-0.5 !bg-blue-100 !text-blue-700 !text-xs !font-medium !rounded-full">
-                              Reviewer
+                              {t.common('reviewer')}
                             </span>
                           </div>
                           <p className="!text-gray-500 !text-xs sm:!text-sm">
@@ -376,7 +378,6 @@ const MovieDetailsPage = () => {
                           <span className="!text-xs sm:!text-sm !font-medium">{review.likes?.length || 0}</span>
                         </div>
                         <div className="!flex !items-center !gap-1 sm:!gap-1.5 !text-gray-600">
-                          <Image src="/wld_token.png" alt="WLD" width={16} height={16} className="object-contain !w-3 !h-3 sm:!w-4 sm:!h-4" />
                           <div className="!text-xs sm:!text-sm">
                             <SupportAmount
                               amount={(review.supports || []).reduce(
@@ -390,7 +391,7 @@ const MovieDetailsPage = () => {
                       
                       {/* Read More Indicator */}
                       <div className="!text-xs !text-gray-400 !font-medium !hidden sm:!block">
-                        Read more →
+                        {t.common('readMore')} →
                       </div>
                     </div>
                   </div>

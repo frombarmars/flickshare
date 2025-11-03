@@ -20,6 +20,8 @@ model User {
   twitterUsername       String?
   bio                   String?
   isAdmin               Boolean?           @default(false)
+  hasSeenReviewGuidelines Boolean?         @default(false)
+  guidelinesSeenAt      DateTime?
   reviews               Review[]
   collections           Collection[]
   inviteCode            InviteCode?

@@ -11,6 +11,8 @@ Table User {
   twitterUsername String
   bio String
   isAdmin Boolean [default: false]
+  hasSeenReviewGuidelines Boolean [default: false]
+  guidelinesSeenAt DateTime
   reviews Review [not null]
   collections Collection [not null]
   inviteCode InviteCode

@@ -7,6 +7,7 @@ export const useProfileData = (username?: string) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [supports, setSupports] = useState<Support[]>([]);
   const [userWalletAddress, setUserWalletAddress] = useState("");
+  const [userId, setUserId] = useState("");
   const [bio, setBio] = useState("");
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export const useProfileData = (username?: string) => {
         const res = await fetch(`/api/profile/${username}`);
         if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
+        setUserId(data.data.id || "");
         setUserWalletAddress(data.data.walletAddress)
         setReviews(data.data.reviews || []);
         setSupports(data.data.supports || []);
@@ -28,5 +30,5 @@ export const useProfileData = (username?: string) => {
     fetchProfile();
   }, [username]);
 
-  return { reviews, supports, userWalletAddress, bio, setBio };
+  return { reviews, supports, userWalletAddress, userId, bio, setBio };
 };

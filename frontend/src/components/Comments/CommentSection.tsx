@@ -103,7 +103,7 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Add a comment..."
-                className="!w-full !pr-10 !p-2 !text-sm !border !border-gray-200 !rounded-lg 
+                className="!w-full !pr-11 !p-2.5 !text-sm !border !border-gray-200 !rounded-lg 
                            !bg-white focus:!outline-none focus:!border-gray-900 
                            !transition-all"
                 disabled={isPosting}
@@ -111,9 +111,10 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
               <button
                 onClick={handlePostComment}
                 disabled={isPosting || !newComment.trim()}
-                className="!absolute !right-2 !bottom-2 !p-1.5 !text-blue-500  
-                           !rounded-md !transition-all
-                           !disabled:!cursor-not-allowed !mt-1"
+                className="!absolute !right-2 !top-1/2 !-translate-y-1/2 !p-1.5 !text-blue-500  
+                           !rounded-md !transition-all hover:!bg-blue-50
+                           disabled:!opacity-40 disabled:!cursor-not-allowed disabled:hover:!bg-transparent
+                           !flex !items-center !justify-center"
               >
                 <svg className="!w-5 !h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

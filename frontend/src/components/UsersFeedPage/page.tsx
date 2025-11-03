@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslation } from "@/translations";
 
 interface UserWithStats {
   id: string;
@@ -47,17 +48,29 @@ function useDebounce(value: string, delay: number) {
 }
 
 export default function UsersFeedPage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [sortBy, setSortBy] = useState("trending");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [users, setUsers] = useState<UserWithStats[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const scrollObserver = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef(false);
   const nextCursorRef = useRef<string | null>(null);
   const hasMoreRef = useRef(true);
+
+  // Handle scroll effect for header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -161,15 +174,15 @@ export default function UsersFeedPage() {
   });
 
   const sortOptions = [
-    { value: "trending", label: "Trending", icon: <TrendingUp size={14} /> },
-    { value: "reviews", label: "Reviews", icon: <MessageSquare size={14} /> },
-    { value: "supports", label: "Supports", icon: <ThumbsUp size={14} /> },
+    { value: "trending", label: t.common('trending'), icon: <TrendingUp size={14} /> },
+    { value: "reviews", label: t.common('reviews'), icon: <MessageSquare size={14} /> },
+    { value: "supports", label: t.common('supports'), icon: <ThumbsUp size={14} /> },
   ];
 
   const getRankBadge = (score: number) => {
-    if (score > 90) return { label: "Elite", bg: "bg-black text-white" };
-    if (score > 80) return { label: "Top", bg: "bg-gray-800 text-white" };
-    return { label: "Rising", bg: "bg-gray-600 text-white" };
+    if (score > 90) return { label: t.common('elite'), bg: "bg-black text-white" };
+    if (score > 80) return { label: t.common('top'), bg: "bg-gray-800 text-white" };
+    return { label: t.common('rising'), bg: "bg-gray-600 text-white" };
   };
 
   if (loading && users.length === 0) {
@@ -186,18 +199,24 @@ export default function UsersFeedPage() {
   return (
     <div className="bg-white min-h-screen pb-safe">
       {/* Header */}
-      <div className="top-0 bg-white border-b border-gray-100 shadow-sm bg-white mt-2 pr-4 pl-4">
+      <div className={`!sticky !top-0 !bg-white/95 !backdrop-blur-md !border-b !z-50 !px-4 !py-3 !transition-all !duration-200 ${
+        isScrolled ? '!border-gray-200 !shadow-md' : '!border-gray-100 !shadow-sm'
+      }`}>
         {/* Search and Filter Bar - Condensed */}
         <div className="flex gap-2">
           <div className="flex-1 bg-gray-100 rounded-lg p-2 flex items-center border border-gray-200">
             <Search size={14} className="text-gray-500 mr-2 ml-1" />
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder={t.common('searchUsers')}
               className="flex-1 bg-transparent border-none outline-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ fontSize: '16px' }}
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
             />
             {searchQuery && (
               <button
@@ -273,9 +292,9 @@ export default function UsersFeedPage() {
             <div className="bg-gray-100 rounded-full p-4">
               <Users size={28} className="text-gray-400" />
             </div>
-            <p className="text-gray-600 font-medium">No users found</p>
+            <p className="text-gray-600 font-medium">{t.common('noUsersFound')}</p>
             <p className="text-xs text-gray-400 mt-1">
-              Try a different search term
+              {t.common('tryDifferentSearch')}
             </p>
           </motion.div>
         ) : (
@@ -341,14 +360,14 @@ export default function UsersFeedPage() {
                           <span className="font-medium">
                             {user._count.reviews}
                           </span>
-                          <span className="text-gray-400 ml-1">reviews</span>
+                          <span className="text-gray-400 ml-1">{t.common('reviews')}</span>
                         </div>
                         <div className="flex items-center gap-1 text-gray-600">
                           <ThumbsUp size={13} />
                           <span className="font-medium">
                             {user._count.supports}
                           </span>
-                          <span className="text-gray-400 ml-1">supports</span>
+                          <span className="text-gray-400 ml-1">{t.common('supports')}</span>
                         </div>
                         <div className="flex items-center gap-1 text-gray-600">
                           <Star
@@ -384,7 +403,7 @@ export default function UsersFeedPage() {
         <div className="text-center py-8">
           <div className="inline-flex items-center gap-2px-4 py-3 rounded-2xl">
             <span className="text-sm font-medium text-gray-600">
-              All users loaded!
+              {t.common('allUsersLoaded')}
             </span>
           </div>
         </div>

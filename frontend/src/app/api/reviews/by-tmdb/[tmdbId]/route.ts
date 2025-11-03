@@ -31,13 +31,23 @@ export async function GET(
 
     // Fetch reviews for this movie
     const reviews = await prisma.review.findMany({
-      where: { movieId: movie.id, isBanned: false },
+      where: { 
+        movieId: movie.id, 
+        isBanned: false,
+        reviewer: {
+          OR: [
+            { isAdmin: false },
+            { isAdmin: null },
+          ],
+        },
+      },
       include: {
         reviewer: {
           select: {
             id: true,
             username: true,
             profilePicture: true,
+            isAdmin: true,
           },
         },
         supports: {

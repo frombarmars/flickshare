@@ -26,6 +26,7 @@ import { Discord } from "iconoir-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { ENV_VARIABLES } from "@/constants/env_variables";
+import { useTranslation } from "@/translations";
 import { decodeAbiParameters, parseAbiParameters } from "viem";
 import {
   checkHowManyUsersMintedNFT,
@@ -42,6 +43,7 @@ interface FormErrors {
 export default function RewardProgram() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const userId = session?.user?.id || "";
   const [transactionId, setTransactionId] = useState<string>("");
   const userWalletAddress = session?.user?.walletAddress || "";
@@ -354,7 +356,7 @@ export default function RewardProgram() {
       {/* Header */}
       <header className="!bg-white/80 !backdrop-blur-xl !border-b !border-gray-200/60 !px-4 !py-3 !sticky !top-0 !z-20">
         <h1 className="!text-base !font-semibold !text-gray-900 !text-center">
-          Rewards
+          {t.reward('rewardProgram')}
         </h1>
       </header>
 
@@ -368,8 +370,8 @@ export default function RewardProgram() {
                   <Gift className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
                 <div>
-                  <h2 className="!text-sm !font-semibold !text-gray-900">Early User NFT</h2>
-                  <p className="!text-xs !text-gray-500">{totalMintedUsers}/1000 claimed</p>
+                  <h2 className="!text-sm !font-semibold !text-gray-900">{t.reward('earlyUserNFT')}</h2>
+                  <p className="!text-xs !text-gray-500">{totalMintedUsers}/1000 {t.reward('claimed')}</p>
                 </div>
               </div>
               {nftClaimed && (
@@ -398,12 +400,12 @@ export default function RewardProgram() {
                 {nftLoading || isNftConfirming ? (
                   <>
                     <Loader className="!w-4 !h-4 !animate-spin" />
-                    {isNftConfirming ? "Confirming..." : "Claiming..."}
+                    {isNftConfirming ? t.reward('confirming') : t.reward('claiming')}
                   </>
                 ) : (
                   <>
                     <Gift className="!w-4 !h-4" />
-                    Claim NFT
+                    {t.reward('claimNFT')}
                   </>
                 )}
               </button>
@@ -430,7 +432,7 @@ export default function RewardProgram() {
                 ) : (
                   <>
                     <Trophy className="!w-4 !h-4" />
-                    View NFT
+                    {t.reward('viewNFT')}
                   </>
                 )}
               </button>
@@ -445,7 +447,7 @@ export default function RewardProgram() {
         {/* On-Chain */}
         <section className="!bg-white !border-b !border-gray-100">
           <div className="!px-4 !py-3 !border-b !border-gray-100">
-            <h3 className="!text-sm !font-semibold !text-gray-900">On-Chain</h3>
+            <h3 className="!text-sm !font-semibold !text-gray-900">{t.reward('onChain')}</h3>
           </div>
           <div className="!divide-y !divide-gray-100">
             <button
@@ -456,8 +458,8 @@ export default function RewardProgram() {
                 <Star className="!w-5 !h-5 !text-yellow-600" strokeWidth={2} />
               </div>
               <div className="!flex-1 !text-left">
-                <h4 className="!text-sm !font-medium !text-gray-900">Review</h4>
-                <p className="!text-xs !text-gray-600">10 points</p>
+                <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('review')}</h4>
+                <p className="!text-xs !text-gray-600">{t.reward('reviewDescription')}</p>
               </div>
               <ArrowRight className="!w-4 !h-4 !text-gray-400" />
             </button>
@@ -470,8 +472,8 @@ export default function RewardProgram() {
                 <ThumbsUp className="!w-5 !h-5 !text-green-600" strokeWidth={2} />
               </div>
               <div className="!flex-1 !text-left">
-                <h4 className="!text-sm !font-medium !text-gray-900">Support</h4>
-                <p className="!text-xs !text-gray-600">10 points / 1 WLD</p>
+                <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('support')}</h4>
+                <p className="!text-xs !text-gray-600">{t.reward('supportDescription')}</p>
               </div>
               <ArrowRight className="!w-4 !h-4 !text-gray-400" />
             </button>
@@ -485,8 +487,8 @@ export default function RewardProgram() {
                 <CheckCircle className="!w-5 !h-5 !text-blue-600" strokeWidth={2} />
               </div>
               <div className="!flex-1 !text-left">
-                <h4 className="!text-sm !font-medium !text-gray-900">Check-in</h4>
-                <p className="!text-xs !text-gray-600">5 points</p>
+                <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('checkIn')}</h4>
+                <p className="!text-xs !text-gray-600">{t.reward('checkInDescription')}</p>
               </div>
               {loading || isConfirming ? (
                 <Loader className="!w-4 !h-4 !text-gray-400 !animate-spin" />
@@ -509,7 +511,7 @@ export default function RewardProgram() {
               className="!w-full !py-2.5 !bg-gray-900 !text-white !rounded-lg !text-sm !font-medium !flex !items-center !justify-center !gap-2 !transition-all"
             >
               <Trophy className="!w-4 !h-4" />
-              Leaderboard
+              {t.reward('leaderboard')}
             </button>
           </div>
         </section>
@@ -517,7 +519,7 @@ export default function RewardProgram() {
         {/* Off-Chain */}
         <section className="!bg-white !border-b !border-gray-100">
           <div className="!px-4 !py-3 !border-b !border-gray-100">
-            <h3 className="!text-sm !font-semibold !text-gray-900">Off-Chain</h3>
+            <h3 className="!text-sm !font-semibold !text-gray-900">{t.reward('offChain')}</h3>
           </div>
 
           {/* Invite */}
@@ -527,8 +529,8 @@ export default function RewardProgram() {
                 <UserPlus className="!w-5 !h-5 !text-indigo-600" strokeWidth={2} />
               </div>
               <div className="!flex-1">
-                <h4 className="!text-sm !font-medium !text-gray-900">Invite</h4>
-                <p className="!text-xs !text-gray-600">50 points per friend</p>
+                <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('invite')}</h4>
+                <p className="!text-xs !text-gray-600">{t.reward('invitePerFriend')}</p>
               </div>
             </div>
 
@@ -556,13 +558,13 @@ export default function RewardProgram() {
 
                 <button
                   onClick={() => {
-                    const text = "Join me on FlickShare!";
+                    const text = t.reward('joinMeOnFlickShare');
                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(inviteCodeLink)}`, '_blank');
                   }}
                   className="!w-full !py-2.5 !bg-black !text-white !rounded-lg !text-sm !font-medium !flex !items-center !justify-center !gap-2"
                 >
                   <X className="!w-4 !h-4" />
-                  Share on X
+                  {t.reward('shareOnX')}
                 </button>
               </>
             )}
@@ -580,8 +582,8 @@ export default function RewardProgram() {
                   <Discord className="!w-5 !h-5 !text-indigo-600" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <h4 className="!text-sm !font-medium !text-gray-900">Discord</h4>
-                  <p className="!text-xs !text-gray-600">20 points</p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('followDiscord')}</h4>
+                  <p className="!text-xs !text-gray-600">{t.reward('followDiscordDescription')}</p>
                 </div>
                 {completedTasks["FOLLOW_DISCORD"] ? (
                   <CheckCircle className="!w-5 !h-5 !text-green-600" />
@@ -601,8 +603,8 @@ export default function RewardProgram() {
                   <X className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <h4 className="!text-sm !font-medium !text-gray-900">X (Twitter)</h4>
-                  <p className="!text-xs !text-gray-600">20 points</p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('followX')}</h4>
+                  <p className="!text-xs !text-gray-600">{t.reward('followXDescription')}</p>
                 </div>
                 {completedTasks["FOLLOW_X"] ? (
                   <CheckCircle className="!w-5 !h-5 !text-green-600" />
@@ -622,8 +624,8 @@ export default function RewardProgram() {
                   <Instagram className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <h4 className="!text-sm !font-medium !text-gray-900">Instagram</h4>
-                  <p className="!text-xs !text-gray-600">20 points</p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('instagram')}</h4>
+                  <p className="!text-xs !text-gray-600">20 {t.reward('pointsText')}</p>
                 </div>
                 {completedTasks["FOLLOW_INSTAGRAM"] ? (
                   <CheckCircle className="!w-5 !h-5 !text-green-600" />
@@ -643,8 +645,8 @@ export default function RewardProgram() {
                   <Facebook className="!w-5 !h-5 !text-white" strokeWidth={2} />
                 </div>
                 <div className="!flex-1 !text-left">
-                  <h4 className="!text-sm !font-medium !text-gray-900">Facebook</h4>
-                  <p className="!text-xs !text-gray-600">20 points</p>
+                  <h4 className="!text-sm !font-medium !text-gray-900">{t.reward('facebook')}</h4>
+                  <p className="!text-xs !text-gray-600">20 {t.reward('pointsText')}</p>
                 </div>
                 {completedTasks["FOLLOW_FACEBOOK"] ? (
                   <CheckCircle className="!w-5 !h-5 !text-green-600" />
