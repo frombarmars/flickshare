@@ -88,7 +88,7 @@ const SupportPage = () => {
     };
 
     fetchReviewData();
-  }, [reviewId, locale, t]);
+  }, [reviewId, locale]);
 
   // fetch balance
   useEffect(() => {
