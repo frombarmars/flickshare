@@ -325,10 +325,11 @@ const ReviewSupportUI = () => {
         <div className="px-4 py-4 bg-white border-t border-gray-100">
           <button
             onClick={() => router.push(`/support/${reviewId}`)}
-            className="!w-full !py-3 !bg-gray-900 hover:!bg-gray-800 !text-white !rounded-xl !text-sm !font-medium !transition-all !shadow-sm !flex !items-center !justify-center !gap-2"
+            className="!w-full !py-3 !bg-gray-900 hover:!bg-gray-800 !text-white !rounded-xl !text-sm !font-medium !transition-all !shadow-sm !flex !items-center !justify-center !gap-2 select-none"
           >
-            <Image src="/wld_token.png" alt="WLD" width={16} height={16} className="object-contain" />
-            <span>{t.review('support')} {review.user}</span>
+            <span className="select-none">
+              {t.review('support')} {review.user}
+            </span>
           </button>
         </div>
 

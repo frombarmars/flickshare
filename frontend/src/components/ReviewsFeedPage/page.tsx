@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { ChevronRight, ThumbsUp, MessageCircle } from "lucide-react";
+import { ChevronRight, ThumbsUp, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import client from "@/lib/worldClient";
@@ -325,7 +325,7 @@ export default function ReviewsFeedPage() {
                         </div>
                         
                         <div className="flex items-center gap-1 text-gray-500">
-                          <span className="text-xs">💬</span>
+                          <MessageSquare className="w-3 h-3" />
                           <span className="text-xs">{r.commentsCount}</span>
                         </div>
                       </div>
